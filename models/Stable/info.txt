@@ -1,0 +1,2 @@
+Inlcude stable diffusion model here
+see https://github.com/AUTOMATIC1111/stable-diffusion-webui/tree/master/models/Stable-diffusion
