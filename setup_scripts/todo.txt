@@ -1,0 +1,4 @@
+setup venv
+install dependencies
+etc
+maybe move to /backend/
