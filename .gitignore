@@ -1,2 +1,5 @@
 myApp/bin/Debug/
 myApp/obj/Debug/
+models/Stable/sd
+models/Stable/unet
+models/Stable/Put Stable Diffusion checkpoints here.txt
