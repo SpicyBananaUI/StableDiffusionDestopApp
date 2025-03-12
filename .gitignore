@@ -1,2 +1,3 @@
-myApp/bin/Debug/
-myApp/obj/Debug/
+.idea/
+myApp/bin/
+myApp/obj/
