@@ -1,4 +1,34 @@
+# Python virtual environment
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.env
+
+# Output files
+backend/fastAPI/outputImages/*.png
+backend/fastAPI/outputImages/*.jpg
+backend/fastAPI/outputImages/*.jpeg
+
+# Build and distribution folders
+bin/
+obj/
+dist/
+build/
+*.egg-info/
+
+# IDE specific files
 .idea/
-myApp/bin/
-myApp/obj/
-models/Stable/
+.vscode/
+*.swp
+*.swo
+
+# .NET Core
+*.dll
+*.exe
+*.pdb
+project.lock.json
+project.fragment.lock.json
+artifacts/
+**/Properties/launchSettings.json

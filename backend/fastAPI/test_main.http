@@ -9,3 +9,8 @@ GET http://127.0.0.1:8000/hello/User
 Accept: application/json
 
 ###
+
+GET http://127.0.0.1:8000/photo/a%20cute%20capybara%20wearing%20a%20hat/20/7.5/
+Accept: application/json
+
+###
