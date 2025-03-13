@@ -2,3 +2,6 @@
 myApp/bin/
 myApp/obj/
 models/Stable/
+backend/api/__pycache__/
+backend/fastAPI/__pycache__/
+backend/fastAPI/outputImages/
