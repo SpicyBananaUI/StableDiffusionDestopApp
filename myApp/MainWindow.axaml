@@ -2,8 +2,37 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
         x:Class="myApp.MainWindow"
-        Title="myApp">
-    Welcome to Avalonia!
+        Title="Stable Diffusion Image Generator">
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,*" Margin="20">
+        <TextBlock Grid.Row="0" Text="Stable Diffusion Image Generator" FontSize="24" FontWeight="Bold" Margin="0,0,0,20"/>
+        
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,10">
+            <TextBlock Text="Prompt:" VerticalAlignment="Center" Width="100"/>
+            <TextBox x:Name="PromptTextBox" Width="500" Watermark="Enter a prompt for image generation"/>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,10">
+            <TextBlock Text="Steps:" VerticalAlignment="Center" Width="100"/>
+            <Slider x:Name="StepsSlider" Minimum="1" Maximum="50" Value="20" Width="300"/>
+            <TextBlock x:Name="StepsValueText" Text="20" Margin="10,0,0,0" VerticalAlignment="Center"/>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,0,0,20">
+            <TextBlock Text="Scale:" VerticalAlignment="Center" Width="100"/>
+            <Slider x:Name="ScaleSlider" Minimum="1" Maximum="15" Value="7.5" Width="300"/>
+            <TextBlock x:Name="ScaleValueText" Text="7.5" Margin="10,0,0,0" VerticalAlignment="Center"/>
+        </StackPanel>
+        
+        <Button Grid.Row="4" x:Name="GenerateButton" Content="Generate Image" HorizontalAlignment="Left" Margin="0,0,0,20"/>
+        
+        <Border Grid.Row="5" BorderBrush="Gray" BorderThickness="1" Padding="10">
+            <Grid>
+                <Image x:Name="ResultImage" Stretch="Uniform" HorizontalAlignment="Center"/>
+                <TextBlock x:Name="StatusText" Text="No image generated yet" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <ProgressBar x:Name="LoadingBar" IsVisible="False" IsIndeterminate="True" Width="200" Height="20" VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+    </Grid>
 </Window>
