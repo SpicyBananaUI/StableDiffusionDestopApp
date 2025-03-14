@@ -84,3 +84,8 @@ print(f"CUDA version: {torch.version.cuda}")
 
 - The Python virtual environment should NOT be committed to version control
 - Make sure to update requirements.txt when adding new Python dependencies
+
+## Known Bugs
+
+- Issues with CUDA support not properly working with certain versions of torch/numpy, CUDA is currently unoptimized, CPU utilization is a viable alternative for now.
+- Frequent timeouts for long prompts.
