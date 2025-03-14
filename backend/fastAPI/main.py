@@ -1,7 +1,7 @@
 import logging
 import os
 from datetime import datetime
-
+import re
 
 
 from fastapi import FastAPI
@@ -140,6 +140,9 @@ async def create_photo(
 ):
     if len(prompt) > 200:
         raise HTTPException(status_code=400, detail="Prompt is too long.")
+    
+    if not re.match("^[a-zA-Z0-9\s]*$", prompt):
+        raise HTTPException(status_code=400, detail="Prompt contains invalid characters. Only alphanumeric characters and spaces are allowed.")
 
     try:
         image = pipe(prompt, num_inference_steps=steps, guidance_scale=scale).images[0]
