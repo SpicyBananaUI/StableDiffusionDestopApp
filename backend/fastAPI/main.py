@@ -4,6 +4,7 @@ from datetime import datetime
 import re
 
 
+import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import FileResponse # TODO: respond to api call with file to allow for host and client on different machines
 from fastapi import Path
@@ -12,7 +13,8 @@ from fastapi import Security, HTTPException, Depends
 from fastapi.security.api_key import APIKeyHeader
 from pydantic import BaseModel
 
-
+from PIL import Image
+from PIL.PngImagePlugin import PngImageFile  # Needed for PNG-specific metadata handling
 
 import torch
 from diffusers import StableDiffusionPipeline
@@ -39,10 +41,10 @@ except ImportError as e:
     logger.info("Please ensure NumPy is installed: pip install numpy")
     raise
 
-import uvicorn
 app = FastAPI()
 
 model_id = "CompVis/stable-diffusion-v1-4"
+LATEST_IMAGE_PATH_FILE = "most_recent.txt" # placeholder image
 
 
 if DEPLOY_MODE == "local":
@@ -70,6 +72,13 @@ def test_device(device):
     except Exception as e:
         logger.warning(f"Device {device} failed execution test: {e}")
         return False
+
+def add_metadata_to_image(image: PngImageFile, model: str, prompt: str) -> PngImageFile:
+    """Adds custom metadata to an image as Exif metadata."""
+    image.info['model_used'] = model
+    image.info['prompt'] = prompt
+
+    return image
 
 device = None
 
@@ -152,20 +161,44 @@ async def create_photo(
         os.makedirs(output_dir, exist_ok=True)  # Ensure directory exists
 
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        image_path = os.path.join(os.path.abspath(output_dir), f"generated_image_{timestamp}.png")
+        latest_filename = f"generated_image_{timestamp}.png"
+        logger.info(f"Latest image: {latest_filename}")
+        image_path = os.path.join(os.path.abspath(output_dir), latest_filename)
 
         # TODO: use proper exif metadata 
-        image.info['model_used'] = model_id
-        image.info['prompt'] = prompt
+        image = add_metadata_to_image(image, model_id, prompt)
+
 
         image.save(image_path)
 
-        return {"message": "Image generated successfully!", "path": image_path}
-        # When the UI can handle it, 
-        # return FileResponse(image_path, media_type="image/png")
+        save_path = os.path.join(os.path.abspath(output_dir), LATEST_IMAGE_PATH_FILE)
+        with open(save_path, 'w') as file:
+            file.write(image_path)
+
+        return {"message": "Image generated successfully!", "image_path": image_path}
     except Exception as e:
         logger.error(f"Error generating image: {e}")
         raise HTTPException(status_code=500, detail="Image generation failed.")
+    
+@app.get("/image")
+async def get_image():
+    """Endpoint to directly serve the generated image"""
+    save_path = os.path.join(os.path.abspath(OUTPUT_DIR_IMAGES), LATEST_IMAGE_PATH_FILE)
+    if not os.path.exists(save_path):
+        raise HTTPException(status_code=404, detail="No images have been generated yet.")
+ 
+    with open(save_path, 'r') as file:
+        latest_image_path = file.read().strip()
+
+    # Check if the image exists
+    if not os.path.exists(latest_image_path):
+        raise HTTPException(status_code=404, detail="The latest image file does not exist.")
+
+    logger.info(f"Returning latest image at: {latest_image_path}")
+    if os.path.exists(latest_image_path):
+        return FileResponse(latest_image_path)
+    else:
+        raise HTTPException(status_code=404, detail="Image not found")
 
 # Start server. For now this is handled by the run_server scripts
 """

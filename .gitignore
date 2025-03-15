@@ -10,6 +10,7 @@ __pycache__/
 backend/fastAPI/outputImages/*.png
 backend/fastAPI/outputImages/*.jpg
 backend/fastAPI/outputImages/*.jpeg
+most_recent.txt
 
 # Build and distribution folders
 bin/
