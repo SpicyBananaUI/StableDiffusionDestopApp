@@ -10,7 +10,17 @@ Accept: application/json
 
 ###
 
-GET http://127.0.0.1:8000/photo/a%20cute%20capybara%20wearing%20a%20hat/20/7.5/
+GET http://127.0.0.1:8000/photo/a penguin going for its first swim/20/7.5/
+Accept: application/json
+
+###
+
+GET http://127.0.0.1:8000/image
+Accept: application/json
+
+###
+
+GET http://127.0.0.1:8000/secure-endpoint/Bogus_Key/
 Accept: application/json
 
 ###

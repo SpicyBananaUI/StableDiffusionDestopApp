@@ -2,6 +2,7 @@ import logging
 import os
 from datetime import datetime
 import re
+import sys
 
 
 import uvicorn
@@ -44,7 +45,7 @@ except ImportError as e:
 app = FastAPI()
 
 model_id = "CompVis/stable-diffusion-v1-4"
-LATEST_IMAGE_PATH_FILE = "most_recent.txt" # placeholder image
+LATEST_IMAGE_PATH_FILE = "most_recent.txt"
 
 
 if DEPLOY_MODE == "local":
@@ -126,18 +127,19 @@ except Exception as e:
 pipe = StableDiffusionPipeline.from_pretrained(model_id)
 pipe = pipe.to(device)
 
+
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
+
+@app.get("/hello/{name}")
+async def say_hello(name: str):
+    return {"message": f"Hello {name}"}
 
 # TODO: verify functionality in remote mode when supported
 @app.get("/secure-endpoint/")
 async def secure_data(api_key: str = Depends(verify_api_key)):
     return {"message": "You have access!"}
-
-@app.get("/hello/{name}")
-async def say_hello(name: str):
-    return {"message": f"Hello {name}"}
 
 # TODO: If UI constraints on params change, change them here too (and vice versa)
 # TODO: In the future, have UI query the range from here, get the range from config

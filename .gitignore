@@ -1,5 +1,6 @@
 # Python virtual environment
 venv/
+webui-venv/
 __pycache__/
 *.py[cod]
 *$py.class
@@ -24,6 +25,9 @@ build/
 .vscode/
 *.swp
 *.swo
+
+# OS specific files
+.DS_Store
 
 # .NET Core
 *.dll
