@@ -1,38 +1,142 @@
+ <!-- Original Code for initial frontend landing page below -->
+ 
+<!-- <Window xmlns="https://github.com/avaloniaui" -->
+<!--         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" -->
+<!--         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" -->
+<!--         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" -->
+<!--         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600" -->
+<!--         x:Class="myApp.MainWindow" -->
+<!--         Title="Stable Diffusion Image Generator"> -->
+<!--     <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,*" Margin="20"> -->
+<!--         <TextBlock Grid.Row="0" Text="Stable Diffusion Image Generator" FontSize="24" FontWeight="Bold" Margin="0,0,0,20"/> -->
+<!--          -->
+<!--         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,10"> -->
+<!--             <TextBlock Text="Prompt:" VerticalAlignment="Center" Width="100"/> -->
+<!--             <TextBox x:Name="PromptTextBox" Width="500" Watermark="Enter a prompt for image generation"/> -->
+<!--         </StackPanel> -->
+<!--          -->
+<!--         <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,10"> -->
+<!--             <TextBlock Text="Steps:" VerticalAlignment="Center" Width="100"/> -->
+<!--             <Slider x:Name="StepsSlider" Minimum="1" Maximum="50" Value="20" Width="300"/> -->
+<!--             <TextBlock x:Name="StepsValueText" Text="20" Margin="10,0,0,0" VerticalAlignment="Center"/> -->
+<!--         </StackPanel> -->
+<!--          -->
+<!--         <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,0,0,20"> -->
+<!--             <TextBlock Text="Scale:" VerticalAlignment="Center" Width="100"/> -->
+<!--             <Slider x:Name="ScaleSlider" Minimum="1" Maximum="15" Value="7.5" Width="300"/> -->
+<!--             <TextBlock x:Name="ScaleValueText" Text="7.5" Margin="10,0,0,0" VerticalAlignment="Center"/> -->
+<!--         </StackPanel> -->
+<!--          -->
+<!--         <Button Grid.Row="4" x:Name="GenerateButton" Content="Generate Image" HorizontalAlignment="Left" Margin="0,0,0,20"/> -->
+<!--          -->
+<!--         <Border Grid.Row="5" BorderBrush="Gray" BorderThickness="1" Padding="10"> -->
+<!--             <Grid> -->
+<!--                 <Image x:Name="ResultImage" Stretch="Uniform" HorizontalAlignment="Center"/> -->
+<!--                 <TextBlock x:Name="StatusText" Text="No image generated yet" HorizontalAlignment="Center" VerticalAlignment="Center"/> -->
+<!--                 <ProgressBar x:Name="LoadingBar" IsVisible="False" IsIndeterminate="True" Width="200" Height="20" VerticalAlignment="Center"/> -->
+<!--             </Grid> -->
+<!--         </Border> -->
+<!--     </Grid> -->
+<!-- </Window> -->
+
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+        mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="600"
         x:Class="myApp.MainWindow"
         Title="Stable Diffusion Image Generator">
-    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,*" Margin="20">
-        <TextBlock Grid.Row="0" Text="Stable Diffusion Image Generator" FontSize="24" FontWeight="Bold" Margin="0,0,0,20"/>
-        
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,10">
-            <TextBlock Text="Prompt:" VerticalAlignment="Center" Width="100"/>
-            <TextBox x:Name="PromptTextBox" Width="500" Watermark="Enter a prompt for image generation"/>
-        </StackPanel>
-        
-        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,10">
-            <TextBlock Text="Steps:" VerticalAlignment="Center" Width="100"/>
-            <Slider x:Name="StepsSlider" Minimum="1" Maximum="50" Value="20" Width="300"/>
-            <TextBlock x:Name="StepsValueText" Text="20" Margin="10,0,0,0" VerticalAlignment="Center"/>
-        </StackPanel>
-        
-        <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,0,0,20">
-            <TextBlock Text="Scale:" VerticalAlignment="Center" Width="100"/>
-            <Slider x:Name="ScaleSlider" Minimum="1" Maximum="15" Value="7.5" Width="300"/>
-            <TextBlock x:Name="ScaleValueText" Text="7.5" Margin="10,0,0,0" VerticalAlignment="Center"/>
-        </StackPanel>
-        
-        <Button Grid.Row="4" x:Name="GenerateButton" Content="Generate Image" HorizontalAlignment="Left" Margin="0,0,0,20"/>
-        
-        <Border Grid.Row="5" BorderBrush="Gray" BorderThickness="1" Padding="10">
-            <Grid>
-                <Image x:Name="ResultImage" Stretch="Uniform" HorizontalAlignment="Center"/>
-                <TextBlock x:Name="StatusText" Text="No image generated yet" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                <ProgressBar x:Name="LoadingBar" IsVisible="False" IsIndeterminate="True" Width="200" Height="20" VerticalAlignment="Center"/>
-            </Grid>
+    
+    <DockPanel>
+        <!-- Top Navigation Bar -->
+        <Border Background="#222" Height="50" DockPanel.Dock="Top">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Stable Diffusion UI" Foreground="LightGreen" FontSize="18" FontWeight="Bold" Margin="10"/>
+                <Button Content="Dashboard" Background="Transparent" Foreground="White" Margin="10,0"/>
+                <Button Content="Models" Background="Transparent" Foreground="White" Margin="10,0"/>
+                <Button Content="Gallery" Background="Transparent" Foreground="White" Margin="10,0"/>
+                <Button Content="Settings" Background="Transparent" Foreground="White" Margin="10,0"/>
+            </StackPanel>
         </Border>
-    </Grid>
+
+        <!-- Main Content Grid -->
+        <Grid Margin="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*" /> <!-- Left Controls -->
+                <ColumnDefinition Width="3*" /> <!-- Right Image Display -->
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/> <!-- Prompt -->
+                <RowDefinition Height="*"/> <!-- Controls and Image -->
+            </Grid.RowDefinitions>
+
+            <!-- Prompt Inputs -->
+            <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,10">
+                <TextBlock Text="Prompt Negative Prompt" FontWeight="Bold"/>
+                <TextBox x:Name="PromptTextBox" Watermark="Enter prompt..." Background="#333" Foreground="White"/>
+                <TextBox x:Name="NegativePromptTextBox" Watermark="Enter negative prompt..." Background="#333" Foreground="White" Margin="0,5,0,0"/>
+            </StackPanel>
+
+            <!-- Controls Section -->
+            <Grid Grid.Row="1" Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Controls -->
+                <Border BorderBrush="Gray" BorderThickness="1" Margin="0,0,0,10">
+                    <StackPanel Margin="10">
+                        <TextBlock Text="Controls" FontWeight="Bold"/>
+                        
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Steps:" VerticalAlignment="Center" Width="50"/>
+                            <Slider x:Name="StepsSlider" Minimum="1" Maximum="50" Value="20" Width="250"/>
+                            <TextBlock x:Name="StepsValueText" Text="20" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Scale:" VerticalAlignment="Center" Width="50"/>
+                            <Slider x:Name="ScaleSlider" Minimum="1" Maximum="15" Value="7.5" Width="250"/>
+                            <TextBlock x:Name="ScaleValueText" Text="7.5" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        
+                    </StackPanel>
+                </Border>
+
+                <!-- Configuration -->
+                <Border BorderBrush="Gray" BorderThickness="1" Grid.Row="1" Margin="0,0,0,10">
+                    <StackPanel Margin="10">
+                        <TextBlock Text="Configuration" FontWeight="Bold"/>
+                        <ComboBox x:Name="ModelComboBox" PlaceholderText="Choose Model"/>
+                        <ComboBox x:Name="SamplerComboBox" PlaceholderText="Choose Sampler"/>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBox Width="50" Watermark="Width"/>
+                            <TextBox Width="50" Watermark="Height" Margin="5,0,0,0"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Progress -->
+                <Border BorderBrush="Gray" BorderThickness="1" Grid.Row="2" Margin="0,0,0,10">
+                    <StackPanel Margin="10">
+                        <TextBlock Text="Progress" FontWeight="Bold"/>
+                        <ProgressBar x:Name="LoadingBar" Width="100" Height="20"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Image Display Section -->
+            <Border Grid.Row="1" Grid.Column="1" BorderBrush="Gray" BorderThickness="1" Padding="10">
+                <StackPanel HorizontalAlignment="Center">
+                    <Image x:Name="ResultImage" Stretch="Uniform" Height="350"/>
+                    <TextBlock x:Name="StatusText" Text="No image generated yet" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <Button x:Name="GenerateButton" Content="Generate" Background="DarkGray" Foreground="White" Width="200" Margin="10" HorizontalContentAlignment="Center"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </DockPanel>
 </Window>
+
