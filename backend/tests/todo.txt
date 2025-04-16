@@ -1,1 +1,0 @@
-tests for the backend. potentially some overlap with https://github.com/AUTOMATIC1111/stable-diffusion-webui/tree/master/test

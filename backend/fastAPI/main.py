@@ -20,6 +20,8 @@ from PIL.PngImagePlugin import PngImageFile  # Needed for PNG-specific metadata 
 import torch
 from diffusers import StableDiffusionPipeline
 
+"""No longer in use"""
+
 
 OUTPUT_DIR_IMAGES = "outputImages"
 # Set the host based on the deployment mode
