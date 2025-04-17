@@ -71,4 +71,5 @@ logger.debug(f"COMMANDLINE_ARGS: {os.environ['COMMANDLINE_ARGS']}")
 
 # Launch backend
 import launch
+print("Launching Stable Diffusion WebUI backend...")
 launch.main()
