@@ -12,6 +12,7 @@ backend/fastAPI/outputImages/*.png
 backend/fastAPI/outputImages/*.jpg
 backend/fastAPI/outputImages/*.jpeg
 most_recent.txt
+test/test_output.png
 
 # Build and distribution folders
 bin/

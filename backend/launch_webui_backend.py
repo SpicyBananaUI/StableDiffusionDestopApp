@@ -1,20 +1,74 @@
 import os
+import platform
+import torch
 import sys
 import subprocess
+import logging
 
-MACOS = True
+# Setup logger
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("device-check")
+logger.setLevel(logging.DEBUG)
+
+def test_device(device):
+    """Use to verify functionality of selected device before proceeding (CUDA, MPS, CPU)"""
+    try:
+        _ = torch.tensor([1.0], device=device) * 2  # Simple operation
+        logger.info(f"Device {device} is working correctly.")
+        return True
+    except Exception as e:
+        logger.warning(f"Device {device} failed execution test: {e}")
+        return False
+
+# Detect OS
+system = platform.system()
+MACOS = system == "Darwin"
+WINDOWS = system == "Windows"
+LINUX = system == "Linux"
+
+# Base commandline args
+args = []
+
+device = "cpu"  # Default fallback
 
 if MACOS:
     os.environ["install_dir"] = "$HOME"
-    os.environ["COMMANDLINE_ARGS"] = "--skip-torch-cuda-test --upcast-sampling --no-half-vae --use-cpu interrogate"
+    args += ["--skip-torch-cuda-test", "--upcast-sampling", "--no-half-vae"]
     os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 
-# dont launch the web ui, just the backend and api.
-if "COMMANDLINE_ARGS" in os.environ:
-    os.environ["COMMANDLINE_ARGS"] += " --nowebui --api --api-log"
-else:
-    os.environ["COMMANDLINE_ARGS"] = "--nowebui --api --api-log"
+    if getattr(torch.backends, "mps", None) and torch.backends.mps.is_available():
+        if test_device("mps"):
+            device = "mps"
+            args.append("--use-cpu interrogate")
+        else:
+            logger.warning("MPS is available but failed test. Falling back to CPU.")
+    else:
+        logger.warning("MPS is not available. Falling back to CPU.")
 
+elif WINDOWS or LINUX:
+    if torch.cuda.is_available():
+        if test_device("cuda"):
+            device = "cuda"
+        else:
+            logger.warning("CUDA is available but failed test. Falling back to CPU.")
+    else:
+        logger.warning("CUDA is not available. Falling back to CPU.")
+        logger.warning("If you have a compatible device, try installing CUDA and the corresponding torch build at https://pytorch.org/get-started/locally/")
+
+# If CPU fallback used, pass --use-cpu to the backend
+if device == "cpu":
+    args.append("--use-cpu interrogate")
+
+# Disable web UI and enable API irrespective of platform/device
+args += ["--nowebui", "--api", "--api-log"]
+
+# Set final command line args
+os.environ["COMMANDLINE_ARGS"] = " ".join(args)
+
+# Optional debug
+logger.info(f"Launching with device: {device}")
+logger.debug(f"COMMANDLINE_ARGS: {os.environ['COMMANDLINE_ARGS']}")
+
+# Launch backend
 import launch
-
 launch.main()
