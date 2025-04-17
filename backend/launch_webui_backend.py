@@ -31,15 +31,20 @@ args = []
 
 device = "cpu"  # Default fallback
 
+# debug torch/cuda
+print(torch.__file__)
+print(torch.__version__)
+print(torch.version.cuda)
+print(torch.cuda.is_available())
+
 if MACOS:
     os.environ["install_dir"] = "$HOME"
-    args += ["--skip-torch-cuda-test", "--upcast-sampling", "--no-half-vae"]
     os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 
     if getattr(torch.backends, "mps", None) and torch.backends.mps.is_available():
         if test_device("mps"):
             device = "mps"
-            args.append("--use-cpu interrogate")
+            args += ["--skip-torch-cuda-test", "--upcast-sampling", "--no-half-vae", "--use-cpu interrogate"]
         else:
             logger.warning("MPS is available but failed test. Falling back to CPU.")
     else:
@@ -55,9 +60,9 @@ elif WINDOWS or LINUX:
         logger.warning("CUDA is not available. Falling back to CPU.")
         logger.warning("If you have a compatible device, try installing CUDA and the corresponding torch build at https://pytorch.org/get-started/locally/")
 
-# If CPU fallback used, pass --use-cpu to the backend
-if device == "cpu":
-    args.append("--use-cpu interrogate")
+# If CPU fallback used, pass args to the backend
+if device == "cpu":    
+    args += ["--skip-torch-cuda-test", "--upcast-sampling", "--no-half-vae", "--use-cpu interrogate"]
 
 # Disable web UI and enable API irrespective of platform/device
 args += ["--nowebui", "--api", "--api-log"]

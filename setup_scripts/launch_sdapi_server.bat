@@ -56,6 +56,12 @@ if errorlevel 1 (
 )
 
 echo.
+echo Checking Python version...
+%PYTHON_EXE% -c "import sys; print(sys.executable)"
+echo.
+
+
+echo.
 echo Launching sdapi (webui backend)...
 echo You can verify functionality by running: %PYTHON_EXE% test\basic_test.py
 echo.

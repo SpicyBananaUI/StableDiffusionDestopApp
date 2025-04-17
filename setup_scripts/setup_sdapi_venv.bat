@@ -44,6 +44,9 @@ REM Upgrade pip
 echo Upgrading pip...
 python -m pip install --upgrade pip
 
+REM Installing cuda-compiled torch
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu126
+
 REM Install required packages
 if exist "requirements_versions.txt" (
     echo Installing required packages...
@@ -58,7 +61,7 @@ echo.
 echo Setup complete!
 echo.
 echo To activate the virtual environment in the future, run:
-echo     call %BACKEND_DIR%\%VENV_DIR%\Scripts\activate.bat
+echo     .\%BACKEND_DIR%\%VENV_DIR%\Scripts\activate.bat
 echo.
 echo To run the sdapi server, run:
 echo     setup_scripts\launch_sdapi_server.bat
