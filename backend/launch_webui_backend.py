@@ -2,10 +2,15 @@ import os
 import sys
 import subprocess
 
-MACOS = True
+#MACOS = TrueTes
+MACOS = False
+
+print("START")
 
 # Temporary include of SD webui before we fork/copy the needed code
-webui_path = os.path.abspath("/Users/ronan/Library/Application Support/StabilityMatrix/Packages/stable-diffusion-webui-forge/")
+#webui_path = os.path.abspath("/Users/ronan/Library/Application Support/StabilityMatrix/Packages/stable-diffusion-webui-forge/")
+webui_path = os.path.abspath("D:/Stability Matrix/Data/Packages/stable-diffusion-webui-forge")
+
 sys.path.append(webui_path)
 
 if MACOS:
@@ -19,6 +24,8 @@ if "COMMANDLINE_ARGS" in os.environ:
 else:
     os.environ["COMMANDLINE_ARGS"] = "--nowebui --api"
 
+print("Launching Stable Diffusion WebUI backend...")
 import launch
 
 launch.main()
+print("Launch complete.")
