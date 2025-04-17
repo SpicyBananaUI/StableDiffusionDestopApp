@@ -1,1 +1,0 @@
-https://github.com/AUTOMATIC1111/stable-diffusion-webui/tree/master/modules/processing_scripts

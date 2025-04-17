@@ -1,0 +1,1 @@
+TODO: we must license the project under the GPL since sd webui forge is licensed under it.

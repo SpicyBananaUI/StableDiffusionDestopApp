@@ -1,0 +1,15 @@
+# For old version of project using torch library for generation
+fastapi>=0.100.0
+uvicorn>=0.22.0
+# Default torch installation (CPU only)
+torch>=2.0.1
+# Add NumPy explicitly - required for Stable Diffusion
+numpy>=1.20.0
+diffusers>=0.21.0
+transformers>=4.30.0
+accelerate>=0.21.0
+scipy>=1.10.0
+pillow>=9.4.0
+
+pydantic==2.8.2
+pydantic_core==2.20.1
