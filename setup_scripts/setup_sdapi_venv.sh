@@ -33,7 +33,6 @@ pip install --upgrade pip
 echo "Installing required packages..."
 pip install -r requirements_versions.txt
 
-# TODO: Create any directories that are .gitignored
 
 echo ""
 echo "Setup complete!"
