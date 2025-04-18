@@ -7,12 +7,14 @@ This project combines a the FastAPI Python backend from [Stable Diffusion WebUI 
 1. Open a terminal in the project directory
 
 2. Run the setup script to create a virtual environment and install dependencies:
+
+#### On Windows
 ```
-# On Windows
 setup_scripts/setup_sdapi_venv.bat
+```
 
-
-# On Linux/Mac
+#### On Linux/Mac
+```
 # First make the script executable
 chmod +x setup_scripts/setup_sdapi_venv.sh
 # Then run the setup to create a Python virtual environment with the required packages
@@ -20,17 +22,23 @@ chmod +x setup_scripts/setup_sdapi_venv.sh
 ```
 
 3. Start the backend server:
+#### On Windows
 ```
-# On Windows
 setup_scripts/launch_sdapi_server.bat
+```
 
-
-# On Linux/Mac
+#### On Linux/Mac
+```
 # First make the script executable
 chmod +x setup_scripts/launch_sdapi_venv.sh
 # Then run it
 ./setup_scripts/launch_sdapi_server.sh
 ```
+
+## Get models
+
+Models should be placed in /backend/models/\[modelname\]
+They can easily be installed in a central location via the [Stability Matrix](https://github.com/LykosAI/StabilityMatrix) project
 
 ## GPU Acceleration Setup (Optional)
 
@@ -71,7 +79,7 @@ print(f"CUDA version: {torch.version.cuda}")
 
 ## Development Notes
 
-- The Python virtual environment should NOT be committed to version control
+- The Python virtual environment should NOT be committed to version control (is in .gitignore)
 - Make sure to update requirements_versions.txt when adding new Python dependencies
 
 ## Known Bugs / Issues
@@ -85,4 +93,4 @@ print(f"CUDA version: {torch.version.cuda}")
 
 - The backend and API for this project are from [Stable Diffusion WebUI Forge](https://github.com/automatic1111/stable-diffusion-webui) by AUTOMATIC1111
 - The credits for code used by that project can be found in its readme, preserved in /backend/README.md. Likewise their CITATION.cff and CODEOWNERS remain in /backend/
-- /backend/launch_webui_backend/ and all code outside of /backend/ are written by members of the [Spicy Banana](https://github.com/SpicyBananaUI) organization.
+- /backend/launch_webui_backend.py and all code outside of /backend/ are written by members of the [Spicy Banana](https://github.com/SpicyBananaUI) organization.
