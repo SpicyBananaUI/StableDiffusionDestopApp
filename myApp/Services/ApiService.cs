@@ -96,6 +96,23 @@ namespace myApp.Services
                 return new  ProgressInfo();
             }
         }
+        
+        public async Task StopGenerationAsync()
+        {
+            try
+            {
+                var response = await _httpClient.PostAsync("http://127.0.0.1:7861/sdapi/v1/interrupt", null);
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new Exception($"Failed to stop generation: {response.StatusCode}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Exception while stopping generation: {ex.Message}");
+            }
+        }
+
 
         public async Task<List<string>> GetAvailableModelsAsync()
         {

@@ -65,7 +65,7 @@ if device == "cpu":
     args += ["--skip-torch-cuda-test", "--upcast-sampling", "--no-half-vae", "--use-cpu interrogate"]
 
 # Disable web UI and enable API irrespective of platform/device
-args += ["--nowebui", "--api", "--api-log"]
+args += ["--nowebui", "--api", "--api-log", "--loglevel WARNING"]
 
 # Set final command line args
 os.environ["COMMANDLINE_ARGS"] = " ".join(args)

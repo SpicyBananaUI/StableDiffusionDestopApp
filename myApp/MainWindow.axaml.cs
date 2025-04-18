@@ -21,6 +21,9 @@ public partial class MainWindow : Window
     private readonly ApiService _apiService;
     private Bitmap? _lastGeneratedImage; // Store the last generated image
     
+    private bool _isGenerating = false; // Keep track of current state of generation
+    private CancellationTokenSource? _generationCts;
+    
     public MainWindow()
     {
         InitializeComponent();
@@ -35,8 +38,11 @@ public partial class MainWindow : Window
         
         // Set up event handlers
         if (this.FindControl<Button>("GenerateButton") is Button generateButton)
+        {
             generateButton.Click += OnGenerateButtonClick;
-        
+            generateButton.Content = "Generate";
+        }
+
         if (this.FindControl<Button>("SaveButton") is Button saveButton)
             saveButton.Click += OnSaveButtonClick;
 
@@ -56,6 +62,23 @@ public partial class MainWindow : Window
 
     private async void OnGenerateButtonClick(object sender, RoutedEventArgs e)
     {
+        var generateButton = this.FindControl<Button>("GenerateButton");
+
+        if (_isGenerating)
+        {
+            // Since a generation was ongoing, this press must have been a cancel
+            generateButton.Content = "Cancelling Generation...";
+            generateButton.IsEnabled = false;           // Will be re-enabled by the generate call finally
+            _generationCts?.Cancel();
+            await _apiService.StopGenerationAsync();  // Interrupt api call
+            return;
+        }
+
+        _isGenerating = true;
+        // Cancellation Token Source for generation progress bar
+        _generationCts = new CancellationTokenSource();
+
+        
         // Get controls
         var promptTextBox = this.FindControl<TextBox>("PromptTextBox");
         var negativePromptTextBox = this.FindControl<TextBox>("NegativePromptTextBox");
@@ -67,7 +90,6 @@ public partial class MainWindow : Window
         var statusText = this.FindControl<TextBlock>("StatusText");
         var loadingBar = this.FindControl<ProgressBar>("LoadingBar");
         var progressText = this.FindControl<TextBlock>("ProgressText");
-        var generateButton = this.FindControl<Button>("GenerateButton");
         var saveButton = this.FindControl<Button>("SaveButton");
         var samplerComboBox = this.FindControl<ComboBox>("SamplerComboBox");
         var modelComboBox =  this.FindControl<ComboBox>("ModelComboBox");
@@ -84,7 +106,8 @@ public partial class MainWindow : Window
         try
         {
             // Update UI state
-            generateButton.IsEnabled = false;
+            _isGenerating = true;
+            generateButton.Content = "Cancel";
             SaveButton.IsEnabled = false;
             resultImage.Source = null;
             statusText.Text = "Generating image...";
@@ -107,8 +130,6 @@ public partial class MainWindow : Window
             this.FindControl<TextBlock>("InfoSamplerText").Text = $"Sampler: {sampler}, Model: {modelComboBox?.SelectedItem}";
             this.FindControl<TextBlock>("InfoSizeText").Text = $"Size: {width} x {height}";
 
-            // Cancellation Token Source for progress bar
-            var cts = new CancellationTokenSource();
             bool done = false;
 
             var pollingTask = Task.Run(async () =>
@@ -116,7 +137,7 @@ public partial class MainWindow : Window
                 try
                 {
 
-                    while (!cts.Token.IsCancellationRequested && !done)
+                    while (!_generationCts.Token.IsCancellationRequested && !done && _isGenerating)
                     {
                         var progressInfo = await _apiService.GetProgressAsync();
 
@@ -138,7 +159,7 @@ public partial class MainWindow : Window
                         //     break;
                         // }
                     
-                        await Task.Delay(300, cts.Token);
+                        await Task.Delay(500, _generationCts.Token);
                     }
                 }
                 catch (OperationCanceledException){
@@ -148,11 +169,12 @@ public partial class MainWindow : Window
             
             var (bitmap, seedUsed) = await _apiService.GenerateImage(prompt, steps, scale, negativePrompt, width, height, sampler, seed);
             _lastGeneratedImage = bitmap; // Store the generated image for later use
-            saveButton.IsEnabled = true;
+            _isGenerating = false;
+            generateButton.Content = "Generate";
             // Record the seed in history
             this.FindControl<TextBlock>("InfoSeedText").Text = $"Seed: {seedUsed}";
             
-            cts.Cancel();
+            _generationCts?.Cancel();
             await pollingTask;
             
             // Load the generated image
@@ -176,10 +198,12 @@ public partial class MainWindow : Window
             {
                 loadingBar.Value = 0;
                 progressText.Text = "Done!";
+                generateButton.IsEnabled = true;
+                ResultImage.IsVisible = true;
+                ProgressOverlay.IsVisible = false;
+                _isGenerating = false;
+                generateButton.Content = "Generate";
             });
-            generateButton.IsEnabled = true;
-            ResultImage.IsVisible = true;
-            ProgressOverlay.IsVisible = false;
         }
     }
 
