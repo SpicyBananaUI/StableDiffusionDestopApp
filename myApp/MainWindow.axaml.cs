@@ -19,7 +19,10 @@ namespace myApp;
 public partial class MainWindow : Window
 {
     private readonly ApiService _apiService;
-    private Bitmap? _lastGeneratedImage; // Store the last generated image
+    private List<Bitmap> _generatedImages = new List<Bitmap>(); // Store all generated images
+    private int _currentImageIndex = 0; // Index of the currently displayed image
+
+    private List<long> _seeds = new List<long>(); // Store the seeds for each generated image
     
     private bool _isGenerating = false; // Keep track of current state of generation
     private CancellationTokenSource? _generationCts;
@@ -58,6 +61,18 @@ public partial class MainWindow : Window
                 if (e.Property == Slider.ValueProperty && this.FindControl<TextBlock>("ScaleValueText") is TextBlock scaleText)
                     scaleText.Text = $"{scaleSlider.Value:F1}";
             };
+
+        if (this.FindControl<Slider>("BatchSlider") is Slider batchSlider)
+        {
+            batchSlider.PropertyChanged += (s, e) => {
+            if (e.Property == Slider.ValueProperty && this.FindControl<TextBlock>("BatchValueText") is TextBlock batchText)
+                batchText.Text = $"{Math.Round(batchSlider.Value)}";
+            };
+        }
+
+        this.FindControl<Button>("PrevImageButton").Click += (s, e) => ShowImageAt(_currentImageIndex - 1);
+        this.FindControl<Button>("NextImageButton").Click += (s, e) => ShowImageAt(_currentImageIndex + 1);
+
     }
 
     private async void OnGenerateButtonClick(object sender, RoutedEventArgs e)
@@ -84,6 +99,7 @@ public partial class MainWindow : Window
         var negativePromptTextBox = this.FindControl<TextBox>("NegativePromptTextBox");
         var stepsSlider = this.FindControl<Slider>("StepsSlider");
         var scaleSlider = this.FindControl<Slider>("ScaleSlider");
+        var batchSlider = this.FindControl<Slider>("BatchSlider");
         var widthTextBox = this.FindControl<TextBox>("WidthTextBox");
         var heightTextBox = this.FindControl<TextBox>("HeightTextBox");
         var resultImage = this.FindControl<Image>("ResultImage");
@@ -118,6 +134,7 @@ public partial class MainWindow : Window
             string negativePrompt = negativePromptTextBox?.Text ?? string.Empty;
             int steps = (int)Math.Round(stepsSlider.Value);
             double scale = scaleSlider.Value;
+            int batchSize = (int)Math.Round(batchSlider.Value);
             int width = int.TryParse(widthTextBox?.Text, out var w) ? Math.Max(64,Math.Min(w,2048)) : 512;
             int height = int.TryParse(heightTextBox?.Text, out var h) ? Math.Max(64,Math.Min(h,2048)) : 512;
             string sampler = samplerComboBox?.SelectedItem as string ?? string.Empty;
@@ -167,20 +184,28 @@ public partial class MainWindow : Window
                 }
             });
             
-            var (bitmap, seedUsed) = await _apiService.GenerateImage(prompt, steps, scale, negativePrompt, width, height, sampler, seed);
-            _lastGeneratedImage = bitmap; // Store the generated image for later use
+            var (images, seeds) = await _apiService.GenerateImage(prompt, steps, scale, negativePrompt, width, height, sampler, seed, batchSize);
+
+            _generatedImages = images; // Store all generated images
+            _seeds = seeds; // Store all generated seeds
+            _currentImageIndex = 0; // Reset the current image index
+            ShowImageAt(_currentImageIndex); // Show the first generated image
+
+            this.FindControl<StackPanel>("ImageNavPanel").IsVisible = _generatedImages.Count > 1; // Show navigation panel if multiple images are generated
+
             _isGenerating = false;
             generateButton.Content = "Generate";
+
             // Record the seed in history
-            this.FindControl<TextBlock>("InfoSeedText").Text = $"Seed: {seedUsed}";
+            this.FindControl<TextBlock>("InfoSeedText").Text = $"Seed: {seeds[_currentImageIndex]}";
             
             _generationCts?.Cancel();
             await pollingTask;
             
             // Load the generated image
-            if (bitmap != null)
+            if (images[0] != null)
             {
-                resultImage.Source = bitmap;
+                resultImage.Source = images[0];
                 statusText.Text = string.Empty;
             }
             else
@@ -202,6 +227,7 @@ public partial class MainWindow : Window
                 ResultImage.IsVisible = true;
                 ProgressOverlay.IsVisible = false;
                 _isGenerating = false;
+                saveButton.IsEnabled = true;
                 generateButton.Content = "Generate";
             });
         }
@@ -209,7 +235,7 @@ public partial class MainWindow : Window
 
     private async void OnSaveButtonClick(object? sender, RoutedEventArgs e){
 
-        if (_lastGeneratedImage == null)
+        if (_generatedImages[_currentImageIndex] == null)
         {
             return;
         }
@@ -234,7 +260,7 @@ public partial class MainWindow : Window
             try
             {
                 using var stream = File.Create(filePath);
-                _lastGeneratedImage.Save(stream);
+                _generatedImages[_currentImageIndex].Save(stream);
             }
             catch (Exception ex)
             {
@@ -288,4 +314,15 @@ public partial class MainWindow : Window
     
     }
 
+    private void ShowImageAt(int index)
+    {
+        if (_generatedImages.Count == 0 || index < 0 || index >= _generatedImages.Count){
+            return;
+        }
+        
+        _currentImageIndex = index;
+        ResultImage.Source = _generatedImages[index];
+        this.FindControl<TextBlock>("ImageIndexLabel").Text = $"Image {index + 1} of {_generatedImages.Count}";
+        this.FindControl<TextBlock>("InfoSeedText").Text = $"Seed: {_seeds[_currentImageIndex]}";
+    }
 }

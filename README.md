@@ -1,51 +1,48 @@
 # Stable Diffusion Desktop App
 
-This project combines a FastAPI Python backend for running Stable Diffusion with an Avalonia UI frontend.
+This project combines a the FastAPI Python backend from [Stable Diffusion WebUI Forge](https://github.com/automatic1111/stable-diffusion-webui) by AUTOMATIC1111 for running Stable Diffusion with an Avalonia UI frontend.
 
 ## Backend Setup
 
-1. Navigate to the backend directory:
-```
-cd backend/fastAPI
-```
+1. Open a terminal in the project directory
 
 2. Run the setup script to create a virtual environment and install dependencies:
+
+#### On Windows
 ```
-# On Windows
-setup_venv.bat
+setup_scripts/setup_sdapi_venv.bat
+```
 
-*Alternative if batch script doesn't work run the following commands*
-1. python -m venv venv
-2. venv\Scripts\activate
-3. pip install -r requirements.txt
-
-# On Linux/Mac
+#### On Linux/Mac
+```
 # First make the script executable
-chmod +x setup_venv.sh
-# Then run it
-./setup_venv.sh
+chmod +x setup_scripts/setup_sdapi_venv.sh
+# Then run the setup to create a Python virtual environment with the required packages
+./setup_scripts/setup_sdapi_venv.sh
 ```
 
 3. Start the backend server:
+#### On Windows
 ```
-# On Windows
-run_server.bat
+setup_scripts/launch_sdapi_server.bat
+```
 
-*If batch scripts don't work run the following*
-
-uvicorn main:app --reload
-
-
-# On Linux/Mac
+#### On Linux/Mac
+```
 # First make the script executable
-chmod +x run_server.sh
+chmod +x setup_scripts/launch_sdapi_venv.sh
 # Then run it
-./run_server.sh
+./setup_scripts/launch_sdapi_server.sh
 ```
+
+## Get models
+
+Models should be placed in /backend/models/\[modelname\]
+They can easily be installed in a central location via the [Stability Matrix](https://github.com/LykosAI/StabilityMatrix) project
 
 ## GPU Acceleration Setup (Optional)
 
-To use GPU acceleration with CUDA (much faster image generation):
+The setup scripts attempt to install a (much faster) CUDA-compiled version of torch. If they are unsuccessful, try the following:
 
 1. Make sure you have a CUDA-compatible NVIDIA GPU
 2. Install NVIDIA drivers for your GPU
@@ -53,8 +50,8 @@ To use GPU acceleration with CUDA (much faster image generation):
 
 ```
 # Activate your virtual environment first
-venv\Scripts\activate  # Windows
-source venv/bin/activate  # Linux/Mac
+backend\webui-venv\Scripts\activate  # Windows
+source backend/webuivenv/bin/activate  # Linux/Mac
 
 # Then install PyTorch with CUDA support (for CUDA 11.8)
 pip uninstall torch
@@ -82,10 +79,18 @@ print(f"CUDA version: {torch.version.cuda}")
 
 ## Development Notes
 
-- The Python virtual environment should NOT be committed to version control
-- Make sure to update requirements.txt when adding new Python dependencies
+- The Python virtual environment should NOT be committed to version control (is in .gitignore)
+- Make sure to update requirements_versions.txt when adding new Python dependencies
 
-## Known Bugs
+## Known Bugs / Issues
 
-- Issues with CUDA support not properly working with certain versions of torch/numpy, CUDA is currently unoptimized, CPU utilization is a viable alternative for now.
-- Frequent timeouts for long prompts.
+- On machines with CUDA support, a CUDA-compiled version of torch must be installed. The setup scripts attempt to install the CUDA version, but if it is not available CPU fallback will be used.
+- The frontend will timeout after 100 seconds of generation, even if the ETA is making progress
+- Default model selection is not functional; displayed model may not be used unless it is explicitly selected
+- When using MPS, quick, repeating calls to the txt2img and interrupt endpoints result in the next image generation failing (black image)
+
+## Credits
+
+- The backend and API for this project are from [Stable Diffusion WebUI Forge](https://github.com/automatic1111/stable-diffusion-webui) by AUTOMATIC1111
+- The credits for code used by that project can be found in its readme, preserved in /backend/README.md. Likewise their CITATION.cff and CODEOWNERS remain in /backend/
+- /backend/launch_webui_backend.py and all code outside of /backend/ are written by members of the [Spicy Banana](https://github.com/SpicyBananaUI) organization.

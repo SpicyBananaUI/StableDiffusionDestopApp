@@ -59,6 +59,13 @@
                                 <TextBlock x:Name="ScaleValueText" Text="7.5" VerticalAlignment="Center" Margin="10,0,0,0" Grid.Column="2"/>
                             </Grid>
 
+                            <!-- Batch Size Slider -->
+                            <Grid Margin="0,5,0,0" ColumnDefinitions="Auto,*,Auto">
+                                <TextBlock Text="# of Images:" VerticalAlignment="Center" Grid.Column="0" Margin="0,0,10,0"/>
+                                <Slider x:Name="BatchSlider" Minimum="1" Maximum="8" Value="1" Grid.Column="1"/>
+                                <TextBlock x:Name="BatchValueText" Text="1" Margin="10,0,0,0" VerticalAlignment="Center" Grid.Column="2"/>
+                            </Grid>
+
                         </StackPanel>
                     </Border>
 
@@ -110,6 +117,12 @@
                     <StackPanel x:Name="ProgressOverlay" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="False">
                         <ProgressBar x:Name="LoadingBar" Minimum="0" Maximum="100" Height="20" HorizontalAlignment="Stretch"/>
                         <TextBlock x:Name="ProgressText" Text="" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                    </StackPanel>
+
+                    <StackPanel x:Name="ImageNavPanel" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,60,0,10" Spacing="10" IsVisible="False">
+                        <Button x:Name="PrevImageButton" Content="←" Width="30"/>
+                        <TextBlock x:Name="ImageIndexLabel" Text="Image 1 of 1" Foreground="LightGreen" VerticalAlignment="Center" FontWeight="Bold"/>
+                        <Button x:Name="NextImageButton" Content="→" Width="30"/>
                     </StackPanel>
 
                     <TextBlock x:Name="StatusText"
