@@ -91,6 +91,6 @@ print(f"CUDA version: {torch.version.cuda}")
 
 ## Credits
 
-- The backend and API for this project are from [Stable Diffusion WebUI Forge](https://github.com/automatic1111/stable-diffusion-webui) by AUTOMATIC1111
-- The credits for code used by that project can be found in its readme, preserved in /backend/README.md. Likewise their CITATION.cff and CODEOWNERS remain in /backend/
+- The backend and API for this project are derived from [Stable Diffusion WebUI Forge](https://github.com/automatic1111/stable-diffusion-webui) by AUTOMATIC1111, and are licensed under the GNU Affero General Public License v3.0.
+- Attribution for third-party code used by that project is preserved in /backend/README.md.
 - /backend/launch_webui_backend.py and all code outside of /backend/ are written by members of the [Spicy Banana](https://github.com/SpicyBananaUI) organization.
