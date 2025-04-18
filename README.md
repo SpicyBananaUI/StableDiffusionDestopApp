@@ -80,3 +80,9 @@ print(f"CUDA version: {torch.version.cuda}")
 - The frontend will timeout after 100 seconds of generation, even if the ETA is making progress
 - Default model selection is not functional; displayed model may not be used unless it is explicitly selected
 - When using MPS, quick, repeating calls to the txt2img and interrupt endpoints result in the next image generation failing (black image)
+
+## Credits
+
+- The backend and API for this project are from [Stable Diffusion WebUI Forge](https://github.com/automatic1111/stable-diffusion-webui) by AUTOMATIC1111
+- The credits for code used by that project can be found in its readme, preserved in /backend/README.md. Likewise their CITATION.cff and CODEOWNERS remain in /backend/
+- /backend/launch_webui_backend/ and all code outside of /backend/ are written by members of the [Spicy Banana](https://github.com/SpicyBananaUI) organization.
