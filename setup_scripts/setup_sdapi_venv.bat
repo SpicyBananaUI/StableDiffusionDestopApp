@@ -14,6 +14,9 @@ if errorlevel 1 (
     exit /b 1
 )
 
+echo Using Python: 
+%PYTHON_EXE% --version
+
 REM Navigate to backend directory
 if not exist "%BACKEND_DIR%" (
     echo Backend directory "%BACKEND_DIR%" does not exist. Creating it...
@@ -31,6 +34,7 @@ if not exist "%VENV_DIR%\Scripts\activate.bat" (
     %PYTHON_EXE% -m venv %VENV_DIR%
 ) else (
     echo Compatible virtual environment already exists.
+    exit /b 1
 )
 
 REM Activate the virtual environment
