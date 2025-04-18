@@ -17,7 +17,7 @@ namespace myApp.Services
         private readonly HttpClient _httpClient = new();
 
         // GenerateImage method to call the Stable Diffusion API
-        public async Task<(Bitmap?, long)> GenerateImage(string prompt, int steps, double guidanceScale, string negativePrompt = "", int width = 512, int height = 512, string sampler = "Euler", long seed = -1)
+        public async Task<(List<Bitmap>, List<long>)> GenerateImage(string prompt, int steps, double guidanceScale, string negativePrompt = "", int width = 512, int height = 512, string sampler = "Euler", long seed = -1, int batch_size = 1)
         {
             // Prompt for API Syntax
             var requestData = new
@@ -29,7 +29,8 @@ namespace myApp.Services
                 width = width,
                 height = height,
                 sampler_name = sampler,
-                seed = seed
+                seed = seed,
+                batch_size = batch_size,
             };
 
             // Set up the HTTP request
@@ -50,23 +51,46 @@ namespace myApp.Services
 
             // Parse the JSON response to extract the image data
             using var doc = JsonDocument.Parse(jsonString);
-            var base64Image = doc.RootElement.GetProperty("images")[0].GetString();
+            var images = new List<Bitmap>();
+            foreach (var imgBase64 in doc.RootElement.GetProperty("images").EnumerateArray())
+            {
+                var base64Image = imgBase64.GetString();
+                if (string.IsNullOrEmpty(base64Image))
+                    return (new List<Bitmap>(), new List<long>());
+
+                // Decode the base64 string to a byte array and create a Bitmap
+                byte[] imageBytes = Convert.FromBase64String(base64Image);
+                using var ms = new MemoryStream(imageBytes);
+                var bitmap = new Bitmap(ms);
+                images.Add(bitmap);
+            }
+            //var base64Image = doc.RootElement.GetProperty("images")[0].GetString();
 
             // Convert the base64 string to a Bitmap
-            if (string.IsNullOrEmpty(base64Image))
-                return (null, -1);
+            //if (string.IsNullOrEmpty(base64Image))
+                //return (null, -1);
 
             // Decode the base64 string to a byte array and create a Bitmap
-            byte[] imageBytes = Convert.FromBase64String(base64Image);
-            using var ms = new MemoryStream(imageBytes);
-            var bitmap = new Bitmap(ms);
+            //byte[] imageBytes = Convert.FromBase64String(base64Image);
+            //using var ms = new MemoryStream(imageBytes);
+            //var bitmap = new Bitmap(ms);
 
             // Get the seed used
             var infoJson = doc.RootElement.GetProperty("info").GetString();
-            using var infoDoc = JsonDocument.Parse(infoJson);
-            long seedUsed = infoDoc.RootElement.GetProperty("seed").GetInt64();
+            using var infoDoc = JsonDocument.Parse(infoJson!);
+            var seeds = infoDoc.RootElement.GetProperty("all_seeds").EnumerateArray();
+            var seedList = new List<long>();
+            foreach (var seedElement in seeds)
+            {
+                if (seedElement.TryGetInt64(out var seedValue))
+                {
+                    seedList.Add(seedValue);
+                }
+            }
+            //long seedUsed = infoDoc.RootElement.GetProperty("seed").GetInt64();
 
-            return (bitmap, seedUsed);
+            //return (bitmap, seedUsed);
+            return (images, seedList);
         }
 
         public class ProgressInfo

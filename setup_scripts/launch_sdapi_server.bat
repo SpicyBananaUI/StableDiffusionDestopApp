@@ -9,7 +9,7 @@ echo Checking for Python 3.10...
 REM Look for python3.10 directly
 where python3.10 >nul 2>&1
 if %errorlevel%==0 (
-    set "PYTHON_EXE=python3.10"
+    set "PYTHON_EXE=python"
 ) else (
     REM Check all installed Python versions and find 3.10
     for /f "delims=" %%P in ('where python 2^>nul') do (
