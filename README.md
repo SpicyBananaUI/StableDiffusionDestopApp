@@ -40,6 +40,8 @@ chmod +x setup_scripts/launch_sdapi_venv.sh
 Models should be placed in /backend/models/\[modelname\]
 They can easily be installed in a central location via the [Stability Matrix](https://github.com/LykosAI/StabilityMatrix) project
 
+An example model can also easily be downloaded from [Hugging Face](https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/blob/main/sd_xl_base_1.0.safetensors)
+
 ## GPU Acceleration Setup (Optional)
 
 The setup scripts attempt to install a (much faster) CUDA-compiled version of torch. If they are unsuccessful, try the following:
