@@ -77,6 +77,44 @@ print(f"CUDA version: {torch.version.cuda}")
 
 3. Run myApp
 
+
+## Frontend:
+** Services/ApiService.cs- Establishes the ApiService class. The following are the functions of the class: **
+It first establishes the user using HttpClient in order to prevent the API calls from starting a new client every single time, helping with performance. 
+The important part of this program would be “GenerateImage()”. It is responsible for sending a request to the Stable Diffusion Backend API to generate the asked for images based on the asked for prompt by the user. Turns the prompt and setting into JSON data that can be transferred, and then sends a POST request to the backend.
+Additional implemented features include:
+GetProcessAsync() which is used for the progress bar and knowing how long until the image is fully generated.
+StopGenerationAsync() which allows the user to interrupt the image generation once started. This is useful for people with slower computers because image generation could take upwards of 10 minutes.
+GetAvailableModelsAsync() lets the user see what generation models they have already installed in the backend and then choose what model should be implemented with the image they want for the design using SetModelAsync()
+GetAvailableSamplersAsync() will find what samplers can be used for sampling the image data for the database.
+## Backend:
+launch.py- This helps the computer determine whether the UI should be launched with or without GUI, effectively starting it on UI only. Starts the environment and does the following:
+Imports launch_utils to start preparing the environment. This allows the user to implement premade utilities into the project.
+Next it records the UI startup time to see how long it takes to start and print the launch mode based on the –-nowebui CLI argument, which, for all of our intents and purposes, will be set to True.(see launch_webui_backend.py READme for more information)
+Lastly it prepares the environment, sets up testing protocols and launches the actual application onto the desktop.
+launch_webui_backend.py- this starts the webui.py function and incorporates all of the necessary parts:
+Starts off by getting and setting the desired logging information. It makes sure that everything is inputted with the DEBUG function and then translates important information with debug-check option.
+Tests the device that is implementing the function and makes sure that it functions under the correct conditions. This check runs and if it fails it knows how to launch the program correctly.
+It finds the right operating system and then DISABLES the webui. This is important, because, even though it is called “webUI.py” it does not actually launch a webui but instead makes it run from the desktop itself.
+webui.py- Using the FastAPI API development system, we implemented the following features into the backend to let the users specify how they want to get their work done:
+This creates a desktop application which is better than a web application because it is a much lighter load on the computer, and this allows people to have access to image generation.
+We implemented environmentally sensitive behavior to check the compatibility of our system and downloaded models to have the correct behavior. Using os.getenv, we are able to set up the deployment mode between local and remote. This allows users to offload some of the work to a different system.
+The second part ties into the first where we allow users to switch between CUDA and CPU. Some personal computers do not have the CUDA extension because it is a proprietary function of Nvidia GPU chips. If we didn’t check for this, some users would be completely unable to use the desktop application.
+We also have a good way of logging the progress of the image generation with clear information on how each image is made and what goes into the process. This makes it much easier to trace what went wrong in the production process and useful to monitor the behavior of the models.
+Lastly, we implemented general input validation for the parameters through the Path() function by FastAPI.
+Requirements_versions.txt: This breaks down the version of each of the needed libraries and additions that are required by the program to run.
+FastAPI: this is the core framework that handles the routing and data validation.
+Uvicorn: optimizes the fastAPI framework.
+Torch: this is only required for CPU usage, but it essentially runs neural network compilation.
+Numpy: general purpose numeric computations.
+Diffusers: this has pretrained diffusion models that are required by the different models.
+Transformers: provides tokenized prompts for diffusers.
+Accelerate: used by hugging face to manage the device placement.
+Scipy: just helps with the mathematical operations.
+Pillow: this is used for image manipulation.
+Pydantic: validates the data and serializes it.
+pydantic_core: works with pydantic and essentially powers it to work
+
 ## Development Notes
 
 - The Python virtual environment should NOT be committed to version control (is in .gitignore)
