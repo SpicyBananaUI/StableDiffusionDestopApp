@@ -84,10 +84,11 @@ print(f"CUDA version: {torch.version.cuda}")
 
 ## Known Bugs / Issues
 
-- On machines with CUDA support, a CUDA-compiled version of torch must be installed. The setup scripts attempt to install the CUDA version, but if it is not available CPU fallback will be used.
-- The frontend will timeout after 100 seconds of generation, even if the ETA is making progress
-- Default model selection is not functional; displayed model may not be used unless it is explicitly selected
-- When using MPS, quick, repeating calls to the txt2img and interrupt endpoints result in the next image generation failing (black image)
+- Issue: The frontend will timeout after 100 seconds of generation, even if the ETA is making progress
+- Bug: Default model selection is not functional; displayed model may not be used unless it is explicitly selected
+- Bug: When using MPS, quick, repeating calls to the txt2img and interrupt endpoints result in the next image generation failing (black image)
+- Bug: After long periods of time left open, sometimes the backend returns blank images
+- Bug: If generate is pressed before a prompt is entered, the next time it is pressed it will send an interrupt api call instead of a generate call, locking the frontend up
 
 ## Credits
 

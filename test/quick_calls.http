@@ -31,3 +31,9 @@ Accept: application/json
 
 GET http://127.0.0.1:7861/sdapi/v1/options
 Accept: application/json
+
+###
+
+GET http://127.0.0.1:7861/sdapi/v1/server-restart
+Accept: application/json
+
