@@ -48,21 +48,21 @@
                             <!-- Steps Slider -->
                             <Grid Margin="0,5,0,0" ColumnDefinitions="Auto,*,Auto">
                                 <TextBlock Text="Steps:" VerticalAlignment="Center" Grid.Column="0" Margin="0,0,10,0"/>
-                                <Slider x:Name="StepsSlider" Minimum="1" Maximum="150" Value="20" Grid.Column="1" />
+                                <Slider x:Name="StepsSlider" Minimum="1" Maximum="150" Value="20" Grid.Column="1" Foreground="LightGreen"/>
                                 <TextBlock x:Name="StepsValueText" Text="20" VerticalAlignment="Center" Margin="10,0,0,0" Grid.Column="2"/>
                             </Grid>
 
                             <!-- Scale Slider -->
                             <Grid Margin="0,5,0,0" ColumnDefinitions="Auto,*,Auto">
                                 <TextBlock Text="Scale:" VerticalAlignment="Center" Grid.Column="0" Margin="0,0,10,0"/>
-                                <Slider x:Name="ScaleSlider" Minimum="1" Maximum="30" Value="7.5" Grid.Column="1" />
+                                <Slider x:Name="ScaleSlider" Minimum="1" Maximum="30" Value="7.5" Grid.Column="1" Foreground="LightGreen" />
                                 <TextBlock x:Name="ScaleValueText" Text="7.5" VerticalAlignment="Center" Margin="10,0,0,0" Grid.Column="2"/>
                             </Grid>
 
                             <!-- Batch Size Slider -->
                             <Grid Margin="0,5,0,0" ColumnDefinitions="Auto,*,Auto">
                                 <TextBlock Text="# of Images:" VerticalAlignment="Center" Grid.Column="0" Margin="0,0,10,0"/>
-                                <Slider x:Name="BatchSlider" Minimum="1" Maximum="8" Value="1" Grid.Column="1"/>
+                                <Slider x:Name="BatchSlider" Minimum="1" Maximum="8" Value="1" Grid.Column="1" Foreground="LightGreen"/>
                                 <TextBlock x:Name="BatchValueText" Text="1" Margin="10,0,0,0" VerticalAlignment="Center" Grid.Column="2"/>
                             </Grid>
 
@@ -115,7 +115,7 @@
                            VerticalAlignment="Center"/>
 
                     <StackPanel x:Name="ProgressOverlay" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="False">
-                        <ProgressBar x:Name="LoadingBar" Minimum="0" Maximum="100" Height="20" HorizontalAlignment="Stretch"/>
+                        <ProgressBar x:Name="LoadingBar" Minimum="0" Maximum="100" Height="20" HorizontalAlignment="Stretch" Foreground="LightGreen"/>
                         <TextBlock x:Name="ProgressText" Text="" HorizontalAlignment="Center" Margin="0,5,0,0"/>
                     </StackPanel>
 
