@@ -1,3 +1,6 @@
+<!-- Copyright (c) 2025 Spicy Banana -->
+<!-- SPDX-License-Identifier: AGPL-3.0-only -->
+
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"

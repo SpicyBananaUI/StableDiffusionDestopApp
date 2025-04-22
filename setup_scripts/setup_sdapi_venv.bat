@@ -1,3 +1,7 @@
+REM Copyright (c) 2025 Spicy Banana
+REM SPDX-License-Identifier: AGPL-3.0-only
+
+
 @echo off
 setlocal
 
@@ -13,6 +17,9 @@ if errorlevel 1 (
     echo Python is not installed or not in PATH. Please install Python 3.10.
     exit /b 1
 )
+
+echo Using Python: 
+%PYTHON_EXE% --version
 
 REM Navigate to backend directory
 if not exist "%BACKEND_DIR%" (
@@ -31,6 +38,7 @@ if not exist "%VENV_DIR%\Scripts\activate.bat" (
     %PYTHON_EXE% -m venv %VENV_DIR%
 ) else (
     echo Compatible virtual environment already exists.
+    exit /b 1
 )
 
 REM Activate the virtual environment

@@ -1,0 +1,39 @@
+# Copyright (c) 2025 Spicy Banana
+# SPDX-License-Identifier: AGPL-3.0-only
+
+###
+
+POST http://127.0.0.1:7861/sdapi/v1/txt2img
+Content-Type: application/json
+Accept: application/json
+
+{
+    "prompt": "A cyberpunk city at night, lights, rain",
+    "steps": 20
+}
+
+###
+
+POST http://127.0.0.1:7861/sdapi/v1/interrupt
+Accept: application/json
+
+###
+
+POST http://127.0.0.1:7861/sdapi/v1/skip
+Accept: application/json
+
+###
+
+POST http://127.0.0.1:7861/sdapi/v1/interrogate
+Accept: application/json
+
+###
+
+GET http://127.0.0.1:7861/sdapi/v1/options
+Accept: application/json
+
+###
+
+GET http://127.0.0.1:7861/sdapi/v1/server-restart
+Accept: application/json
+

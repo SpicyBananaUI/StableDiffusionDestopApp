@@ -1,3 +1,7 @@
+// Copyright (c) 2025 Spicy Banana
+// SPDX-License-Identifier: AGPL-3.0-only
+
+
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
