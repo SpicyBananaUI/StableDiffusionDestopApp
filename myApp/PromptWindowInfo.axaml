@@ -1,0 +1,81 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="myApp.SlideshowWindow"
+        Title="Prompt Tips"
+        Width="600"
+        Height="500"
+        WindowStartupLocation="CenterOwner">
+    <Grid Background="#222">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title -->
+        <TextBlock x:Name="TitleText" Text="Prompt Tips" 
+                   Foreground="LightGreen" FontSize="18" FontWeight="Bold"
+                   HorizontalAlignment="Center" Margin="10"/>
+
+        <!-- Slide Content -->
+        <Border Grid.Row="1" Margin="10" Background="Transparent" CornerRadius="8">
+            <Grid>
+                <Grid x:Name="Slide1" IsVisible="True">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Image Source="/Assets/pic1.jpg" Width="300" Height="200" 
+                               Margin="0,0,0,20" Stretch="Uniform"/>
+                        <TextBlock Text="Specificity Matters" Foreground="LightGreen" 
+                                   FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        <TextBlock Text="When writing the prompts, be specific with your descriptions. Instead of &apos;a landscape&apos;, try &apos;a majestic mountain landscape at sunset with vibrant orange and purple skies&apos;. The longer the description the more accurate the result will be to what you are looking for."
+                                   TextWrapping="Wrap" HorizontalAlignment="Center" TextAlignment="Center"
+                                   Margin="20" Foreground="White" MaxWidth="500"/>
+                    </StackPanel>
+                </Grid>
+
+                <Grid x:Name="Slide2" IsVisible="False">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Image Source="/Assets/pic2.jpg" Width="300" Height="200" 
+                               Margin="0,0,0,20" Stretch="Uniform"/>
+                        <TextBlock Text="Negative Prompt" Foreground="LightGreen" 
+                                   FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        <TextBlock Text="The negative prompt gives you precise control over image generation by allowing you to specify exactly what you want to exclude from your AI-generated images. If the initial result contains unwanted elements—such as specific objects (blurry faces, extra limbs), undesirable styles (watermarks, low quality), or distracting features (text, distorted proportions)—simply list these in the negative prompt. The AI will then actively avoid incorporating those elements in the next generation, leading to cleaner, more accurate, and higher-quality results tailored to your vision."
+                                   TextWrapping="Wrap" HorizontalAlignment="Center" TextAlignment="Center"
+                                   Margin="20" Foreground="White" MaxWidth="500"/>
+                    </StackPanel>
+                </Grid>
+
+                <Grid x:Name="Slide3" IsVisible="False">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Image Source="/Assets/pic3.jpg" Width="300" Height="200" 
+                               Margin="0,0,0,20" Stretch="Uniform"/>
+                        <TextBlock Text="Weighting Terms" Foreground="LightGreen" 
+                                   FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        <TextBlock Text="The prompt box supports sophisticated formatting options that provide professional-level control over your AI image generation. You can emphasize important elements using parentheses: (word) for slight emphasis, ((word)) for stronger impact, and (word:1.5) for precise numerical weighting where values above 1.0 increase emphasis and below 1.0 decrease influence."
+                                   TextWrapping="Wrap" HorizontalAlignment="Center" TextAlignment="Center"
+                                   Margin="20" Foreground="White" MaxWidth="500"/>
+                    </StackPanel>
+                </Grid>
+                
+                <Grid x:Name="Slide4" IsVisible="False">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Image Source="/Assets/pic1.jpg" Width="300" Height="200" 
+                               Margin="0,0,0,20" Stretch="Uniform"/>
+                        <TextBlock Text="Weighting Terms" Foreground="LightGreen" 
+                                   FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        <TextBlock Text="The system also supports alternation between options using [option1|option2], concept repetition with word~3, blending with AND syntax, and reduction of unwanted elements through negative weighting. These advanced features work together to give you fine-tuned command over the AI's attention, allowing you to balance multiple concepts, emphasize critical elements, and refine your results with exceptional precision for optimal image generation."
+                                   TextWrapping="Wrap" HorizontalAlignment="Center" TextAlignment="Center"
+                                   Margin="20" Foreground="White" MaxWidth="500"/>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <!-- Navigation -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
+            <Button x:Name="PrevButton" Content="Previous" Width="80" Margin="0,0,10,0"
+                    Background="#444" Foreground="White" Click="PrevButton_Click" IsEnabled="False"/>
+            <Button x:Name="NextButton" Content="Next" Width="80" 
+                    Background="#444" Foreground="White" Click="NextButton_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

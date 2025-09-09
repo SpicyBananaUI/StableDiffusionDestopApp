@@ -1,6 +1,7 @@
 <!-- Copyright (c) 2025 Spicy Banana -->
 <!-- SPDX-License-Identifier: AGPL-3.0-only -->
 
+
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -10,7 +11,7 @@
         Title="Stable Diffusion Image Generator"
         MinWidth="800"
         MinHeight="600">
-
+    
     <DockPanel>
         <!-- Top Navigation Bar -->
         <Border Background="#222" Height="50" DockPanel.Dock="Top">
@@ -36,8 +37,18 @@
 
             <!-- Prompt Inputs -->
             <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,10">
-                <TextBlock Text="Prompt &amp; Negative Prompt" FontWeight="Bold"/>
-                <TextBox x:Name="PromptTextBox" Watermark="Enter prompt..." Background="#333" Foreground="White"/>
+                <Grid Margin="0,0,0,5">
+                    <TextBlock Text="Prompt &amp; Negative Prompt" FontWeight="Bold" VerticalAlignment="Center"/>
+                    <Button Grid.Column="1" HorizontalAlignment="Right" Background="Transparent" 
+                            BorderThickness="0" Width="20" Height="20" Margin="0,0,5,0"
+                            Click="ShowPromptTips">
+                        <Button.Content>
+                            <TextBlock Text="?" Foreground="LightGray" FontWeight="Bold"/>
+                        </Button.Content>
+                    </Button>
+                </Grid>
+
+                <TextBox x:Name="PromptTextBox" Watermark="Enter positive prompt..." Background="#333" Foreground="White"/>
                 <TextBox x:Name="NegativePromptTextBox" Watermark="Enter negative prompt..." Background="#333" Foreground="White" Margin="0,5,0,0"/>
             </StackPanel>
 

@@ -20,4 +20,17 @@
     </PackageReference>
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Assets\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Assets\pic1.jpg" />
+    <AvaloniaResource Include="Assets\pic1.jpg" />
+    <None Remove="Assets\pic2.jpg" />
+    <AvaloniaResource Include="Assets\pic2.jpg" />
+    <None Remove="Assets\pic3.jpg" />
+    <AvaloniaResource Include="Assets\pic3.jpg" />
+  </ItemGroup>
 </Project>
