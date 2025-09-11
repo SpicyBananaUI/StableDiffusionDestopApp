@@ -95,6 +95,84 @@ namespace myApp.Services
             //return (bitmap, seedUsed);
             return (images, seedList);
         }
+        
+        public async Task<(List<Bitmap>, List<long>)> GenerateImage2Image(
+            string prompt,
+            int steps,
+            double guidanceScale,
+            Bitmap initImage,
+            string negativePrompt = "",
+            int width = 512,
+            int height = 512,
+            string sampler = "Euler",
+            long seed = -1,
+            int batch_size = 1,
+            double denoisingStrength = 0.75)
+        {
+            if (initImage == null)
+                throw new ArgumentNullException(nameof(initImage));
+
+            // Convert Bitmap to Base64
+            using var ms = new MemoryStream();
+            initImage.Save(ms);
+            string base64InitImage = Convert.ToBase64String(ms.ToArray());
+
+
+            // Build request
+            var requestData = new
+            {
+                prompt = prompt,
+                negative_prompt = negativePrompt,
+                steps = steps,
+                cfg_scale = guidanceScale,
+                width = width,
+                height = height,
+                sampler_name = sampler,
+                seed = seed,
+                batch_size = batch_size,
+                denoising_strength = denoisingStrength,
+                init_images = new[] { base64InitImage }
+            };
+
+            var content = new StringContent(JsonSerializer.Serialize(requestData), Encoding.UTF8, "application/json");
+
+            // POST to img2img endpoint
+            var response = await _httpClient.PostAsync("http://127.0.0.1:7861/sdapi/v1/img2img", content);
+            if (!response.IsSuccessStatusCode)
+                throw new Exception($"SD API returned error: {response.StatusCode}");
+
+            var jsonString = await response.Content.ReadAsStringAsync();
+
+            // Parse response
+            using var doc = JsonDocument.Parse(jsonString);
+            var images = new List<Bitmap>();
+
+            foreach (var imgBase64 in doc.RootElement.GetProperty("images").EnumerateArray())
+            {
+                var base64Image = imgBase64.GetString();
+                if (string.IsNullOrEmpty(base64Image))
+                    return (new List<Bitmap>(), new List<long>());
+
+                byte[] outBytes = Convert.FromBase64String(base64Image);
+                using var ims = new MemoryStream(outBytes);
+                var bitmap = new Bitmap(ims);
+                images.Add(bitmap);
+            }
+
+            // Extract seeds
+            var infoJson = doc.RootElement.GetProperty("info").GetString();
+            using var infoDoc = JsonDocument.Parse(infoJson!);
+
+            var seedList = new List<long>();
+            foreach (var seedElement in infoDoc.RootElement.GetProperty("all_seeds").EnumerateArray())
+            {
+                if (seedElement.TryGetInt64(out var seedValue))
+                    seedList.Add(seedValue);
+            }
+
+            return (images, seedList);
+        }
+
 
         public class ProgressInfo
         {

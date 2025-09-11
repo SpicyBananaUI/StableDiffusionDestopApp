@@ -1,0 +1,83 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="myApp.ModelsView">
+    
+    <Grid RowDefinitions="Auto,*">
+        <!-- Header -->
+        <StackPanel Orientation="Horizontal" Margin="10" Spacing="10">
+            <TextBlock Text="Models &amp; Plugins" FontSize="22" FontWeight="Bold"/>
+            <ComboBox Width="150" SelectedIndex="0">
+                <ComboBoxItem Content="Browse Models"/>
+                <ComboBoxItem Content="Browse Plugins"/>
+                <ComboBoxItem Content="Installed"/>
+            </ComboBox>
+            <TextBox Width="200" Watermark="Search..." />
+        </StackPanel>
+
+        <!-- Content Area -->
+        <TabControl Grid.Row="1">
+            
+            <!-- Browse Models -->
+            <TabItem Header="Browse Models">
+                <ScrollViewer>
+                    <WrapPanel Margin="10">
+                        <!-- Example Model Card -->
+                        <Border Width="200" Height="280" Background="#2d2d2d" CornerRadius="10" Padding="8">
+                            <StackPanel>
+                                <Image Source=""
+                                       Stretch="UniformToFill"
+                                       Height="150"
+                                       Margin="0,0,0,5"/>
+                                <TextBlock Text="DreamShaper v8" FontWeight="Bold" Margin="0,0,0,5"/>
+                                <TextBlock Text="Style: Realistic" FontSize="12"/>
+                                <ProgressBar Minimum="0" Maximum="100" Value="0" Height="10" Margin="0,5"/>
+                                <Button Content="Download" HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                        </Border>
+                    </WrapPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- Browse Plugins -->
+            <TabItem Header="Browse Plugins">
+                <ScrollViewer>
+                    <StackPanel Margin="10" Spacing="10">
+                        <!-- Example Plugin Card -->
+                        <Border Background="#2d2d2d" CornerRadius="10" Padding="10">
+                            <StackPanel>
+                                <TextBlock Text="ControlNet" FontWeight="Bold" FontSize="16"/>
+                                <TextBlock Text="Adds image guidance for poses, edges, etc." FontSize="12" TextWrapping="Wrap"/>
+                                <ProgressBar Minimum="0" Maximum="100" Value="0" Height="10" Margin="0,5"/>
+                                <Button Content="Install" HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- Installed -->
+            <TabItem Header="Installed">
+                <ListBox Margin="10">
+                    <ListBoxItem>
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock Text="DreamShaper v8"/>
+                            <Button Content="Activate"/>
+                            <Button Content="Remove"/>
+                        </StackPanel>
+                    </ListBoxItem>
+                    <ListBoxItem>
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock Text="ControlNet Plugin"/>
+                            <Button Content="Update"/>
+                            <Button Content="Remove"/>
+                        </StackPanel>
+                    </ListBoxItem>
+                </ListBox>
+            </TabItem>
+        </TabControl>
+    </Grid>
+    
+</UserControl>
