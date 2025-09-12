@@ -11,15 +11,19 @@ set "PYTHON_EXE=python"
 
 echo Creating virtual environment with packages required by sdapi (webui) backend...
 
-REM Check if Python 3.10 is installed
-where %PYTHON_EXE% >nul 2>&1
-if errorlevel 1 (
-    echo Python is not installed or not in PATH. Please install Python 3.10.
-    exit /b 1
+REM Detect py launcher for 3.10 first
+py -3.10 --version >nul 2>&1
+if %ERRORLEVEL%==0 (
+    set "PYTHON_EXE=py -3.10"
+) else (
+    REM fallback: check if a python3.10.exe is on PATH
+    for /f "usebackq tokens=*" %%P in (`where python 2^>nul`) do (
+        for /f "tokens=2 delims==." %%V in ('"%%P" --version 2^>^&1') do (
+            rem parse major.minor from version like "Python 3.10.11"
+            echo %%V | findstr /r "^10 " >nul 2>&1
+        )
+    )
 )
-
-echo Using Python: 
-%PYTHON_EXE% --version
 
 REM Navigate to backend directory
 if not exist "%BACKEND_DIR%" (
