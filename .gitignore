@@ -26,6 +26,7 @@ build/
 .vscode/
 *.swp
 *.swo
+*.user
 
 # OS specific files
 .DS_Store
