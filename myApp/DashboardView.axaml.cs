@@ -29,9 +29,12 @@ public partial class DashboardView : UserControl
     private Bitmap? _initImage;
     private double _strength = 0.75;
     
+    public static DashboardView? _instance;
+    
     public DashboardView()
     {
         InitializeComponent();
+        _instance = this;
         
         // Initialize the API service
         _apiService = new ApiService();
@@ -263,6 +266,7 @@ public partial class DashboardView : UserControl
             (List<Bitmap> images, List<long> seeds) result;
             if (modeComboBox.SelectedIndex == 1) // Image2Image
             {
+                
                 if (_initImage == null)
                 {
                     statusText.Text = "Please select an init image first.";
@@ -280,6 +284,15 @@ public partial class DashboardView : UserControl
             _seeds = result.seeds; // Store all generated seeds
             _currentImageIndex = 0; // Reset the current image index
             ShowImageAt(_currentImageIndex); // Show the first generated image
+            
+            // Add generated images to gallery (recent memory)
+            foreach (var img in _generatedImages)
+            {
+                if (img != null)
+                {
+                    GalleryService.AddRecentImage(img);
+                }
+            }
 
             this.FindControl<StackPanel>("ImageNavPanel").IsVisible = _generatedImages.Count > 1; // Show navigation panel if multiple images are generated
 
@@ -431,6 +444,21 @@ public partial class DashboardView : UserControl
         var slideshowWindow = new SlideshowWindow();
         slideshowWindow.Title = "Positive Prompt Tips";
         slideshowWindow.ShowDialog(window);
+    }
+    
+    public void SetInitImage(Bitmap bmp)
+    {
+        _initImage = bmp;
+
+        // Switch mode to Img2Img
+        var modeComboBox = this.FindControl<ComboBox>("ModeComboBox");
+        if (modeComboBox != null)
+            modeComboBox.SelectedIndex = 1; // Assuming 0=Txt2Img, 1=Img2Img
+
+        // Update preview
+        var preview = this.FindControl<Image>("InitImagePreview");
+        if (preview != null)
+            preview.Source = _initImage;
     }
     
 }
