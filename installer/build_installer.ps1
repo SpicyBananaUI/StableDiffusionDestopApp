@@ -445,51 +445,94 @@ Set-Content -Path (Join-Path $publishDir 'run_frontend.bat') -Value $runFrontend
 
 $runBackend = @"
 @echo off
+setlocal enabledelayedexpansion
 REM Enhanced backend launcher with optional model downloading
 pushd "%~dp0"
 
 REM Check if models directory exists and is empty or missing
-set MODELS_DIR=%~dp0\backend\models
+set "MODELS_DIR=%~dp0backend\models"
+set "SD_MODELS_DIR=%MODELS_DIR%\Stable-diffusion"
 set NEEDS_MODELS=0
+
 if not exist "%MODELS_DIR%" (
     set NEEDS_MODELS=1
 ) else (
-    dir /b "%MODELS_DIR%\Stable-diffusion\*.safetensors" >nul 2>&1 || set NEEDS_MODELS=1
+    if not exist "%SD_MODELS_DIR%" (
+        set NEEDS_MODELS=1
+    ) else (
+        dir /b "%SD_MODELS_DIR%\*.safetensors" >nul 2>&1 || set NEEDS_MODELS=1
+    )
 )
 
 REM If no models found, ask user if they want to download a basic model
-if %NEEDS_MODELS%==1 (
+if !NEEDS_MODELS!==1 (
     echo.
     echo No Stable Diffusion models found in the models directory.
     echo.
     echo Would you like to download a basic model? This will download approximately 2GB.
     echo Recommended model: DreamShaper 8 ^(high quality, versatile^)
     echo.
-    choice /C YN /M "Download DreamShaper 8 model? (Y/N)"
+    choice /C YN /M "Download DreamShaper 8 model?"
     if !ERRORLEVEL!==1 (
-        echo Downloading DreamShaper 8 model...
-        mkdir "%MODELS_DIR%\Stable-diffusion" 2>nul
-        powershell -Command "& { Invoke-WebRequest -Uri 'https://huggingface.co/Lykon/DreamShaper/resolve/main/DreamShaper_8_pruned.safetensors' -OutFile '%MODELS_DIR%\Stable-diffusion\dreamshaper_8.safetensors' -UseBasicParsing; Write-Host 'Model download completed!' }"
-        if !ERRORLEVEL! NEQ 0 (
-            echo Failed to download model. You can manually download models later.
-            timeout /t 3 >nul
+        echo.
+        echo Creating models directory...
+        mkdir "%SD_MODELS_DIR%" 2>nul
+        
+        echo Downloading DreamShaper 8 model... This may take several minutes.
+        echo Please be patient, the download is approximately 2GB.
+        echo.
+        
+        powershell -ExecutionPolicy Bypass -Command "try { $ProgressPreference = 'Continue'; Invoke-WebRequest -Uri 'https://huggingface.co/Lykon/DreamShaper/resolve/main/DreamShaper_8_pruned.safetensors' -OutFile '%SD_MODELS_DIR%\dreamshaper_8.safetensors' -UseBasicParsing; Write-Host 'Model download completed successfully!' -ForegroundColor Green; exit 0 } catch { Write-Host 'Download failed: ' $_.Exception.Message -ForegroundColor Red; exit 1 }"
+        
+        if !ERRORLEVEL!==0 (
+            echo.
+            echo ✓ Model downloaded successfully to: %SD_MODELS_DIR%
+            echo The model will be available in the frontend dropdown.
+            echo.
+        ) else (
+            echo.
+            echo ✗ Failed to download model. You can:
+            echo   1. Try running this script again
+            echo   2. Use the download_models.bat script
+            echo   3. Manually download models to: %SD_MODELS_DIR%
+            echo.
         )
+        pause
     ) else (
-        echo Skipping model download. You can download models manually later.
-        echo See README.md for model installation instructions.
-        timeout /t 3 >nul
+        echo.
+        echo Skipping model download. You can download models later using:
+        echo   • The download_models.bat script
+        echo   • Manually from HuggingFace or other sources
+        echo.
+        echo Models should be placed in: %SD_MODELS_DIR%
+        timeout /t 5 >nul
     )
 )
 
 REM Continue with normal backend startup
-if exist "%~dp0\backend\webui-venv\Scripts\activate.bat" (
+echo.
+echo Starting backend server...
+if exist "%~dp0backend\webui-venv\Scripts\activate.bat" (
     echo Activating existing virtualenv and launching backend...
-    call "%~dp0\backend\webui-venv\Scripts\activate.bat"
-    call "%~dp0\backend\setup_scripts\launch_sdapi_server.bat"
+    call "%~dp0backend\webui-venv\Scripts\activate.bat"
+    cd /d "%~dp0backend"
+    if exist "setup_scripts\launch_sdapi_server.bat" (
+        call "setup_scripts\launch_sdapi_server.bat"
+    ) else (
+        echo Warning: launch_sdapi_server.bat not found, trying webui.py directly...
+        python webui.py --nowebui --api
+    )
 ) else (
     echo No virtualenv found. Running backend setup script ^(this may take a while^)...
-    call "%~dp0\backend\setup_scripts\setup_sdapi_venv.bat"
-    call "%~dp0\backend\setup_scripts\launch_sdapi_server.bat"
+    cd /d "%~dp0backend"
+    if exist "setup_scripts\setup_sdapi_venv.bat" (
+        call "setup_scripts\setup_sdapi_venv.bat"
+        call "setup_scripts\launch_sdapi_server.bat"
+    ) else (
+        echo Error: Setup scripts not found in backend directory.
+        echo Please check the installation and try running the installer again.
+        pause
+    )
 )
 popd
 "@
@@ -498,44 +541,86 @@ Set-Content -Path (Join-Path $publishDir 'run_backend.bat') -Value $runBackend -
 # Create a model download helper script
 $downloadModels = @"
 @echo off
+setlocal enabledelayedexpansion
 REM Helper script to download common Stable Diffusion models
 pushd "%~dp0"
 
-set MODELS_DIR=%~dp0\backend\models\Stable-diffusion
+set "MODELS_DIR=%~dp0backend\models\Stable-diffusion"
+echo Creating models directory: %MODELS_DIR%
 mkdir "%MODELS_DIR%" 2>nul
 
+echo.
+echo ============================================
+echo    Stable Diffusion Model Downloader
+echo ============================================
+echo.
 echo Available models to download:
 echo.
-echo 1. DreamShaper 8 ^(~2GB^) - High quality, versatile model
-echo 2. SDXL Base 1.0 ^(~6.6GB^) - Latest high-resolution model
+echo 1. DreamShaper 8 (~2GB) - High quality, versatile model
+echo 2. SDXL Base 1.0 (~6.6GB) - Latest high-resolution model  
 echo 3. Both models
 echo 4. Cancel
 echo.
 choice /C 1234 /M "Select option"
 
-if %ERRORLEVEL%==1 goto :download_dreamshaper
-if %ERRORLEVEL%==2 goto :download_sdxl
-if %ERRORLEVEL%==3 goto :download_both
-if %ERRORLEVEL%==4 goto :end
+if !ERRORLEVEL!==1 goto :download_dreamshaper
+if !ERRORLEVEL!==2 goto :download_sdxl
+if !ERRORLEVEL!==3 goto :download_both
+if !ERRORLEVEL!==4 goto :end
 
 :download_dreamshaper
-echo Downloading DreamShaper 8...
-powershell -Command "Invoke-WebRequest -Uri 'https://huggingface.co/Lykon/DreamShaper/resolve/main/DreamShaper_8_pruned.safetensors' -OutFile '%MODELS_DIR%\dreamshaper_8.safetensors' -UseBasicParsing"
+echo.
+echo Downloading DreamShaper 8... Please wait, this may take several minutes.
+powershell -ExecutionPolicy Bypass -Command "try { $ProgressPreference = 'Continue'; Invoke-WebRequest -Uri 'https://huggingface.co/Lykon/DreamShaper/resolve/main/DreamShaper_8_pruned.safetensors' -OutFile '%MODELS_DIR%\dreamshaper_8.safetensors' -UseBasicParsing; Write-Host 'DreamShaper 8 downloaded successfully!' -ForegroundColor Green; exit 0 } catch { Write-Host 'Download failed: ' $_.Exception.Message -ForegroundColor Red; exit 1 }"
+if !ERRORLEVEL!==0 (
+    echo ✓ DreamShaper 8 downloaded successfully!
+) else (
+    echo ✗ DreamShaper 8 download failed.
+)
 goto :end
 
-:download_sdxl
-echo Downloading SDXL Base 1.0 ^(this may take a while^)...
-powershell -Command "Invoke-WebRequest -Uri 'https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors' -OutFile '%MODELS_DIR%\sd_xl_base_1.0.safetensors' -UseBasicParsing"
+:download_sdxl  
+echo.
+echo Downloading SDXL Base 1.0... This is a large file and may take a while.
+powershell -ExecutionPolicy Bypass -Command "try { $ProgressPreference = 'Continue'; Invoke-WebRequest -Uri 'https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors' -OutFile '%MODELS_DIR%\sd_xl_base_1.0.safetensors' -UseBasicParsing; Write-Host 'SDXL Base 1.0 downloaded successfully!' -ForegroundColor Green; exit 0 } catch { Write-Host 'Download failed: ' $_.Exception.Message -ForegroundColor Red; exit 1 }"
+if !ERRORLEVEL!==0 (
+    echo ✓ SDXL Base 1.0 downloaded successfully!
+) else (
+    echo ✗ SDXL Base 1.0 download failed.
+)
 goto :end
 
 :download_both
-echo Downloading DreamShaper 8...
-powershell -Command "Invoke-WebRequest -Uri 'https://huggingface.co/Lykon/DreamShaper/resolve/main/DreamShaper_8_pruned.safetensors' -OutFile '%MODELS_DIR%\dreamshaper_8.safetensors' -UseBasicParsing"
-echo Downloading SDXL Base 1.0 ^(this may take a while^)...
-powershell -Command "Invoke-WebRequest -Uri 'https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors' -OutFile '%MODELS_DIR%\sd_xl_base_1.0.safetensors' -UseBasicParsing"
+echo.
+echo Downloading both models... This will take a while.
+echo.
+echo [1/2] Downloading DreamShaper 8...
+powershell -ExecutionPolicy Bypass -Command "try { $ProgressPreference = 'Continue'; Invoke-WebRequest -Uri 'https://huggingface.co/Lykon/DreamShaper/resolve/main/DreamShaper_8_pruned.safetensors' -OutFile '%MODELS_DIR%\dreamshaper_8.safetensors' -UseBasicParsing; Write-Host 'DreamShaper 8 downloaded successfully!' -ForegroundColor Green; exit 0 } catch { Write-Host 'Download failed: ' $_.Exception.Message -ForegroundColor Red; exit 1 }"
+if !ERRORLEVEL!==0 (
+    echo ✓ DreamShaper 8 downloaded successfully!
+) else (
+    echo ✗ DreamShaper 8 download failed.
+)
+
+echo.
+echo [2/2] Downloading SDXL Base 1.0...
+powershell -ExecutionPolicy Bypass -Command "try { $ProgressPreference = 'Continue'; Invoke-WebRequest -Uri 'https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors' -OutFile '%MODELS_DIR%\sd_xl_base_1.0.safetensors' -UseBasicParsing; Write-Host 'SDXL Base 1.0 downloaded successfully!' -ForegroundColor Green; exit 0 } catch { Write-Host 'Download failed: ' $_.Exception.Message -ForegroundColor Red; exit 1 }"
+if !ERRORLEVEL!==0 (
+    echo ✓ SDXL Base 1.0 downloaded successfully!
+) else (
+    echo ✗ SDXL Base 1.0 download failed.
+)
 
 :end
-echo Done!
+echo.
+echo Models are saved to: %MODELS_DIR%
+echo.
+echo After downloading, restart the backend for models to appear in the dropdown.
+echo You can also check the downloaded models by looking in the models directory.
+echo.
+dir "%MODELS_DIR%\*.safetensors" 2>nul && echo Current models: || echo No models found yet.
+dir "%MODELS_DIR%\*.safetensors" /b 2>nul
+echo.
 pause
 popd
 "@

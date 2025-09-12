@@ -5,7 +5,20 @@ This project combines a the FastAPI Python backend from [Stable Diffusion WebUI 
 ## Quick Start Options
 
 ### Option 1: Windows Installer (Recommended)
-Build and run a Windows installer for easy distribution:
+
+#### Use Pre-built Installer
+If an installer has already been built, simply run the most recent one:
+
+```powershell
+# Navigate to installer output directory
+cd installer_output
+
+# Run the most recent installer
+.\StableDiffusionDesktopApp-Setup-1.0.0.exe
+```
+
+#### Build New Installer
+To build a fresh installer for distribution:
 
 ```powershell
 # Navigate to installer directory

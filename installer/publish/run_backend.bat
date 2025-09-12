@@ -1,48 +1,68 @@
 @echo off
-REM Enhanced backend launcher with optional model downloading
-pushd "%~dp0"
+setlocal enabledelayedexpansion
 
-REM Check if models directory exists and is empty or missing
-set MODELS_DIR=%~dp0\backend\models
-set NEEDS_MODELS=0
-if not exist "%MODELS_DIR%" (
-    set NEEDS_MODELS=1
+echo ========================================
+echo  Stable Diffusion Desktop App
+echo ========================================
+echo.
+
+:: Set paths
+set "CURRENT_DIR=%~dp0"
+set "BACKEND_DIR=%CURRENT_DIR%backend"
+set "VENV_DIR=%BACKEND_DIR%\webui-venv"
+set "PYTHON_EXE=%VENV_DIR%\Scripts\python.exe"
+set "SD_MODELS_DIR=%BACKEND_DIR%\models\Stable-diffusion"
+
+:: Check if virtual environment exists
+if not exist "%PYTHON_EXE%" (
+    echo ERROR: Virtual environment not found!
+    echo Expected location: %VENV_DIR%
+    echo Please ensure the installer completed successfully.
+    pause
+    exit /b 1
+)
+
+:: Check for models
+echo Checking for Stable Diffusion models...
+if exist "%SD_MODELS_DIR%\*.safetensors" (
+    echo Models found! Starting backend...
+    goto :start_backend
 ) else (
-    dir /b "%MODELS_DIR%\Stable-diffusion\*.safetensors" >nul 2>&1 || set NEEDS_MODELS=1
+    echo No models found in: %SD_MODELS_DIR%
+    echo.
+    echo Would you like to download a model now?
+    echo 1^) Download DreamShaper 8 ^(recommended, ~2GB^)
+    echo 2^) Download SDXL Base 1.0 ^(larger, ~7GB^) 
+    echo 3^) Skip and start without models
+    echo.
+    set /p "choice=Enter your choice (1-3): "
+    
+    if "!choice!"=="1" goto :download_dreamshaper
+    if "!choice!"=="2" goto :download_sdxl
+    if "!choice!"=="3" goto :start_backend
+    
+    echo Invalid choice. Starting without models...
+    goto :start_backend
 )
 
-REM If no models found, ask user if they want to download a basic model
-if %NEEDS_MODELS%==1 (
-    echo.
-    echo No Stable Diffusion models found in the models directory.
-    echo.
-    echo Would you like to download a basic model? This will download approximately 2GB.
-    echo Recommended model: DreamShaper 8 ^(high quality, versatile^)
-    echo.
-    choice /C YN /M "Download DreamShaper 8 model? (Y/N)"
-    if !ERRORLEVEL!==1 (
-        echo Downloading DreamShaper 8 model...
-        mkdir "%MODELS_DIR%\Stable-diffusion" 2>nul
-        powershell -Command "& { Invoke-WebRequest -Uri 'https://huggingface.co/Lykon/DreamShaper/resolve/main/DreamShaper_8_pruned.safetensors' -OutFile '%MODELS_DIR%\Stable-diffusion\dreamshaper_8.safetensors' -UseBasicParsing; Write-Host 'Model download completed!' }"
-        if !ERRORLEVEL! NEQ 0 (
-            echo Failed to download model. You can manually download models later.
-            timeout /t 3 >nul
-        )
-    ) else (
-        echo Skipping model download. You can download models manually later.
-        echo See README.md for model installation instructions.
-        timeout /t 3 >nul
-    )
-)
+:download_dreamshaper
+echo.
+echo Downloading DreamShaper 8... Please wait.
+mkdir "%SD_MODELS_DIR%" 2>nul
+powershell.exe -ExecutionPolicy Bypass -Command "Invoke-WebRequest -Uri 'https://huggingface.co/Lykon/DreamShaper/resolve/main/DreamShaper_8_pruned.safetensors' -OutFile '%SD_MODELS_DIR%\dreamshaper_8.safetensors' -UseBasicParsing; Write-Host 'Download completed!'"
+goto :start_backend
 
-REM Continue with normal backend startup
-if exist "%~dp0\backend\webui-venv\Scripts\activate.bat" (
-    echo Activating existing virtualenv and launching backend...
-    call "%~dp0\backend\webui-venv\Scripts\activate.bat"
-    call "%~dp0\backend\setup_scripts\launch_sdapi_server.bat"
-) else (
-    echo No virtualenv found. Running backend setup script ^(this may take a while^)...
-    call "%~dp0\backend\setup_scripts\setup_sdapi_venv.bat"
-    call "%~dp0\backend\setup_scripts\launch_sdapi_server.bat"
-)
-popd
+:download_sdxl
+echo.
+echo Downloading SDXL Base 1.0... Please wait.
+mkdir "%SD_MODELS_DIR%" 2>nul
+powershell.exe -ExecutionPolicy Bypass -Command "Invoke-WebRequest -Uri 'https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors' -OutFile '%SD_MODELS_DIR%\sd_xl_base_1.0.safetensors' -UseBasicParsing; Write-Host 'Download completed!'"
+goto :start_backend
+
+:start_backend
+echo.
+echo Starting Stable Diffusion backend...
+cd /d "%BACKEND_DIR%"
+call "%VENV_DIR%\Scripts\activate.bat"
+"%PYTHON_EXE%" launch_webui_backend.py
+pause
