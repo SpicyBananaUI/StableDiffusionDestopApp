@@ -2,6 +2,33 @@
 
 This project combines a the FastAPI Python backend from [Stable Diffusion WebUI Forge](https://github.com/automatic1111/stable-diffusion-webui) by AUTOMATIC1111 for running Stable Diffusion with an Avalonia UI frontend.
 
+## Quick Start Options
+
+### Option 1: Windows Installer (Recommended)
+Build and run a Windows installer for easy distribution:
+
+```powershell
+# Navigate to installer directory
+cd installer
+
+# Build compact installer (~2.3GB) - Recommended
+.\build_installer.ps1 -CreateMinimalVenv
+
+# Or build with a specific model included (~4-5GB)  
+.\build_installer.ps1 -CreateMinimalVenv -SpecificModels @('dreamshaper')
+```
+
+The installer will be created in `installer_output/` and includes:
+- Self-contained .NET frontend
+- Optimized Python backend with minimal dependencies
+- Automatic model download on first run
+- Start Menu and Desktop shortcuts
+
+See [installer/README_installer.md](installer/README_installer.md) for detailed build options.
+
+### Option 2: Manual Setup (Development)
+For development or manual installation, follow the backend and frontend setup below.
+
 ## Backend Setup
 
 1. Open a terminal in the project directory
@@ -119,6 +146,53 @@ print(f"CUDA version: {torch.version.cuda}")
 9. Pillow: this is used for image manipulation.
 10. Pydantic: validates the data and serializes it.
 11. pydantic_core: works with pydantic and essentially powers it to work
+
+## Windows Installer
+
+For easy distribution and installation, this project includes a Windows installer builder:
+
+### Building the Installer
+
+**Prerequisites:**
+- .NET SDK installed
+- Python 3.10 or 3.11 installed  
+- (Optional) Inno Setup for automatic compilation
+
+**Recommended build command:**
+```powershell
+cd installer
+.\build_installer.ps1 -CreateMinimalVenv
+```
+
+This creates a ~2.3GB installer that includes:
+- ✅ Self-contained .NET frontend
+- ✅ Optimized Python environment with essential packages
+- ✅ Automatic model download on first run  
+- ✅ All necessary runtime dependencies
+
+**Other build options:**
+```powershell
+# Include specific model (larger but ready to use)
+.\build_installer.ps1 -CreateMinimalVenv -SpecificModels @('dreamshaper')
+
+# Force specific Python version  
+.\build_installer.ps1 -CreateMinimalVenv -PythonPath "C:\Python310\python.exe"
+
+# Full build with everything (21GB+ - not recommended)
+.\build_installer.ps1 -IncludeModels -IncludeRepositories -IncludeFullVenv
+```
+
+### Using the Installer
+
+After installation, users get:
+- **Desktop shortcut** to launch the app
+- **Start Menu shortcuts** for frontend and backend
+- **Automatic setup** - models download when first needed
+- **No manual configuration** required
+
+The installer handles all Python dependencies, virtual environment setup, and provides helper scripts for model management.
+
+For detailed installer documentation, see [installer/README_installer.md](installer/README_installer.md).
 
 ## Development Notes
 
