@@ -1,0 +1,52 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:services="clr-namespace:myApp.Services"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="myApp.GalleryView">
+    
+    <DockPanel LastChildFill="True">
+
+        <!-- Page Title -->
+        <TextBlock Text="Recently Generated Image Gallery"
+                   FontSize="24"
+                   FontWeight="Bold"
+                   Foreground="White"
+                   HorizontalAlignment="Center"
+                   Margin="0,0,0,20"
+                   DockPanel.Dock="Top"/>
+
+        <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+            <ItemsControl ItemsSource="{x:Static services:GalleryService.RecentImages}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <!-- 5 columns -->
+                        <UniformGrid Columns="5" Rows="5"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Background="#2D2D30" CornerRadius="8" BorderBrush="Gray" BorderThickness="1" Margin="8" Padding="8">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                
+                                <Image Source="{Binding}" Stretch="UniformToFill" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+
+                                <!-- Buttons row -->
+                                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="5" Margin="0,5,0,0">
+                                    <Button Content="Save" Tag="{Binding}" Click="OnSaveClick" Background="#3A3A3D" Foreground="White" Padding="6,2" CornerRadius="4"/>
+                                    <Button Content="Use for Img2Img" Tag="{Binding}" Click="OnUseClick" Background="#3A3A3D" Foreground="White" Padding="6,2" CornerRadius="4"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </DockPanel>
+</UserControl>

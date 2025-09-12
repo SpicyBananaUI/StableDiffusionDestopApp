@@ -21,6 +21,7 @@ public partial class MainWindow : Window
     private readonly DashboardView _dashboardView = new DashboardView();
     private readonly SettingsView _settingsView = new SettingsView();
     private readonly ModelsView _modelsView = new ModelsView();
+    private readonly GalleryView _galleryView = new GalleryView();
     
     public MainWindow()
     {
@@ -37,7 +38,18 @@ public partial class MainWindow : Window
         
         if (this.FindControl<Button>("ModelsButton") is Button modelsButton)
             modelsButton.Click += (_, _) => MainContent.Content = _modelsView;
-
+        
+        if (this.FindControl<Button>("GalleryButton") is Button galleryButton)
+            galleryButton.Click += (_, _) => MainContent.Content = _galleryView;
+        
+        GalleryService.Img2ImgSelected += bmp =>
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                MainContent.Content = _dashboardView;
+                _dashboardView.SetInitImage(bmp);
+            });
+        };
     }
     
 }

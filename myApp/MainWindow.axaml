@@ -15,7 +15,7 @@
                 <TextBlock Text="Stable Diffusion UI" Foreground="LightGreen" FontSize="18" FontWeight="Bold" Margin="10"/>
                 <Button Content="Dashboard" Name="DashboardButton" Background="Transparent" Foreground="White" Margin="10,0"/>
                 <Button Content="Models" Name="ModelsButton" Background="Transparent" Foreground="White" Margin="10,0"/>
-                <Button Content="Gallery" Background="Transparent" Foreground="White" Margin="10,0"/>
+                <Button Content="Gallery" Name="GalleryButton" Background="Transparent" Foreground="White" Margin="10,0"/>
                 <Button Content="Settings" Name="SettingsButton" Background="Transparent" Foreground="White" Margin="10,0"/>
             </StackPanel>
         </Border>
