@@ -1,12 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
-    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
+    <OutputType>WinExe</OutputType>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(OS)' != 'Windows_NT'">
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
 
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.2.1" />
@@ -20,6 +27,33 @@
     </PackageReference>
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
   </ItemGroup>
+
+  <ItemGroup Condition="'$(OS)' != 'Windows_NT'">
+    <Content Include="..\backend\**\*"
+          Exclude="..\backend\**\__pycache__\**\*;
+                   ..\backend\cache\**\*;
+                   ..\backend\config_states\**\*;
+                   ..\backend\embeddings\**\*;
+                   ..\backend\extensions\**\*;
+                   ..\backend\log\**\*;
+                   ..\backend\models\**\*;
+                   !..\backend\models\;
+                   !..\backend\models\*\;
+                   ..\backend\outputs\**\*;
+                   ..\backend\repositories\**\*;
+                   ..\backend\venv\**\*;
+                   ..\backend\webui-venv\**\*">
+      <Link>backend\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="..\setup_scripts\**\*">
+      <Link>setup_scripts\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
 
   <ItemGroup>
     <Folder Include="Assets\" />

@@ -5,6 +5,10 @@
 
 
 BACKEND_DIR="./backend"
+SCRIPT_DIR="$(dirname "$0")"
+
+cd "$SCRIPT_DIR"
+cd ".."
 
 # Check if Python is installed
 if ! command -v python3.10 &> /dev/null; then

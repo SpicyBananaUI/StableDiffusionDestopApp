@@ -5,6 +5,10 @@
 
 
 BACKEND_DIR="./backend"
+SCRIPT_DIR="$(dirname "$0")"
+
+cd "$SCRIPT_DIR"
+cd ".."
 
 echo "Creating virtual environment with packages required by sdapi (webui) backend..."
 
