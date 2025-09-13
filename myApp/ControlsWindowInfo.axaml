@@ -1,0 +1,69 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="myApp.ControlsWindow"
+        Title="Prompt Tips"
+        Width="600"
+        Height="500"
+        WindowStartupLocation="CenterOwner">
+    <Grid Background="#222">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title -->
+        <TextBlock x:Name="TitleText" Text="Controls Tips" 
+                   Foreground="LightGreen" FontSize="18" FontWeight="Bold"
+                   HorizontalAlignment="Center" Margin="10"/>
+
+        <!-- Slide Content -->
+        <Border Grid.Row="1" Margin="10" Background="Transparent" CornerRadius="8">
+            <Grid>
+                <Grid x:Name="Slide1" IsVisible="True">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Image Source="/Assets/pic1.jpg" Width="300" Height="200" 
+                               Margin="0,0,0,20" Stretch="Uniform"/>
+                        <TextBlock Text="Steps" Foreground="LightGreen" 
+                                   FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        <TextBlock Text="The steps setting in Stable Diffusion controls how many times the model refines the image. More steps generally improve quality but take longer to generate. Fewer steps are faster but may lack detail. A typical range is 20–50, with most users finding a good balance around 30–40."
+                                   TextWrapping="Wrap" HorizontalAlignment="Center" TextAlignment="Center"
+                                   Margin="20" Foreground="White" MaxWidth="500"/>
+                    </StackPanel>
+                </Grid>
+
+                <Grid x:Name="Slide2" IsVisible="False">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Image Source="/Assets/pic2.jpg" Width="300" Height="200" 
+                               Margin="0,0,0,20" Stretch="Uniform"/>
+                        <TextBlock Text="Scale" Foreground="LightGreen" 
+                                   FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        <TextBlock Text="The scale setting, also known as CFG (Classifier-Free Guidance) scale, controls how closely the image follows your prompt. Lower values (e.g., 3–7) allow more creative or unexpected results, while higher values (e.g., 10–15) force the model to stick more strictly to the prompt. A common default is 7 or 8, which balances prompt accuracy and creativity."
+                                   TextWrapping="Wrap" HorizontalAlignment="Center" TextAlignment="Center"
+                                   Margin="20" Foreground="White" MaxWidth="500"/>
+                    </StackPanel>
+                </Grid>
+
+                <Grid x:Name="Slide3" IsVisible="False">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Image Source="/Assets/pic3.jpg" Width="300" Height="200" 
+                               Margin="0,0,0,20" Stretch="Uniform"/>
+                        <TextBlock Text="Number of Images" Foreground="LightGreen" 
+                                   FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        <TextBlock Text="The number of images setting controls how many images are generated in a single run. This setting doesn’t affect image quality—just how many results you get at once."
+                                   TextWrapping="Wrap" HorizontalAlignment="Center" TextAlignment="Center"
+                                   Margin="20" Foreground="White" MaxWidth="500"/>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <!-- Navigation -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
+            <Button x:Name="PrevButton" Content="Previous" Width="80" Margin="0,0,10,0"
+                    Background="#444" Foreground="White" Click="PrevButton_Click" IsEnabled="False"/>
+            <Button x:Name="NextButton" Content="Next" Width="80" 
+                    Background="#444" Foreground="White" Click="NextButton_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

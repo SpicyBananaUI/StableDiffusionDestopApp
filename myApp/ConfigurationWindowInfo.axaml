@@ -1,0 +1,81 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="myApp.ConfigWindow"
+        Title="Prompt Tips"
+        Width="600"
+        Height="500"
+        WindowStartupLocation="CenterOwner">
+    <Grid Background="#222">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title -->
+        <TextBlock x:Name="TitleText" Text="Configuration Tips" 
+                   Foreground="LightGreen" FontSize="18" FontWeight="Bold"
+                   HorizontalAlignment="Center" Margin="10"/>
+
+        <!-- Slide Content -->
+        <Border Grid.Row="1" Margin="10" Background="Transparent" CornerRadius="8">
+            <Grid>
+                <Grid x:Name="Slide1" IsVisible="True">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Image Source="/Assets/pic1.jpg" Width="300" Height="200" 
+                               Margin="0,0,0,20" Stretch="Uniform"/>
+                        <TextBlock Text="Model Choice" Foreground="LightGreen" 
+                                   FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        <TextBlock Text="The model choice in Stable Diffusion determines the overall style, capabilities, and output quality of the generated images. Different models are trained on different datasets and optimized for specific purposes. Some focus on realism, others on anime, art, or fantasy. Choosing the right model affects how well your prompt is interpreted and the visual style of the result."
+                                   TextWrapping="Wrap" HorizontalAlignment="Center" TextAlignment="Center"
+                                   Margin="20" Foreground="White" MaxWidth="500"/>
+                    </StackPanel>
+                </Grid>
+
+                <Grid x:Name="Slide2" IsVisible="False">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Image Source="/Assets/pic2.jpg" Width="300" Height="200" 
+                               Margin="0,0,0,20" Stretch="Uniform"/>
+                        <TextBlock Text="Sampler Choice" Foreground="LightGreen" 
+                                   FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        <TextBlock Text="The sampler controls how the image is generated during each step of the denoising process. Different samplers use different algorithms to guide image refinement, which can affect the style, sharpness, and consistency of the final result. Some samplers are faster, while others may produce smoother or more detailed images."
+                                   TextWrapping="Wrap" HorizontalAlignment="Center" TextAlignment="Center"
+                                   Margin="20" Foreground="White" MaxWidth="500"/>
+                    </StackPanel>
+                </Grid>
+
+                <Grid x:Name="Slide3" IsVisible="False">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Image Source="/Assets/pic3.jpg" Width="300" Height="200" 
+                               Margin="0,0,0,20" Stretch="Uniform"/>
+                        <TextBlock Text="Width and Height" Foreground="LightGreen" 
+                                   FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        <TextBlock Text="The width and height settings define the resolution of the generated image. Larger dimensions produce bigger, more detailed images but also take longer to generate. It's best to stick to sizes that are multiples of 64 to avoid errors or artifacts. Choosing unusual aspect ratios can affect composition, so adjusting width and height is a useful way to control framing and layout in your results."
+                                   TextWrapping="Wrap" HorizontalAlignment="Center" TextAlignment="Center"
+                                   Margin="20" Foreground="White" MaxWidth="500"/>
+                    </StackPanel>
+                </Grid>
+                
+                <Grid x:Name="Slide4" IsVisible="False">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Image Source="/Assets/pic1.jpg" Width="300" Height="200" 
+                               Margin="0,0,0,20" Stretch="Uniform"/>
+                        <TextBlock Text="Seed" Foreground="LightGreen" 
+                                   FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        <TextBlock Text="The seed the randomness of the image generation. Using the same seed with the same settings and prompt will produce the exact same image every time, making it useful for consistency or recreating a result. Changing the seed gives you a different variation, even with identical prompts. Setting the seed to -1 tells the model to pick a random seed each time."
+                                   TextWrapping="Wrap" HorizontalAlignment="Center" TextAlignment="Center"
+                                   Margin="20" Foreground="White" MaxWidth="500"/>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <!-- Navigation -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
+            <Button x:Name="PrevButton" Content="Previous" Width="80" Margin="0,0,10,0"
+                    Background="#444" Foreground="White" Click="PrevButton_Click" IsEnabled="False"/>
+            <Button x:Name="NextButton" Content="Next" Width="80" 
+                    Background="#444" Foreground="White" Click="NextButton_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

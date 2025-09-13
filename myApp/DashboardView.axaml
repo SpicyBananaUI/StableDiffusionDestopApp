@@ -43,7 +43,14 @@
                     <Border BorderBrush="Gray" BorderThickness="1" Padding="10">
                         <StackPanel>
                             <TextBlock Text="Controls" FontWeight="Bold"/>
-                            
+                            <Button Grid.Column="1" HorizontalAlignment="Right" Background="Transparent" 
+                                    BorderThickness="0" Width="20" Height="20" Margin="0,0,5,0"
+                                    Click="ShowControlTips">
+                                <Button.Content>
+                                    <TextBlock Text="?" Foreground="LightGray" FontWeight="Bold"/>
+                                </Button.Content>
+                            </Button>
+
                             <!-- Mode Toggle -->
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,10" Spacing="10">
                                 <TextBlock Text="Mode:" VerticalAlignment="Center"/>
@@ -99,6 +106,13 @@
                     <Border BorderBrush="Gray" BorderThickness="1" Padding="10">
                         <StackPanel>
                             <TextBlock Text="Configuration" FontWeight="Bold"/>
+                            <Button Grid.Column="1" HorizontalAlignment="Right" Background="Transparent" 
+                                    BorderThickness="0" Width="20" Height="20" Margin="0,0,5,0"
+                                    Click="ShowConfigurationTips">
+                                <Button.Content>
+                                    <TextBlock Text="?" Foreground="LightGray" FontWeight="Bold"/>
+                                </Button.Content>
+                            </Button>
                             <ComboBox x:Name="ModelComboBox" PlaceholderText="Choose Model" Margin="0,5,0,0"/>
                             <ComboBox x:Name="SamplerComboBox" PlaceholderText="Choose Sampler" Margin="0,5,0,0"/>
                             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">

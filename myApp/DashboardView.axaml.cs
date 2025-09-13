@@ -446,6 +446,28 @@ public partial class DashboardView : UserControl
         slideshowWindow.ShowDialog(window);
     }
     
+    
+    private void ShowControlTips(object sender, RoutedEventArgs e)
+    {
+        var window = this.VisualRoot as Window;
+        if (window == null) return;
+
+        var ControlsWindow = new ControlsWindow();
+        ControlsWindow.Title = "Controls Tips";
+        ControlsWindow.ShowDialog(window);
+    }
+    
+    private void ShowConfigurationTips(object sender, RoutedEventArgs e)
+    {
+        var window = this.VisualRoot as Window;
+        if (window == null) return;
+
+        var ConfigWindow = new ConfigWindow();
+        ConfigWindow.Title = "Controls Tips";
+        ConfigWindow.ShowDialog(window);
+    }
+
+    
     public void SetInitImage(Bitmap bmp)
     {
         _initImage = bmp;
