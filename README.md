@@ -79,6 +79,25 @@ print(f"CUDA version: {torch.version.cuda}")
 
 3. Run myApp
 
+## Package Setup (macOS)
+
+On macOS, there is an optional package that can be used for app installation in place of the above instructions. It is not yet as polished or reliable as the Windows installer as it was not planned as an Alpha feature.
+
+1. Ensure Python 3.10 is installed.
+
+2. Download and open SDapp.dmg
+
+3. After placing in your Applications folder, run the app myApp via the terminal:
+```/Applications/SDapp.app/Contents/MacOS/```
+
+4. This will take a while since it has to download any missing python packages and a ~2GB stable diffusion model.
+
+5. If you ran the app by clicking on it, macOS may kill the process before it has completed setting up the backend and downloading your first model. If so, rerun it. If the port is later occupied (check app_tst % lsof -i :7861), you may need to kill an errant python process
+
+6. Once all setup is complete, the app should launch
+
+7. If adding other models or there is another need to access the /backend/ or /setup_scripts/ folder, they are located at user/Library/Application Support/SDApp. This is now the case when running on macOS even if not using the package installation. (If using the regular installation, the frontend app will copy the backend into Application Support on the first run.)
+
 
 ## Frontend:
 ### Services/ApiService.cs- Establishes the ApiService class. The following are the functions of the class: 
