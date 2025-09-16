@@ -1,83 +1,62 @@
 @echo off
-setlocal enabledelayedexpansion
-REM Helper script to download common Stable Diffusion models
-pushd "%~dp0"
+setlocal
 
-set "MODELS_DIR=%~dp0backend\models\Stable-diffusion"
-echo Creating models directory: %MODELS_DIR%
-mkdir "%MODELS_DIR%" 2>nul
+:: Set the target directory relative to backend
+set "TARGET_DIR=%~dp0..\backend\models\Stable-diffusion"
 
-echo.
-echo ============================================
-echo    Stable Diffusion Model Downloader
-echo ============================================
-echo.
-echo Available models to download:
-echo.
-echo 1. DreamShaper 8 (~2GB) - High quality, versatile model
-echo 2. SDXL Base 1.0 (~6.6GB) - Latest high-resolution model  
-echo 3. Both models
-echo 4. Cancel
-echo.
-choice /C 1234 /M "Select option"
+:: Create directory if it doesn't exist
+if not exist "%TARGET_DIR%" mkdir "%TARGET_DIR%"
 
-if !ERRORLEVEL!==1 goto :download_dreamshaper
-if !ERRORLEVEL!==2 goto :download_sdxl
-if !ERRORLEVEL!==3 goto :download_both
-if !ERRORLEVEL!==4 goto :end
+echo Downloading DreamShaper 8 model...
+echo This may take a while due to the large file size (2GB)...
+echo Progress will be shown below...
 
-:download_dreamshaper
-echo.
-echo Downloading DreamShaper 8... Please wait, this may take several minutes.
-powershell -ExecutionPolicy Bypass -Command "try { $ProgressPreference = 'Continue'; Invoke-WebRequest -Uri 'https://huggingface.co/Lykon/DreamShaper/resolve/main/DreamShaper_8_pruned.safetensors' -OutFile '%MODELS_DIR%\dreamshaper_8.safetensors' -UseBasicParsing; Write-Host 'DreamShaper 8 downloaded successfully!' -ForegroundColor Green; exit 0 } catch { Write-Host 'Download failed: ' $_.Exception.Message -ForegroundColor Red; exit 1 }"
-if !ERRORLEVEL!==0 (
-    echo ✓ DreamShaper 8 downloaded successfully!
-) else (
-    echo ✗ Download failed. Please check your internet connection and try again.
-)
-goto :end
+@echo off
+setlocal
 
-:download_sdxl  
-echo.
-echo Downloading SDXL Base 1.0... This is a large file and may take a while.
-powershell -ExecutionPolicy Bypass -Command "try { $ProgressPreference = 'Continue'; Invoke-WebRequest -Uri 'https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors' -OutFile '%MODELS_DIR%\sd_xl_base_1.0.safetensors' -UseBasicParsing; Write-Host 'SDXL Base 1.0 downloaded successfully!' -ForegroundColor Green; exit 0 } catch { Write-Host 'Download failed: ' $_.Exception.Message -ForegroundColor Red; exit 1 }"
-if !ERRORLEVEL!==0 (
-    echo ✓ SDXL Base 1.0 downloaded successfully!
-) else (
-    echo ✗ Download failed. Please check your internet connection and try again.
-)
-goto :end
+:: Set the target directory relative to backend
+set "TARGET_DIR=%~dp0..\backend\models\Stable-diffusion"
 
-:download_both
-echo.
-echo Downloading both models... This will take a while.
-echo.
-echo [1/2] Downloading DreamShaper 8...
-powershell -ExecutionPolicy Bypass -Command "try { $ProgressPreference = 'Continue'; Invoke-WebRequest -Uri 'https://huggingface.co/Lykon/DreamShaper/resolve/main/DreamShaper_8_pruned.safetensors' -OutFile '%MODELS_DIR%\dreamshaper_8.safetensors' -UseBasicParsing; Write-Host 'DreamShaper 8 downloaded successfully!' -ForegroundColor Green; exit 0 } catch { Write-Host 'Download failed: ' $_.Exception.Message -ForegroundColor Red; exit 1 }"
-if !ERRORLEVEL!==0 (
-    echo ✓ DreamShaper 8 downloaded successfully!
-) else (
-    echo ✗ DreamShaper 8 download failed.
+:: Create directory if it doesn't exist
+if not exist "%TARGET_DIR%" mkdir "%TARGET_DIR%"
+
+echo Downloading DreamShaper 8 model...
+echo Target directory: %TARGET_DIR%
+echo This may take a while due to the large file size (2GB)...
+
+:: Simple but reliable download using PowerShell
+powershell -ExecutionPolicy Bypass -Command ^
+"$url = 'https://civitai.com/api/download/models/128713'; " ^
+"$output = '%TARGET_DIR%\dreamshaper_8.safetensors'; " ^
+"Write-Host 'Starting download to:' $output; " ^
+"try { " ^
+"  $webClient = New-Object System.Net.WebClient; " ^
+"  $webClient.Headers.Add('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'); " ^
+"  $webClient.DownloadFile($url, $output); " ^
+"  $size = (Get-Item $output).Length; " ^
+"  Write-Host 'Downloaded' ([Math]::Round($size / 1MB, 2)) 'MB'; " ^
+"  $webClient.Dispose(); " ^
+"} catch { " ^
+"  Write-Host 'Download failed:' $_.Exception.Message; " ^
+"  exit 1; " ^
+"}"
+
+if %ERRORLEVEL% NEQ 0 (
+    echo Download failed!
+    pause
+    exit /b 1
 )
 
-echo.
-echo [2/2] Downloading SDXL Base 1.0...
-powershell -ExecutionPolicy Bypass -Command "try { $ProgressPreference = 'Continue'; Invoke-WebRequest -Uri 'https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors' -OutFile '%MODELS_DIR%\sd_xl_base_1.0.safetensors' -UseBasicParsing; Write-Host 'SDXL Base 1.0 downloaded successfully!' -ForegroundColor Green; exit 0 } catch { Write-Host 'Download failed: ' $_.Exception.Message -ForegroundColor Red; exit 1 }"
-if !ERRORLEVEL!==0 (
-    echo ✓ SDXL Base 1.0 downloaded successfully!
-) else (
-    echo ✗ SDXL Base 1.0 download failed.
-)
-
-:end
-echo.
-echo Models are saved to: %MODELS_DIR%
-echo.
-echo After downloading, restart the backend for models to appear in the dropdown.
-echo You can also check the downloaded models by looking in the models directory.
-echo.
-dir "%MODELS_DIR%\*.safetensors" 2>nul && echo Current models: || echo No models found yet.
-dir "%MODELS_DIR%\*.safetensors" /b 2>nul
-echo.
+echo Download completed successfully!
+echo Model saved to: %TARGET_DIR%\dreamshaper_8.safetensors
 pause
-popd
+
+if %ERRORLEVEL% NEQ 0 (
+    echo Download failed!
+    pause
+    exit /b 1
+)
+
+echo Model saved to: %TARGET_DIR%\dreamshaper_8.safetensors
+echo You can now use this model in the Stable Diffusion application.
+pause

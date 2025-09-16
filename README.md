@@ -11,7 +11,7 @@ If an installer has already been built, simply run the most recent one:
 
 ```powershell
 # Navigate to installer output directory
-cd installer_output
+cd installer\installer_output
 
 # Run the most recent installer
 .\StableDiffusionDesktopApp-Setup-1.0.0.exe
@@ -24,17 +24,29 @@ To build a fresh installer for distribution:
 # Navigate to installer directory
 cd installer
 
-# Build compact installer (~2.3GB) - Recommended
+# Build compact installer (~1.7GB) - Recommended
 .\build_installer.ps1 -CreateMinimalVenv
 
-# Or build with a specific model included (~4-5GB)  
+# Or build with a specific model included (~4GB)  
 .\build_installer.ps1 -CreateMinimalVenv -SpecificModels @('dreamshaper')
 ```
 
-The installer will be created in `installer_output/` and includes:
+**Prerequisites for building:**
+- .NET SDK installed
+- Python 3.10 or 3.11 installed
+- (Optional) Inno Setup 6 for automatic compilation
+
+**What the build process does:**
+1. Creates an embedded Python environment with minimal dependencies
+2. Publishes the .NET frontend as a single executable
+3. Copies and optimizes the backend files
+4. Generates helper scripts for launching and model downloads
+5. Compiles everything into a Windows installer
+
+The installer will be created in `installer/installer_output/` and includes:
 - Self-contained .NET frontend
 - Optimized Python backend with minimal dependencies
-- Automatic model download on first run
+- Automatic model download on first run (via CivitAI integration)
 - Start Menu and Desktop shortcuts
 
 See [installer/README_installer.md](installer/README_installer.md) for detailed build options.
@@ -162,14 +174,13 @@ print(f"CUDA version: {torch.version.cuda}")
 
 ## Windows Installer
 
-For easy distribution and installation, this project includes a Windows installer builder:
-
+For easy distribution and installation, this project includes a Windows installer builder that creates a complete, portable installation package.
 ### Building the Installer
 
 **Prerequisites:**
 - .NET SDK installed
 - Python 3.10 or 3.11 installed  
-- (Optional) Inno Setup for automatic compilation
+- (Optional) Inno Setup 6 for automatic compilation
 
 **Recommended build command:**
 ```powershell
@@ -177,33 +188,41 @@ cd installer
 .\build_installer.ps1 -CreateMinimalVenv
 ```
 
-This creates a ~2.3GB installer that includes:
+This creates a ~1.7GB installer that includes:
 - ✅ Self-contained .NET frontend
-- ✅ Optimized Python environment with essential packages
-- ✅ Automatic model download on first run  
+- ✅ Optimized Python environment (~6GB compressed with minimal packages)
+- ✅ Automatic model download integration (CivitAI and HuggingFace)
 - ✅ All necessary runtime dependencies
+- ✅ Helper batch scripts for easy launching and model management
 
-**Other build options:**
+**Advanced build options:**
 ```powershell
-# Include specific model (larger but ready to use)
+# Include specific model (larger but ready to use immediately)
 .\build_installer.ps1 -CreateMinimalVenv -SpecificModels @('dreamshaper')
 
 # Force specific Python version  
 .\build_installer.ps1 -CreateMinimalVenv -PythonPath "C:\Python310\python.exe"
 
-# Full build with everything (21GB+ - not recommended)
+# Full build with everything (21GB+ - not recommended for distribution)
 .\build_installer.ps1 -IncludeModels -IncludeRepositories -IncludeFullVenv
 ```
 
-### Using the Installer
+**Build Process Overview:**
+1. **Python Environment Creation**: Creates optimized embedded Python with only essential packages
+2. **Frontend Compilation**: Publishes .NET app as single-file executable  
+3. **Backend Optimization**: Copies core backend files, excludes large cached data
+4. **Script Generation**: Creates launch scripts and model download helpers
+5. **Installer Compilation**: Packages everything with Inno Setup
+
+### Post-Installation Experience
 
 After installation, users get:
 - **Desktop shortcut** to launch the app
-- **Start Menu shortcuts** for frontend and backend
-- **Automatic setup** - models download when first needed
-- **No manual configuration** required
+- **Start Menu shortcuts** for frontend, backend, and model downloads
+- **Automatic setup** - models download when first needed via integrated download script
+- **No manual configuration** required - everything just works
 
-The installer handles all Python dependencies, virtual environment setup, and provides helper scripts for model management.
+The installer handles all Python dependencies, virtual environment setup, and provides helper scripts for model management with reliable downloads from CivitAI and HuggingFace.
 
 For detailed installer documentation, see [installer/README_installer.md](installer/README_installer.md).
 

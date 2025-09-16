@@ -1,6 +1,8 @@
-# Python virtual environment
+# Python virtual environments and embedded Python
 venv/
 webui-venv/
+python-embedded/
+fastAPI/venv/
 __pycache__/
 *.py[cod]
 *$py.class
@@ -39,5 +41,27 @@ project.fragment.lock.json
 artifacts/
 **/Properties/launchSettings.json
 
-# Downloaded models
+# Downloaded models and large model files
 models/Stable/
+backend/models/
+*.safetensors
+*.ckpt
+*.pt
+*.pth
+
+# Installer output
+installer_output/
+installer/publish/
+
+# Cache and temporary files
+backend/cache/
+backend/config_states/
+backend/repositories/
+*.tmp
+*.log
+
+# Large dependency libraries (reconstructed by installer)
+**/torch/lib/*.dll
+**/torch/lib/*.lib
+**/llvmlite/binding/*.dll
+**/cv2/*.pyd
