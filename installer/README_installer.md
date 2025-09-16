@@ -5,13 +5,15 @@ This folder contains helper files to build an Inno Setup installer for the Stabl
 ## What the Scripts Do
 
 - **`build_installer.ps1`** - Main build script that:
+  - Creates an optimized embedded Python environment with minimal dependencies
   - Publishes the .NET frontend as a single-file EXE (win-x64)
-  - Copies and optimizes the backend folder 
-  - Creates a minimal Python virtual environment
+  - Copies and optimizes the backend folder (excluding models, cache, repositories)
   - Generates helper batch scripts (`run_frontend.bat`, `run_backend.bat`, `download_models.bat`)
-  - Optionally compiles the final installer EXE
+  - Optionally compiles the final installer EXE with Inno Setup
 
 - **`installer.iss`** - Inno Setup script that packages everything under `installer/publish` into a single installer EXE with Start Menu and Desktop shortcuts
+
+- **`installer_embedded.iss`** - Enhanced Inno Setup script with improved exclusion patterns and desktop icon configuration
 
 ## Prerequisites
 
@@ -21,24 +23,25 @@ This folder contains helper files to build an Inno Setup installer for the Stabl
 
 ## Build Options
 
-### Ultra-Compact Installer (~2.3GB)
+### Ultra-Compact Installer (~1.7GB)
 **Recommended for distribution**
 ```powershell
 cd installer
 .\build_installer.ps1 -CreateMinimalVenv
 ```
-- Creates optimized Python environment with only essential packages
-- Excludes models (users download post-install) 
+- Creates optimized embedded Python environment (~6GB compressed to ~1GB in installer)
+- Includes only essential packages (torch, diffusers, transformers, fastapi, etc.)
+- Excludes models (users download post-install via integrated CivitAI/HuggingFace script) 
 - Excludes repositories/cache (downloaded on first run)
 - Uses Python 3.10/3.11 automatically for best compatibility
 
-### Include Specific Model (~4-5GB)
+### Include Specific Model (~4GB)
 ```powershell
 cd installer  
 .\build_installer.ps1 -CreateMinimalVenv -SpecificModels @('dreamshaper')
 ```
-- Includes DreamShaper model for immediate use
-- Still creates minimal Python environment
+- Includes DreamShaper model for immediate use (no post-install download needed)
+- Still creates minimal Python environment for optimal size
 
 ### Specify Python Version
 ```powershell
@@ -70,9 +73,21 @@ The compiled installer will be placed in `../installer_output/`
 The installer creates shortcuts for:
 - **Stable Diffusion Desktop App** - Launches the frontend
 - **Run Backend** - Starts the backend server (with model download prompts if needed)
-- **Download Models** - Helper script to download additional models
+- **Download Models** - Helper script to download additional models from CivitAI and HuggingFace
 
-On first backend run, users will be prompted to download models if none are included in the installer.
+**First-time setup:**
+1. Install and launch from Desktop shortcut
+2. Backend automatically starts with the frontend
+3. If no models are present, use "Download Models" shortcut to get DreamShaper 8 (~2GB)
+4. Models download reliably using improved PowerShell scripts with progress tracking
+5. Start generating images immediately after download completes
+
+**Integrated model download features:**
+- Downloads from both CivitAI and HuggingFace for reliability
+- Progress indication during large file downloads
+- Automatic file integrity verification  
+- Resume capability for interrupted downloads
+- Multiple model options (DreamShaper 8, SD 1.5, SD 2.1, SDXL)
 
 ## Build Output Structure
 
@@ -80,13 +95,24 @@ On first backend run, users will be prompted to download models if none are incl
 installer/publish/
 ├── Frontend/
 │   └── myApp.exe                 # .NET desktop app  
-├── backend/                      # Python backend
-│   ├── webui-venv/              # Minimal virtual environment
+├── backend/                      # Optimized Python backend
+│   ├── webui-venv/              # Embedded Python environment (~6GB)
+│   │   ├── python.exe           # Embedded Python 3.10/3.11
+│   │   ├── Lib/site-packages/   # Essential packages only
+│   │   └── Scripts/             # Python tools and executables
 │   ├── (core backend files)     # Excluding models, cache, repositories  
+│   └── models/                  # Empty - populated post-install
 ├── run_frontend.bat             # Launch frontend
-├── run_backend.bat              # Launch backend (with setup)
-└── download_models.bat          # Download additional models
+├── run_backend.bat              # Launch backend (with auto-setup)
+└── download_models.bat          # Download models (CivitAI/HuggingFace integration)
 ```
+
+**Embedded Python Environment Details:**
+- **Size**: ~6GB uncompressed, ~1GB in compressed installer
+- **Packages**: Only essential dependencies (torch, diffusers, transformers, fastapi, uvicorn, etc.)
+- **Excluded**: Development tools, documentation, cached files, duplicate libraries
+- **CUDA Support**: Included for GPU acceleration where available
+- **Compatibility**: Works on Windows 10/11 x64 systems
 
 ## Advanced Options
 
@@ -100,10 +126,30 @@ All available build flags:
 
 ## Troubleshooting
 
-**Build too large (>21GB):** Use `-CreateMinimalVenv` flag
+**Build too large (>21GB):** Use `-CreateMinimalVenv` flag (creates ~1.7GB installer)
 
 **Python compatibility issues:** Ensure Python 3.10 or 3.11 is installed and use `-PythonPath` to specify it
 
-**Missing dependencies:** The minimal venv excludes some packages that cause compatibility issues - they'll be installed on first run if needed
+**Missing dependencies:** The minimal embedded environment excludes some packages that cause compatibility issues - they'll be installed automatically on first run if needed
 
-**Antivirus warnings:** The installer isn't code-signed. For production use, sign with `signtool` and a valid certificate
+**Model download failures:** The integrated download script uses both CivitAI and HuggingFace with retry logic. Check internet connection and try the "Download Models" shortcut again
+
+**Antivirus warnings:** The installer isn't code-signed. For production distribution, sign the installer with `signtool` and a valid certificate
+
+**Large file exclusions:** The build process automatically excludes:
+- Model files (*.safetensors, *.ckpt) - downloaded post-install
+- Cache directories - rebuilt on first run  
+- Repository clones - fetched as needed
+- Development tools and documentation
+
+**Build process fails:** Ensure all prerequisites are installed:
+```powershell
+# Check .NET SDK
+dotnet --version
+
+# Check Python version  
+python --version
+
+# Check Inno Setup (optional)
+Get-Command ISCC.exe -ErrorAction SilentlyContinue
+```

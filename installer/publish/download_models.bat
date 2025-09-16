@@ -1,41 +1,62 @@
 @echo off
-REM Helper script to download common Stable Diffusion models
-pushd "%~dp0"
+setlocal
 
-set MODELS_DIR=%~dp0\backend\models\Stable-diffusion
-mkdir "%MODELS_DIR%" 2>nul
+:: Set the target directory relative to backend
+set "TARGET_DIR=%~dp0..\backend\models\Stable-diffusion"
 
-echo Available models to download:
-echo.
-echo 1. DreamShaper 8 ^(~2GB^) - High quality, versatile model
-echo 2. SDXL Base 1.0 ^(~6.6GB^) - Latest high-resolution model
-echo 3. Both models
-echo 4. Cancel
-echo.
-choice /C 1234 /M "Select option"
+:: Create directory if it doesn't exist
+if not exist "%TARGET_DIR%" mkdir "%TARGET_DIR%"
 
-if %ERRORLEVEL%==1 goto :download_dreamshaper
-if %ERRORLEVEL%==2 goto :download_sdxl
-if %ERRORLEVEL%==3 goto :download_both
-if %ERRORLEVEL%==4 goto :end
+echo Downloading DreamShaper 8 model...
+echo This may take a while due to the large file size (2GB)...
+echo Progress will be shown below...
 
-:download_dreamshaper
-echo Downloading DreamShaper 8...
-powershell -Command "Invoke-WebRequest -Uri 'https://huggingface.co/Lykon/DreamShaper/resolve/main/DreamShaper_8_pruned.safetensors' -OutFile '%MODELS_DIR%\dreamshaper_8.safetensors' -UseBasicParsing"
-goto :end
+@echo off
+setlocal
 
-:download_sdxl
-echo Downloading SDXL Base 1.0 ^(this may take a while^)...
-powershell -Command "Invoke-WebRequest -Uri 'https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors' -OutFile '%MODELS_DIR%\sd_xl_base_1.0.safetensors' -UseBasicParsing"
-goto :end
+:: Set the target directory relative to backend
+set "TARGET_DIR=%~dp0..\backend\models\Stable-diffusion"
 
-:download_both
-echo Downloading DreamShaper 8...
-powershell -Command "Invoke-WebRequest -Uri 'https://huggingface.co/Lykon/DreamShaper/resolve/main/DreamShaper_8_pruned.safetensors' -OutFile '%MODELS_DIR%\dreamshaper_8.safetensors' -UseBasicParsing"
-echo Downloading SDXL Base 1.0 ^(this may take a while^)...
-powershell -Command "Invoke-WebRequest -Uri 'https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors' -OutFile '%MODELS_DIR%\sd_xl_base_1.0.safetensors' -UseBasicParsing"
+:: Create directory if it doesn't exist
+if not exist "%TARGET_DIR%" mkdir "%TARGET_DIR%"
 
-:end
-echo Done!
+echo Downloading DreamShaper 8 model...
+echo Target directory: %TARGET_DIR%
+echo This may take a while due to the large file size (2GB)...
+
+:: Simple but reliable download using PowerShell
+powershell -ExecutionPolicy Bypass -Command ^
+"$url = 'https://civitai.com/api/download/models/128713'; " ^
+"$output = '%TARGET_DIR%\dreamshaper_8.safetensors'; " ^
+"Write-Host 'Starting download to:' $output; " ^
+"try { " ^
+"  $webClient = New-Object System.Net.WebClient; " ^
+"  $webClient.Headers.Add('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'); " ^
+"  $webClient.DownloadFile($url, $output); " ^
+"  $size = (Get-Item $output).Length; " ^
+"  Write-Host 'Downloaded' ([Math]::Round($size / 1MB, 2)) 'MB'; " ^
+"  $webClient.Dispose(); " ^
+"} catch { " ^
+"  Write-Host 'Download failed:' $_.Exception.Message; " ^
+"  exit 1; " ^
+"}"
+
+if %ERRORLEVEL% NEQ 0 (
+    echo Download failed!
+    pause
+    exit /b 1
+)
+
+echo Download completed successfully!
+echo Model saved to: %TARGET_DIR%\dreamshaper_8.safetensors
 pause
-popd
+
+if %ERRORLEVEL% NEQ 0 (
+    echo Download failed!
+    pause
+    exit /b 1
+)
+
+echo Model saved to: %TARGET_DIR%\dreamshaper_8.safetensors
+echo You can now use this model in the Stable Diffusion application.
+pause

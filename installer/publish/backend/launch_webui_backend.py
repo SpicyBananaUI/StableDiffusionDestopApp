@@ -71,6 +71,14 @@ if device == "cpu":
 # Disable web UI and enable API irrespective of platform/device
 args += ["--nowebui", "--api", "--api-log", "--loglevel WARNING"]
 
+# Skip git operations and environment preparation for installer builds
+args += ["--skip-version-check", "--skip-prepare-environment"]
+
+# Add user AppData models directory for downloaded models (no admin required)
+user_models_dir = os.path.join(os.environ.get("LOCALAPPDATA", ""), "StableDiffusion", "models", "Stable-diffusion")
+if os.path.exists(user_models_dir):
+    args += [f"--ckpt-dir={user_models_dir}"]
+
 # Set final command line args
 os.environ["COMMANDLINE_ARGS"] = " ".join(args)
 

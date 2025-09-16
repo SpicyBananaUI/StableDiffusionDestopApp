@@ -71,6 +71,13 @@ if device == "cpu":
 # Disable web UI and enable API irrespective of platform/device
 args += ["--nowebui", "--api", "--api-log", "--loglevel WARNING"]
 
+# Skip git operations and environment preparation for installer builds
+args += ["--skip-version-check", "--skip-prepare-environment"]
+
+# Let the backend use its default models directory (backend/models/Stable-diffusion)
+# This is the standard location that works both in development and installer
+# No need to override with --ckpt-dir unless user wants a custom location
+
 # Set final command line args
 os.environ["COMMANDLINE_ARGS"] = " ".join(args)
 
