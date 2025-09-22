@@ -34,7 +34,7 @@ cd installer
 **Prerequisites for building:**
 - .NET SDK installed
 - Python 3.10 or 3.11 installed
-- (Optional) Inno Setup 6 for automatic compilation
+- Inno Setup 6 for automatic compilation
 
 **What the build process does:**
 1. Creates an embedded Python environment with minimal dependencies
@@ -180,20 +180,20 @@ For easy distribution and installation, this project includes a Windows installe
 **Prerequisites:**
 - .NET SDK installed
 - Python 3.10 or 3.11 installed  
-- (Optional) Inno Setup 6 for automatic compilation
+- Inno Setup 6 for automatic compilation
 
 **Recommended build command:**
 ```powershell
 cd installer
-.\build_installer.ps1 -CreateMinimalVenv
+.\build_installer.ps1
 ```
 
 This creates a ~1.7GB installer that includes:
-- ✅ Self-contained .NET frontend
-- ✅ Optimized Python environment (~6GB compressed with minimal packages)
-- ✅ Automatic model download integration (CivitAI and HuggingFace)
-- ✅ All necessary runtime dependencies
-- ✅ Helper batch scripts for easy launching and model management
+- Self-contained .NET frontend
+- Optimized Python environment
+- Automatic model download integration (CivitAI and HuggingFace)
+- All necessary runtime dependencies
+- Helper batch scripts for easy launching and model management
 
 **Advanced build options:**
 ```powershell
@@ -213,14 +213,6 @@ This creates a ~1.7GB installer that includes:
 3. **Backend Optimization**: Copies core backend files, excludes large cached data
 4. **Script Generation**: Creates launch scripts and model download helpers
 5. **Installer Compilation**: Packages everything with Inno Setup
-
-### Post-Installation Experience
-
-After installation, users get:
-- **Desktop shortcut** to launch the app
-- **Start Menu shortcuts** for frontend, backend, and model downloads
-- **Automatic setup** - models download when first needed via integrated download script
-- **No manual configuration** required - everything just works
 
 The installer handles all Python dependencies, virtual environment setup, and provides helper scripts for model management with reliable downloads from CivitAI and HuggingFace.
 

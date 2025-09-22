@@ -2,7 +2,7 @@
 # This creates the installer using embedded Python instead of venv
 
 param(
-    [switch]$BuildFrontend = $false,
+    [switch]$BuildFrontend = $true,
     [switch]$CleanBuild = $false
 )
 
@@ -43,8 +43,7 @@ if (-not (Test-Path "..\python-embedded\python.exe")) {
     Write-Host "Building embedded Python environment first..." -ForegroundColor Yellow
     
     # Run the embedded Python build script
-    Set-Location ".."
-    python installer\build_embedded_python.py
+    python build_embedded_python.py
     Set-Location "installer"
     
     if (-not (Test-Path "..\python-embedded\python.exe")) {
@@ -85,13 +84,6 @@ if ($LASTEXITCODE -eq 0) {
         Write-Host "SUCCESS!" -ForegroundColor Green
         Write-Host "Installer created: installer_output\StableDiffusionDesktopApp_Setup.exe"
         Write-Host "Installer size: $($installerSize.ToString('F1')) MB"
-        Write-Host ""
-        Write-Host "Key improvements over venv approach:"
-        Write-Host "  - No complex venv activation scripts"
-        Write-Host "  - Simplified batch files"  
-        Write-Host "  - Smaller size - 6GB vs 12GB venv"
-        Write-Host "  - More portable and reliable"
-        Write-Host "  - Direct python.exe calls"
         Write-Host ""
         Write-Host "Ready to distribute!" -ForegroundColor Green
     } else {
