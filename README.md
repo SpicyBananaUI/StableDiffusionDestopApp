@@ -14,7 +14,7 @@ If an installer has already been built, simply run the most recent one:
 cd installer\installer_output
 
 # Run the most recent installer
-.\StableDiffusionDesktopApp-Setup-1.0.0.exe
+.\StableDiffusionDesktopApp-Setup.exe
 ```
 
 #### Build New Installer
@@ -25,10 +25,7 @@ To build a fresh installer for distribution:
 cd installer
 
 # Build compact installer (~1.7GB) - Recommended
-.\build_installer.ps1 -CreateMinimalVenv
-
-# Or build with a specific model included (~4GB)  
-.\build_installer.ps1 -CreateMinimalVenv -SpecificModels @('dreamshaper')
+.\build_installer.ps1
 ```
 
 **Prerequisites for building:**
@@ -47,7 +44,7 @@ The installer will be created in `installer/installer_output/` and includes:
 - Self-contained .NET frontend
 - Optimized Python backend with minimal dependencies
 - Automatic model download on first run (via CivitAI integration)
-- Start Menu and Desktop shortcuts
+- Desktop shortcut
 
 See [installer/README_installer.md](installer/README_installer.md) for detailed build options.
 
@@ -194,18 +191,6 @@ This creates a ~1.7GB installer that includes:
 - Automatic model download integration (CivitAI and HuggingFace)
 - All necessary runtime dependencies
 - Helper batch scripts for easy launching and model management
-
-**Advanced build options:**
-```powershell
-# Include specific model (larger but ready to use immediately)
-.\build_installer.ps1 -CreateMinimalVenv -SpecificModels @('dreamshaper')
-
-# Force specific Python version  
-.\build_installer.ps1 -CreateMinimalVenv -PythonPath "C:\Python310\python.exe"
-
-# Full build with everything (21GB+ - not recommended for distribution)
-.\build_installer.ps1 -IncludeModels -IncludeRepositories -IncludeFullVenv
-```
 
 **Build Process Overview:**
 1. **Python Environment Creation**: Creates optimized embedded Python with only essential packages

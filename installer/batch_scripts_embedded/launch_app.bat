@@ -29,21 +29,38 @@ if not exist "%FRONTEND_EXE%" (
     exit /b 1
 )
 
+
 echo [1/2] Starting backend server...
 echo This may take 20-30 seconds on first launch...
-
-REM Start backend in background
 cd /d "%BACKEND_DIR%"
 start "Stable Diffusion Backend" /min "%PYTHON_PATH%" -c "import sys; sys.path.insert(0, '.'); import launch_webui_backend"
+cd /d "%~dp0"
+
+REM Wait for backend to be ready (poll http://localhost:7861)
+set "READY=0"
+set "RETRIES=60"
+set "WAIT=2"
+for /l %%i in (1,1,%RETRIES%) do (
+    rem Query the models API which returns JSON once models are loaded
+    powershell -Command "try { $r = Invoke-RestMethod -Uri 'http://localhost:7861/sdapi/v1/sd-models' -TimeoutSec 2 } catch { $r = $null }; if ($r -and $r.Count -gt 0) { exit 0 } else { exit 1 }"
+    if not errorlevel 1 (
+        set READY=1
+        goto :backend_ready
+    )
+    echo Waiting for backend to be ready... (%%i/%RETRIES%)
+    timeout /t %WAIT% /nobreak >nul
+)
+
+:backend_ready
+if "%READY%"=="1" (
+    echo Backend is ready!
+) else (
+    echo WARNING: Backend did not respond after %RETRIES% tries. Launching frontend anyway.
+)
 
 echo [2/2] Starting desktop application...
 echo Backend will be available at: http://localhost:7861
 echo.
-
-REM Wait a moment for backend to initialize
-timeout /t 3 /nobreak >nul
-
-REM Launch the frontend (this will be the main window)
 "%FRONTEND_EXE%"
 
 echo.

@@ -37,20 +37,25 @@ if ($BuildFrontend) {
     Write-Host "Frontend build completed" -ForegroundColor Green
 }
 
+Write-Host "Current directory: $(Get-Location)"
+
 # Verify embedded Python exists
 if (-not (Test-Path "..\python-embedded\python.exe")) {
     Write-Host "ERROR: Embedded Python not found!" -ForegroundColor Red
     Write-Host "Building embedded Python environment first..." -ForegroundColor Yellow
     
+    Write-Host "Current directory: $(Get-Location)"
+
     # Run the embedded Python build script
     python build_embedded_python.py
-    Set-Location "installer"
     
-    if (-not (Test-Path "..\python-embedded\python.exe")) {
+    Write-Host "Current directory: $(Get-Location)"
+
+    if (-not (Test-Path "..\\python-embedded\\python.exe")) {
         Write-Host "ERROR: Failed to create embedded Python environment!" -ForegroundColor Red
         exit 1
     }
-    Write-Host "✓ Embedded Python environment created successfully" -ForegroundColor Green
+    Write-Host "Embedded Python environment created successfully" -ForegroundColor Green
 }
 
 # Verify frontend exists

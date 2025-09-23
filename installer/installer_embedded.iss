@@ -10,11 +10,13 @@ OutputDir=installer_output
 OutputBaseFilename=StableDiffusionDesktopApp_Setup
 Compression=lzma2/max
 SolidCompression=yes
-SetupIconFile=
+SetupIconFile=desktopIcon.ico
 WizardStyle=modern
 
 [Files]
 ; Embedded Python environment (much smaller than venv!)
+; Add the icon file for installer and shortcuts
+Source: "desktopIcon.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\python-embedded\*"; DestDir: "{app}\python-embedded"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 ; Backend application (excluding large model files completely)
@@ -35,13 +37,13 @@ Source: "batch_scripts_embedded\*"; DestDir: "{app}"; Flags: ignoreversion
 [Dirs]
 
 [Icons]
-Name: "{group}\Stable Diffusion Desktop App"; Filename: "{app}\launch_app.bat"
+Name: "{group}\Stable Diffusion Desktop App"; Filename: "{app}\launch_app.bat"; IconFilename: "{app}\desktopIcon.ico"
 Name: "{group}\Launch Backend Only"; Filename: "{app}\launch_backend.bat"
 Name: "{group}\Download Models"; Filename: "{app}\download_models.bat"
-Name: "{commondesktop}\Stable Diffusion Desktop App"; Filename: "{app}\launch_app.bat"; Tasks: desktopicon
+Name: "{userdesktop}\Stable Diffusion Desktop App"; Filename: "{app}\launch_app.bat"; Tasks: desktopicon; IconFilename: "{app}\desktopIcon.ico"
 
 [Tasks]
-Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: checkedonce
 
 [Run]
 ; Create models directory and run model download

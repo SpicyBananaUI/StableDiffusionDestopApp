@@ -8,7 +8,7 @@ This folder contains helper files to build an Inno Setup installer for the Stabl
   - Creates an optimized embedded Python environment with minimal dependencies
   - Publishes the .NET frontend as a single-file EXE (win-x64)
   - Copies and optimizes the backend folder (excluding models, cache, repositories)
-  - Generates helper batch scripts (`run_frontend.bat`, `run_backend.bat`, `download_models.bat`)
+  - Generates helper batch scripts (`launch_frontend.bat`, `launch_backend.bat`, `launch_app.bat`, `download_models.bat`)
   - Optionally compiles the final installer EXE with Inno Setup
 
 - **`installer.iss`** - Inno Setup script that packages everything under `installer/publish` into a single installer EXE with Start Menu and Desktop shortcuts
@@ -23,40 +23,17 @@ This folder contains helper files to build an Inno Setup installer for the Stabl
 
 ## Build Options
 
-### Ultra-Compact Installer (~1.7GB)
+### Compact Installer (~1.7GB)
 **Recommended for distribution**
 ```powershell
 cd installer
-.\build_installer.ps1 -CreateMinimalVenv
+.\build_installer.ps1
 ```
 - Creates optimized embedded Python environment (~6GB compressed to ~1GB in installer)
 - Includes only essential packages (torch, diffusers, transformers, fastapi, etc.)
 - Excludes models (users download post-install via integrated CivitAI/HuggingFace script) 
 - Excludes repositories/cache (downloaded on first run)
 - Uses Python 3.10/3.11 automatically for best compatibility
-
-### Include Specific Model (~4GB)
-```powershell
-cd installer  
-.\build_installer.ps1 -CreateMinimalVenv -SpecificModels @('dreamshaper')
-```
-- Includes DreamShaper model for immediate use (no post-install download needed)
-- Still creates minimal Python environment for optimal size
-
-### Specify Python Version
-```powershell
-cd installer
-.\build_installer.ps1 -CreateMinimalVenv -PythonPath "C:\Python310\python.exe"
-```
-- Forces use of specific Python installation
-- Useful if auto-detection selects wrong version
-
-### Full Build (Not Recommended - 21GB+)
-```powershell  
-cd installer
-.\build_installer.ps1 -IncludeModels -IncludeRepositories -IncludeFullVenv
-```
-- Includes everything - may exceed Inno Setup size limits
 
 ## Manual Compilation
 
@@ -89,44 +66,14 @@ The installer creates shortcuts for:
 - Resume capability for interrupted downloads
 - Multiple model options (DreamShaper 8, SD 1.5, SD 2.1, SDXL)
 
-## Build Output Structure
-
-```
-installer/publish/
-├── Frontend/
-│   └── myApp.exe                 # .NET desktop app  
-├── backend/                      # Optimized Python backend
-│   ├── webui-venv/              # Embedded Python environment (~6GB)
-│   │   ├── python.exe           # Embedded Python 3.10/3.11
-│   │   ├── Lib/site-packages/   # Essential packages only
-│   │   └── Scripts/             # Python tools and executables
-│   ├── (core backend files)     # Excluding models, cache, repositories  
-│   └── models/                  # Empty - populated post-install
-├── run_frontend.bat             # Launch frontend
-├── run_backend.bat              # Launch backend (with auto-setup)
-└── download_models.bat          # Download models (CivitAI/HuggingFace integration)
-```
-
 **Embedded Python Environment Details:**
-- **Size**: ~6GB uncompressed, ~1GB in compressed installer
+- **Size**: ~1.7GB
 - **Packages**: Only essential dependencies (torch, diffusers, transformers, fastapi, uvicorn, etc.)
 - **Excluded**: Development tools, documentation, cached files, duplicate libraries
 - **CUDA Support**: Included for GPU acceleration where available
 - **Compatibility**: Works on Windows 10/11 x64 systems
 
-## Advanced Options
-
-All available build flags:
-- `-CreateMinimalVenv` - Create optimized Python environment (recommended)
-- `-IncludeModels` - Include all models in build
-- `-SpecificModels @('model1', 'model2')` - Include only specified models
-- `-IncludeRepositories` - Include git repositories and cache
-- `-IncludeFullVenv` - Include existing full virtual environment  
-- `-PythonPath "path"` - Use specific Python executable
-
 ## Troubleshooting
-
-**Build too large (>21GB):** Use `-CreateMinimalVenv` flag (creates ~1.7GB installer)
 
 **Python compatibility issues:** Ensure Python 3.10 or 3.11 is installed and use `-PythonPath` to specify it
 
@@ -150,6 +97,6 @@ dotnet --version
 # Check Python version  
 python --version
 
-# Check Inno Setup (optional)
+# Check Inno Setup
 Get-Command ISCC.exe -ErrorAction SilentlyContinue
 ```
