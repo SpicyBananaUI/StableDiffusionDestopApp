@@ -230,7 +230,6 @@ On macOS, there is an optional package that can be used for app installation in 
 ## Known Bugs / Issues
 
 - Issue: The frontend will timeout after 100 seconds of generation, even if the ETA is making progress
-- Bug: Default model selection is not functional; displayed model may not be used unless it is explicitly selected
 - Bug: When using MPS, quick, repeating calls to the txt2img and interrupt endpoints result in the next image generation failing (black image)
 - Bug: After long periods of time left open, sometimes the backend returns blank images
 - Bug: If generate is pressed before a prompt is entered, the next time it is pressed it will send an interrupt api call instead of a generate call, locking the frontend up

@@ -1,9 +1,4 @@
 #!/bin/bash
-
-# Copyright (c) 2025 Spicy Banana
-# SPDX-License-Identifier: AGPL-3.0-only
-
-
 BACKEND_DIR="./backend"
 SCRIPT_DIR="$(dirname "$0")"
 

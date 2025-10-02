@@ -1,7 +1,3 @@
-REM Copyright (c) 2025 Spicy Banana
-REM SPDX-License-Identifier: AGPL-3.0-only
-
-
 @echo off
 setlocal
 
