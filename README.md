@@ -128,6 +128,16 @@ print(f"CUDA version: {torch.version.cuda}")
 
 3. Run myApp
 
+### GPU Performance Settings
+
+The Settings tab in the desktop app now groups hardware-related options so you can tune GPU behaviour without leaving the UI:
+
+- **Precision & Kernels**: force 32-bit attention, enable automatic VAE precision fallbacks, or toggle quantized sampler kernels.
+- **Memory Budget**: keep idle checkpoints in system RAM, cache fp16 weights for FP8 runs, control checkpoint cache slots, and adjust VRAM telemetry frequency.
+- **Sampler Throughput**: toggle prompt-conditioning caches, padding, NGMS behaviour, and set the token-merging ratio for faster sampling.
+
+Changes are applied live through the backend API—no restart required as long as the backend is running.
+
 
 ## Frontend:
 ### Services/ApiService.cs- Establishes the ApiService class. The following are the functions of the class: 

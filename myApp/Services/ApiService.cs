@@ -271,6 +271,85 @@ namespace myApp.Services
 
             return samplerNames;
         }
+
+        public async Task<bool?> GetBoolOptionAsync(string optionName)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync("http://127.0.0.1:7861/sdapi/v1/options");
+                if (!response.IsSuccessStatusCode)
+                    return null;
+
+                var json = await response.Content.ReadAsStringAsync();
+                using var doc = JsonDocument.Parse(json);
+
+                if (doc.RootElement.TryGetProperty(optionName, out var optionElement) && optionElement.ValueKind is JsonValueKind.True or JsonValueKind.False)
+                {
+                    return optionElement.GetBoolean();
+                }
+
+                return null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public async Task<bool> SetBoolOptionAsync(string optionName, bool value)
+        {
+            var payload = new Dictionary<string, object?>
+            {
+                [optionName] = value
+            };
+
+            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync("http://127.0.0.1:7861/sdapi/v1/options", content);
+            return response.IsSuccessStatusCode;
+        }
+
+        public async Task<double?> GetNumberOptionAsync(string optionName)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync("http://127.0.0.1:7861/sdapi/v1/options");
+                if (!response.IsSuccessStatusCode)
+                    return null;
+
+                var json = await response.Content.ReadAsStringAsync();
+                using var doc = JsonDocument.Parse(json);
+
+                if (doc.RootElement.TryGetProperty(optionName, out var optionElement))
+                {
+                    if (optionElement.ValueKind == JsonValueKind.Number)
+                        return optionElement.GetDouble();
+
+                    if (optionElement.ValueKind == JsonValueKind.String && double.TryParse(optionElement.GetString(), out var parsed))
+                        return parsed;
+                }
+
+                return null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public async Task<bool> SetNumberOptionAsync(string optionName, double value)
+        {
+            object payloadValue = Math.Abs(value % 1) < 0.000001 ? Convert.ToInt32(value) : value;
+
+            var payload = new Dictionary<string, object?>
+            {
+                [optionName] = payloadValue
+            };
+
+            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync("http://127.0.0.1:7861/sdapi/v1/options", content);
+            return response.IsSuccessStatusCode;
+        }
         
     }
 }
