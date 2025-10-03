@@ -17,7 +17,15 @@ namespace myApp.Services
     public class ApiService
     {
         // HttpClient is intended to be instantiated once per application, rather than per-use.
-        private readonly HttpClient _httpClient = new();
+        private readonly HttpClient _httpClient;
+
+        public ApiService()
+        {
+            _httpClient = new HttpClient
+            {
+                BaseAddress = new Uri(App.AppConfig.RemoteAddress)
+            };
+        }
 
         // GenerateImage method to call the Stable Diffusion API
         public async Task<(List<Bitmap>, List<long>)> GenerateImage(string prompt, int steps, double guidanceScale, string negativePrompt = "", int width = 512, int height = 512, string sampler = "Euler", long seed = -1, int batch_size = 1)
@@ -41,7 +49,8 @@ namespace myApp.Services
 
             // Send the request to the API
             // Note: Ensure that the URL is correct and the API is running
-            var response = await _httpClient.PostAsync("http://127.0.0.1:7861/sdapi/v1/txt2img", content);
+            //var response = await _httpClient.PostAsync("http://127.0.0.1:7861/sdapi/v1/txt2img", content);
+            var response = await _httpClient.PostAsync("/sdapi/v1/txt2img", content);
 
             // Check if the response is successful
             if (!response.IsSuccessStatusCode)
@@ -137,7 +146,8 @@ namespace myApp.Services
             var content = new StringContent(JsonSerializer.Serialize(requestData), Encoding.UTF8, "application/json");
 
             // POST to img2img endpoint
-            var response = await _httpClient.PostAsync("http://127.0.0.1:7861/sdapi/v1/img2img", content);
+            //var response = await _httpClient.PostAsync("http://127.0.0.1:7861/sdapi/v1/img2img", content);
+            var response = await _httpClient.PostAsync("/sdapi/v1/img2img", content);
             if (!response.IsSuccessStatusCode)
                 throw new Exception($"SD API returned error: {response.StatusCode}");
 
@@ -184,7 +194,8 @@ namespace myApp.Services
         {
             try
             {
-                var response = await _httpClient.GetAsync("http://127.0.0.1:7861/sdapi/v1/progress");
+                //var response = await _httpClient.GetAsync("http://127.0.0.1:7861/sdapi/v1/progress");
+                var response = await _httpClient.GetAsync("/sdapi/v1/progress");
                 if (!response.IsSuccessStatusCode)
                     return new ProgressInfo();
 
@@ -206,7 +217,8 @@ namespace myApp.Services
         {
             try
             {
-                var response = await _httpClient.PostAsync("http://127.0.0.1:7861/sdapi/v1/interrupt", null);
+                //var response = await _httpClient.PostAsync("http://127.0.0.1:7861/sdapi/v1/interrupt", null);
+                var response = await _httpClient.PostAsync("/sdapi/v1/interrupt", null);
                 if (!response.IsSuccessStatusCode)
                 {
                     throw new Exception($"Failed to stop generation: {response.StatusCode}");
@@ -221,7 +233,8 @@ namespace myApp.Services
 
         public async Task<List<string>> GetAvailableModelsAsync()
         {
-            var response = await _httpClient.GetAsync("http://127.0.0.1:7861/sdapi/v1/sd-models");
+            //var response = await _httpClient.GetAsync("http://127.0.0.1:7861/sdapi/v1/sd-models");
+            var response = await _httpClient.GetAsync("/sdapi/v1/sd-models");
             response.EnsureSuccessStatusCode();
 
             var json = await response.Content.ReadAsStringAsync();
@@ -248,12 +261,14 @@ namespace myApp.Services
             JsonSerializer.Serialize(new { sd_model_checkpoint = modelName }),
             Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync("http://127.0.0.1:7861/sdapi/v1/options", content);
+            //var response = await _httpClient.PostAsync("http://127.0.0.1:7861/sdapi/v1/options", content);
+            var response = await _httpClient.PostAsync("/sdapi/v1/options", content);
             response.EnsureSuccessStatusCode();
         }
     
         public async Task<List<string>> GetAvailableSamplersAsync(){
-            var response = await _httpClient.GetAsync("http://127.0.0.1:7861/sdapi/v1/samplers");
+            //var response = await _httpClient.GetAsync("http://127.0.0.1:7861/sdapi/v1/samplers");
+            var response = await _httpClient.GetAsync("/sdapi/v1/samplers");
             response.EnsureSuccessStatusCode();
 
             var json = await response.Content.ReadAsStringAsync();

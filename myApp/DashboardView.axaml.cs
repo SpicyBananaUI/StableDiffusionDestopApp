@@ -17,7 +17,7 @@ using System.Collections.Generic;
 namespace myApp;
 public partial class DashboardView : UserControl
 {
-    private readonly ApiService _apiService;
+    private ApiService _apiService;
     private List<Bitmap> _generatedImages = new List<Bitmap>(); // Store all generated images
     private int _currentImageIndex = 0; // Index of the currently displayed image
 
@@ -35,9 +35,6 @@ public partial class DashboardView : UserControl
     {
         InitializeComponent();
         _instance = this;
-        
-        // Initialize the API service
-        _apiService = new ApiService();
 
         // Set up default model and watch for changes
         InitUIAsync();
@@ -379,11 +376,41 @@ public partial class DashboardView : UserControl
 
 
     }
+    
+    private async Task WaitForBackendAsync(string baseUrl, int timeoutMs = 15000)
+    {
+        using var http = new HttpClient();
+        int attempts = 0;
+        int delayMs = 500;
+
+        while (attempts * delayMs < timeoutMs)
+        {
+            try
+            {
+                var response = await http.GetAsync($"{baseUrl}/sdapi/v1/sd-models");
+                if (response.IsSuccessStatusCode)
+                    return; // Remote backend is ready
+            }
+            catch { }
+
+            await Task.Delay(delayMs);
+            attempts++;
+        }
+
+        throw new TimeoutException("Remote backend did not respond in time.");
+    }
+
+
 
     private async void InitUIAsync()
     {
         try
         {
+            await WaitForBackendAsync(App.AppConfig.RemoteAddress);
+            
+            // Initialize the API service
+            _apiService = new ApiService();
+            
             // Initialize UI components here if needed
             var modelComboBox = this.FindControl<ComboBox>("ModelComboBox");
             var models = await _apiService.GetAvailableModelsAsync();
