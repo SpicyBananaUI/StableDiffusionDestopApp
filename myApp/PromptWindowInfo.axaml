@@ -22,7 +22,7 @@
             <Grid>
                 <Grid x:Name="Slide1" IsVisible="True">
                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <Image Source="/Assets/pic1.jpg" Width="300" Height="200" 
+                        <Image Source="/Assets/prompt.jpg" Width="400" Height="200" 
                                Margin="0,0,0,20" Stretch="Uniform"/>
                         <TextBlock Text="Specificity Matters" Foreground="LightGreen" 
                                    FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
@@ -34,7 +34,7 @@
 
                 <Grid x:Name="Slide2" IsVisible="False">
                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <Image Source="/Assets/pic2.jpg" Width="300" Height="200" 
+                        <Image Source="/Assets/negativeprompt.jpg" Width="400" Height="200" 
                                Margin="0,0,0,20" Stretch="Uniform"/>
                         <TextBlock Text="Negative Prompt" Foreground="LightGreen" 
                                    FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
@@ -46,7 +46,7 @@
 
                 <Grid x:Name="Slide3" IsVisible="False">
                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <Image Source="/Assets/pic3.jpg" Width="300" Height="200" 
+                        <Image Source="/Assets/weighting.jpg" Width="400" Height="200" 
                                Margin="0,0,0,20" Stretch="Uniform"/>
                         <TextBlock Text="Weighting Terms" Foreground="LightGreen" 
                                    FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
@@ -58,9 +58,9 @@
                 
                 <Grid x:Name="Slide4" IsVisible="False">
                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <Image Source="/Assets/pic1.jpg" Width="300" Height="200" 
+                        <Image Source="/Assets/additonal.jpg" Width="400" Height="200" 
                                Margin="0,0,0,20" Stretch="Uniform"/>
-                        <TextBlock Text="Weighting Terms" Foreground="LightGreen" 
+                        <TextBlock Text="Additional Tips" Foreground="LightGreen" 
                                    FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
                         <TextBlock Text="The system also supports alternation between options using [option1|option2], concept repetition with word~3, blending with AND syntax, and reduction of unwanted elements through negative weighting. These advanced features work together to give you fine-tuned command over the AI's attention, allowing you to balance multiple concepts, emphasize critical elements, and refine your results with exceptional precision for optimal image generation."
                                    TextWrapping="Wrap" HorizontalAlignment="Center" TextAlignment="Center"

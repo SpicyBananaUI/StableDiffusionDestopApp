@@ -493,7 +493,17 @@ public partial class DashboardView : UserControl
         ConfigWindow.Title = "Controls Tips";
         ConfigWindow.ShowDialog(window);
     }
+    
+    private void ShowImage2ImageTips(object sender, RoutedEventArgs e)
+    {
+        var window = this.VisualRoot as Window;
+        if (window == null) return;
 
+        var Image2ImageWindow = new Image2ImageWindow();
+        Image2ImageWindow.Title = "Controls Tips";
+        Image2ImageWindow.ShowDialog(window);
+    }
+    
     
     public void SetInitImage(Bitmap bmp)
     {

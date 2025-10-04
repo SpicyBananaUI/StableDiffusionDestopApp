@@ -1,0 +1,117 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="myApp.IntroWindow"
+        Title="Intro"
+        Width="800"
+        Height="700"
+        WindowStartupLocation="CenterOwner">
+    <Grid Background="#222">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title -->
+        <TextBlock x:Name="TitleText" Text="Intro" 
+                   Foreground="LightGreen" FontSize="18" FontWeight="Bold"
+                   HorizontalAlignment="Center" Margin="10"/>
+
+        <!-- Slide Content -->
+        <Border Grid.Row="1" Margin="10" Background="Transparent" CornerRadius="8">
+            <Grid>
+                <Grid x:Name="Slide1" IsVisible="True">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Image Source="/Assets/icon.png" Width="500" Height="300" 
+                               Margin="0,0,0,20" Stretch="Uniform"/>
+                        <TextBlock Text="Welcome to SpicyBananaUI" Foreground="LightGreen" 
+                                   FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Welcome to SpicyBananaUI, your gateway to the power of AI art generation. This desktop application puts the advanced capabilities of Stable Diffusion right at your fingertips, completely offline and private. Whether you're an artist seeking inspiration, a designer brainstorming concepts, or just someone who loves to create, this app is designed to be fast, intuitive, and powerful. We've built this tool to demystify AI art, providing you with a professional-grade studio without the complexity."
+                                   TextWrapping="Wrap" HorizontalAlignment="Center" TextAlignment="Center"
+                                   Margin="20" Foreground="White" MaxWidth="500"/>
+                    </StackPanel>
+                </Grid>
+
+                <Grid x:Name="Slide2" IsVisible="False">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Image Source="/Assets/text2image.jpg" Width="500" Height="300" 
+                               Margin="0,0,0,20" Stretch="Uniform"/>
+                        <TextBlock Text="Bring Ideas to Life with Text-to-Image" Foreground="LightGreen" 
+                                   FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        <TextBlock Text="At the heart of the app is Text-to-Image generation. This is where your imagination becomes reality. Simply type a description of anything you can dream up and our AI will generate a unique image from scratch. You have full control over the artistic style, level of detail, and composition using parameters like Samplers, CFG Scale, and Step Count, allowing you to fine-tune the creativity of the AI to match your vision perfectly."
+                                   TextWrapping="Wrap" HorizontalAlignment="Center" TextAlignment="Center"
+                                   Margin="20" Foreground="White" MaxWidth="500"/>
+                    </StackPanel>
+                </Grid>
+
+                <Grid x:Name="Slide3" IsVisible="False">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Image Source="/Assets/image2image.jpg" Width="500" Height="300" 
+                               Margin="0,0,0,20" Stretch="Uniform"/>
+                        <TextBlock Text="Change Reality with Image-to-Image" Foreground="LightGreen" 
+                                   FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Go beyond text with Image-to-Image generation. This feature allows you to use an existing photo or drawing as a starting point and transform it based on a new prompt. Want to see your photo reimagined as an oil painting or turn a simple sketch into a detailed masterpiece? This feature allows you to do exactly that!"
+                                   TextWrapping="Wrap" HorizontalAlignment="Center" TextAlignment="Center"
+                                   Margin="20" Foreground="White" MaxWidth="500"/>
+                    </StackPanel>
+                </Grid>
+                
+                <Grid x:Name="Slide4" IsVisible="False">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Image Source="/Assets/models.jpg" Width="500" Height="300" 
+                               Margin="0,0,0,20" Stretch="Uniform"/>
+                        <TextBlock Text="Managing Your AI Toolkit" Foreground="LightGreen" 
+                                   FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Your images depend on the models you use. The Models section is your AI toolkit, where you can manage, download, and switch between different Stable Diffusion checkpoints. Each model is trained for different styles—some excel at photorealism, while others are masters of anime, fantasy art, or specific artistic techniques. We make it easy to browse, import, and organize your collection, ensuring you always have the right tool for your current project."
+                                   TextWrapping="Wrap" HorizontalAlignment="Center" TextAlignment="Center"
+                                   Margin="20" Foreground="White" MaxWidth="500"/>
+                    </StackPanel>
+                </Grid>
+                
+                <Grid x:Name="Slide5" IsVisible="False">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Image Source="/Assets/gallery.jpg" Width="500" Height="300" 
+                               Margin="0,0,0,20" Stretch="Uniform"/>
+                        <TextBlock Text="Your Art Gallery" Foreground="LightGreen" 
+                                   FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Every image you generate is automatically saved to your personal Gallery. Browse through all your creations, view their generation parameters, and quickly re-use prompts and settings from your favorite images. The gallery also allows you to select any previous image to use as a base for a new Image-to-Image or Inpainting task, creating a seamless workflow where every creation can inspire the next."
+                                   TextWrapping="Wrap" HorizontalAlignment="Center" TextAlignment="Center"
+                                   Margin="20" Foreground="White" MaxWidth="500"/>
+                    </StackPanel>
+                </Grid>
+                
+                <Grid x:Name="Slide6" IsVisible="False">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Image Source="/Assets/settings.jpg" Width="500" Height="300" 
+                               Margin="0,0,0,20" Stretch="Uniform"/>
+                        <TextBlock Text="Configuring Your Experience" Foreground="LightGreen" 
+                                   FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Tailor the app to your workflow in the Settings panel. Here, you can configure the core engine settings, such as the path to your model files and the default image resolution. You can also adjust application behavior, like where your images are saved and how many images are kept in history. This central hub ensures the app runs efficiently and exactly how you want it to."
+                                   TextWrapping="Wrap" HorizontalAlignment="Center" TextAlignment="Center"
+                                   Margin="20" Foreground="White" MaxWidth="500"/>
+                    </StackPanel>
+                </Grid>
+                
+                <Grid x:Name="Slide7" IsVisible="False">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Image Source="/Assets/pic1.jpg" Width="500" Height="300" 
+                               Margin="0,0,0,20" Stretch="Uniform"/>
+                        <TextBlock Text="Ready to Create!" Foreground="LightGreen" 
+                                   FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        <TextBlock Text='You are all set! The best way to learn is by doing. Start at the Dashboard to begin a new Text-to-Image creation, or jump into any other tab to explore. Remember, you can always access this guide again by clicking the "Intro" button in the top-right corner. Each one of the functions also includes a ? button to the right if you want a deeper explanation into how each one works!'
+                                   TextWrapping="Wrap" HorizontalAlignment="Center" TextAlignment="Center"
+                                   Margin="20" Foreground="White" MaxWidth="500"/>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <!-- Navigation -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
+            <Button x:Name="PrevButton" Content="Previous" Width="80" Margin="0,0,10,0"
+                    Background="#444" Foreground="White" Click="PrevButton_Click" IsEnabled="False"/>
+            <Button x:Name="NextButton" Content="Next" Width="80" 
+                    Background="#444" Foreground="White" Click="NextButton_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

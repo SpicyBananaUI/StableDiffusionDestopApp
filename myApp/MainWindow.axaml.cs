@@ -52,4 +52,15 @@ public partial class MainWindow : Window
         };
     }
     
+    
+    private void ShowIntro(object sender, RoutedEventArgs e)
+    {
+        var window = this.VisualRoot as Window;
+        if (window == null) return;
+
+        var IntWindow = new IntroWindow();
+        IntWindow.Title = "Intro";
+        IntWindow.ShowDialog(window);
+    }
+    
 }
