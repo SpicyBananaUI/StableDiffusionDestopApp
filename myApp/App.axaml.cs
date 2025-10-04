@@ -110,9 +110,21 @@ public partial class App : Application
             {
                 AppConfig.Mode = mode;
                 StartBackend(AppConfig.Mode);
+
+
+                switch (AppConfig.Mode)
+                {
+                    case RunMode.Local:
+                    case RunMode.RemoteClient:
+                        desktop.MainWindow = new MainWindow();
+                        desktop.MainWindow.Show();
+                        break;
+                        
+                    case RunMode.RemoteServer:
+                        desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+                        break;
+                }
                 
-                desktop.MainWindow = new MainWindow();
-                desktop.MainWindow.Show();
             }
             
             dummyWindow.Close();
