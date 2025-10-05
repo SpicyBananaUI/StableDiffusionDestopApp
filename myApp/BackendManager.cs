@@ -74,15 +74,24 @@ public static class BackendManager
     {
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
-            Console.WriteLine("Not macOS, skipping backend launch.");
+            Console.WriteLine($"Not macOS, skipping script {scriptName}.");
             return;
         }
-        
-        string scriptsDir = Path.Combine(
+        // Decide scripts directory based on build configuration
+        string scriptsDir;
+#if DEBUG
+        // Use local scripts in development (Debug)
+        scriptsDir = Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory,
+                "../../../../setup_scripts");
+#else
+        // Use bundled scripts in Application Support for release
+        scriptsDir = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
             AppName,
-            "setup_scripts"
-        );
+            "setup_scripts");
+#endif
+        Console.WriteLine($"Using scripts directory: {scriptsDir}");
 
         string backendScriptPath = Path.Combine(scriptsDir, scriptName);
 

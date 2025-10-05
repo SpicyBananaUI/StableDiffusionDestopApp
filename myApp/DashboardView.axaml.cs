@@ -452,6 +452,34 @@ public partial class DashboardView : UserControl
     
     }
 
+    public async Task ReloadModelsAsync()
+    {
+        try
+        {
+            if (_apiService == null)
+                _apiService = new ApiService();
+
+            await _apiService.RefreshCheckpointsAsync();
+            var models = await _apiService.GetAvailableModelsAsync();
+
+            var modelComboBox = this.FindControl<ComboBox>("ModelComboBox");
+            if (modelComboBox != null)
+            {
+                var current = modelComboBox.SelectedItem as string;
+                modelComboBox.ItemsSource = models;
+                // Keep selection if still present
+                if (current != null && models.Contains(current))
+                    modelComboBox.SelectedItem = current;
+                else
+                    modelComboBox.SelectedIndex = 0;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to reload models: {ex.Message}");
+        }
+    }
+
     private void ShowImageAt(int index)
     {
         if (_generatedImages.Count == 0 || index < 0 || index >= _generatedImages.Count){

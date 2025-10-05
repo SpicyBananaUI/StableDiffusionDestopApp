@@ -60,6 +60,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="models.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </None>
     <None Remove="Assets\pic1.jpg" />
     <AvaloniaResource Include="Assets\pic1.jpg" />
     <None Remove="Assets\pic2.jpg" />

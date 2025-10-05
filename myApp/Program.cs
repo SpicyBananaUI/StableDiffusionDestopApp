@@ -14,12 +14,7 @@ class Program
     // yet and stuff might break.
     [STAThread]
     public static void Main(string[] args)
-    {
-        // MacOS: Copy the backend into Application support and run it
-        BackendManager.EnsureBackendFromBundleMac();
-        BackendManager.DownloadDreamshaperMac();
-        BackendManager.RunBackendMac();
-        
+    {   
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
     }
 

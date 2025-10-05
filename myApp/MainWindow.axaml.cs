@@ -12,6 +12,7 @@ using Avalonia;
 using System;
 using Avalonia.Media.TextFormatting.Unicode;
 using Avalonia.Threading;
+using System.Diagnostics;
 using System.Collections.Generic;
 
 namespace myApp;
@@ -37,7 +38,10 @@ public partial class MainWindow : Window
             settingsButton.Click += (_, _) => MainContent.Content = _settingsView;
         
         if (this.FindControl<Button>("ModelsButton") is Button modelsButton)
-            modelsButton.Click += (_, _) => MainContent.Content = _modelsView;
+            modelsButton.Click += (_, _) =>     {
+                Debug.WriteLine("ModelsButton clicked.");
+                MainContent.Content = _modelsView;
+            };
         
         if (this.FindControl<Button>("GalleryButton") is Button galleryButton)
             galleryButton.Click += (_, _) => MainContent.Content = _galleryView;

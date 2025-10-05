@@ -7,17 +7,21 @@ import uvicorn
 import ipaddress
 import requests
 import gradio as gr
-from threading import Lock
+from threading import Lock, Thread
 from io import BytesIO
-from fastapi import APIRouter, Depends, FastAPI, Request, Response
+from fastapi import APIRouter, Body, Depends, FastAPI, Request, Response
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.exceptions import HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from secrets import compare_digest
+import hashlib
+import urllib.request
+from uuid import uuid4
+from modules import model_downloader
 
 import modules.shared as shared
-from modules import sd_samplers, deepbooru, images, scripts, ui, postprocessing, errors, restart, shared_items, script_callbacks, infotext_utils, sd_models, sd_schedulers
+from modules import paths, sd_samplers, deepbooru, images, scripts, ui, postprocessing, errors, restart, shared_items, script_callbacks, infotext_utils, sd_models, sd_schedulers
 from modules.api import models
 from modules.shared import opts
 from modules.processing import StableDiffusionProcessingTxt2Img, StableDiffusionProcessingImg2Img, process_images, process_extra_images
@@ -32,6 +36,8 @@ import piexif
 import piexif.helper
 from contextlib import closing
 from modules.progress import create_task_id, add_task_to_queue, start_task, finish_task, current_task
+
+# Download management logic has been moved to modules/model_downloader.py
 
 def script_name_to_index(name, scripts):
     try:
@@ -242,6 +248,8 @@ class Api:
         self.add_api_route("/sdapi/v1/scripts", self.get_scripts_list, methods=["GET"], response_model=models.ScriptsList)
         self.add_api_route("/sdapi/v1/script-info", self.get_script_info, methods=["GET"], response_model=list[models.ScriptInfo])
         self.add_api_route("/sdapi/v1/extensions", self.get_extensions_list, methods=["GET"], response_model=list[models.ExtensionItem])
+        self.add_api_route("/sdapi/v1/download-model", self.download_model, methods=["POST"])
+        self.add_api_route("/sdapi/v1/download-model/progress/{download_id}", self.download_model_progress, methods=["GET"])
 
         if shared.cmd_opts.api_server_stop:
             self.add_api_route("/sdapi/v1/server-kill", self.kill_webui, methods=["POST"])
@@ -877,4 +885,30 @@ class Api:
     def stop_webui(request):
         shared.state.server_command = "stop"
         return Response("Stopping.")
+
+    def download_model(self, payload: dict = Body(...)):
+        print("Downloading model:", payload)
+
+        model_url = payload.get("url")
+        checksum = payload.get("checksum")
+
+        if not model_url:
+            raise HTTPException(status_code=400, detail="Model URL is required")
+
+        # Prepare target
+        model_dir = "Stable-diffusion"
+        target_dir = os.path.abspath(os.path.join(paths.models_path, model_dir))
+
+        # Extract file name from URL, ignoring query string
+        file_name = model_url.split("/")[-1].split("?")[0]
+
+        # Start or reuse a download via module
+        result = model_downloader.start_model_download(model_url, checksum, target_dir, file_name)
+        return result
+
+    def download_model_progress(self, download_id: str):
+        try:
+            return model_downloader.get_download_progress(download_id)
+        except KeyError:
+            raise HTTPException(status_code=404, detail="Download not found")
 
