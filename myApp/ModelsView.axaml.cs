@@ -9,6 +9,7 @@ using System.IO;
 using System.Text.Json;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace myApp;
 
@@ -43,6 +44,9 @@ public partial class ModelsView : UserControl
         {
             Debug.WriteLine($"Failed to load models.json: {ex.Message}");
         }
+
+        // Initialize Built-in Plugins UI
+        _ = InitializeBuiltinPluginsUI();
     }
 
     private async void OnDownloadModelButtonClick(object? sender, RoutedEventArgs e)
@@ -140,6 +144,100 @@ public partial class ModelsView : UserControl
         finally
         {
             if (progressBar != null) progressBar.IsIndeterminate = false;
+        }
+    }
+
+    private List<string> _backendSafeSelected = new();
+
+    private async Task InitializeBuiltinPluginsUI()
+    {
+        try
+        {
+            var api = new ApiService();
+            var extensions = await api.GetExtensionsAsync();
+
+            // Separate backend-safe vs unsafe by simple heuristic (same as backend): no javascript folder and no gradio imports known server-side.
+            // The backend-safe set is what /enable-backend-safe would choose; here we just display based on names in list that backend exposes.
+            var backendSafe = new List<ApiService.ExtensionInfo>();
+            var unsafeList = new List<ApiService.ExtensionInfo>();
+
+            // We cannot locally check file contents; ask backend to compute and return the set by calling the endpoint with dry run behavior.
+            // Fallback: classify by known prefixes likely safe.
+            foreach (var e in extensions)
+            {
+                if (e.name.StartsWith("forge_preprocessor_") || e.name == "SwinIR" || e.name == "ScuNET" || e.name == "soft-inpainting")
+                    backendSafe.Add(e);
+                else
+                    unsafeList.Add(e);
+            }
+
+            var panelSafe = this.FindControl<StackPanel>("BackendSafeExtensionsPanel");
+            var panelUnsafe = this.FindControl<StackPanel>("UnsafeExtensionsPanel");
+            var btnToggleSelect = this.FindControl<Button>("ToggleSelectBackendSafeButton");
+            var btnApplySelected = this.FindControl<Button>("ApplySelectedBackendSafeButton");
+
+            if (panelSafe != null)
+            {
+                panelSafe.Children.Clear();
+                foreach (var e in backendSafe.OrderBy(x => x.name))
+                {
+                    var cb = new CheckBox { Content = e.name, IsChecked = e.enabled };
+                    cb.Checked += (_, __) => { if (!_backendSafeSelected.Contains(e.name)) _backendSafeSelected.Add(e.name); };
+                    cb.Unchecked += (_, __) => { _backendSafeSelected.RemoveAll(x => x == e.name); };
+                    panelSafe.Children.Add(cb);
+                    if (e.enabled && !_backendSafeSelected.Contains(e.name)) _backendSafeSelected.Add(e.name);
+                }
+            }
+
+            if (panelUnsafe != null)
+            {
+                panelUnsafe.Children.Clear();
+                foreach (var e in unsafeList.OrderBy(x => x.name))
+                {
+                    var txt = new TextBlock { Text = e.name };
+                    panelUnsafe.Children.Add(txt);
+                }
+            }
+
+            if (btnToggleSelect != null && panelSafe != null)
+            {
+                btnToggleSelect.Click += (_, __) =>
+                {
+                    // If not all selected, select all; else deselect all
+                    var checkboxes = panelSafe.Children.OfType<CheckBox>().ToList();
+                    bool allSelected = checkboxes.All(c => c.IsChecked == true);
+                    bool target = !allSelected;
+                    foreach (var cb in checkboxes)
+                    {
+                        cb.IsChecked = target;
+                    }
+                    btnToggleSelect.Content = target ? "Deselect All" : "Select All";
+                };
+            }
+
+            if (btnApplySelected != null)
+            {
+                btnApplySelected.Click += async (_, __) =>
+                {
+                    try
+                    {
+                        // Merge selected backend-safe with any other currently enabled non-safe extensions to avoid accidentally disabling them
+                        var current = await api.GetExtensionsAsync();
+                        var otherEnabled = current.Where(x => x.enabled && !_backendSafeSelected.Contains(x.name)).Select(x => x.name);
+                        var target = otherEnabled.Concat(_backendSafeSelected).Distinct().ToList();
+                        var ok = await api.EnableExtensionsAsync(target);
+                        Debug.WriteLine(ok ? "Enabled selected backend-safe extensions" : "Enable selected backend-safe failed");
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"Enable selected backend-safe error: {ex.Message}");
+                    }
+                };
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Failed to initialize Built-in Plugins UI: {ex.Message}");
         }
     }
 

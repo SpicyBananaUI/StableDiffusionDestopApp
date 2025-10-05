@@ -105,6 +105,109 @@
                                 </Grid>
                             </StackPanel>
 
+                            <Expander Header="Advanced options" Background="#1a1a1a" CornerRadius="6" Padding="10" BorderBrush="#333" BorderThickness="1">
+                                <StackPanel Spacing="10">
+                                    <!-- Highres Fix -->
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Text="Highres Fix" FontWeight="Bold"/>
+                                        <CheckBox x:Name="EnableHrCheckbox" Content="Enable Highres Fix"/>
+                                        <StackPanel Orientation="Horizontal" Spacing="10">
+                                            <TextBlock Text="Upscaler:" VerticalAlignment="Center"/>
+                                            <ComboBox x:Name="HrUpscalerComboBox" Width="180"/>
+                                            <TextBlock Text="Scale:" VerticalAlignment="Center"/>
+                                            <TextBox x:Name="HrScaleTextBox" Width="60" Watermark="1.5"/>
+                                        </StackPanel>
+                                    </StackPanel>
+
+                                    <!-- FreeU -->
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Text="FreeU" FontWeight="Bold"/>
+                                        <CheckBox x:Name="FreeUEnabledCheckbox" Content="Enable FreeU"/>
+                                        <Grid ColumnDefinitions="Auto,*,Auto,*,Auto,*,Auto,*,Auto,*,Auto,*,Auto,*,Auto,*,Auto" RowDefinitions="Auto,Auto" >
+                                            <TextBlock Grid.Column="0" Text="B1:" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Column="1" x:Name="FreeUB1TextBox" Width="60" Text="1.01"/>
+                                            <TextBlock Grid.Column="2" Text="B2:" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Column="3" x:Name="FreeUB2TextBox" Width="60" Text="1.02"/>
+                                            <TextBlock Grid.Column="4" Text="S1:" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Column="5" x:Name="FreeUS1TextBox" Width="60" Text="0.99"/>
+                                            <TextBlock Grid.Column="6" Text="S2:" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Column="7" x:Name="FreeUS2TextBox" Width="60" Text="0.95"/>
+                                            <TextBlock Grid.Column="8" Text="Start:" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Column="9" x:Name="FreeUStartTextBox" Width="60" Text="0.0"/>
+                                            <TextBlock Grid.Column="10" Text="End:" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Column="11" x:Name="FreeUEndTextBox" Width="60" Text="1.0"/>
+                                        </Grid>
+                                    </StackPanel>
+
+                                    <!-- Dynamic Thresholding (CFG-Fix) -->
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Text="Dynamic Thresholding (CFG-Fix)" FontWeight="Bold"/>
+                                        <CheckBox x:Name="DynThresEnabledCheckbox" Content="Enable Dynamic Thresholding"/>
+                                        <Grid ColumnDefinitions="Auto,*,Auto,*,Auto,*,Auto,*,Auto,*,Auto,*,Auto,*,Auto,*,Auto,*,Auto" RowDefinitions="Auto,Auto,Auto">
+                                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Mimic Scale:" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Row="0" Grid.Column="1" x:Name="DynThresMimicScaleTextBox" Width="60" Text="7.0"/>
+                                            <TextBlock Grid.Row="0" Grid.Column="2" Text="Threshold %:" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Row="0" Grid.Column="3" x:Name="DynThresThresholdPctTextBox" Width="60" Text="1.0"/>
+                                            <TextBlock Grid.Row="0" Grid.Column="4" Text="Mimic Mode:" VerticalAlignment="Center"/>
+                                            <ComboBox Grid.Row="0" Grid.Column="5" x:Name="DynThresMimicModeCombo" Width="150">
+                                                <ComboBoxItem Content="Constant"/>
+                                                <ComboBoxItem Content="Linear Down"/>
+                                                <ComboBoxItem Content="Cosine Down"/>
+                                                <ComboBoxItem Content="Half Cosine Down"/>
+                                                <ComboBoxItem Content="Linear Up"/>
+                                                <ComboBoxItem Content="Cosine Up"/>
+                                                <ComboBoxItem Content="Half Cosine Up"/>
+                                                <ComboBoxItem Content="Power Up"/>
+                                                <ComboBoxItem Content="Power Down"/>
+                                                <ComboBoxItem Content="Linear Repeating"/>
+                                                <ComboBoxItem Content="Cosine Repeating"/>
+                                                <ComboBoxItem Content="Sawtooth"/>
+                                            </ComboBox>
+
+                                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Mimic Scale Min:" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Row="1" Grid.Column="1" x:Name="DynThresMimicScaleMinTextBox" Width="60" Text="0.0"/>
+                                            <TextBlock Grid.Row="1" Grid.Column="2" Text="Cfg Mode:" VerticalAlignment="Center"/>
+                                            <ComboBox Grid.Row="1" Grid.Column="3" x:Name="DynThresCfgModeCombo" Width="150">
+                                                <ComboBoxItem Content="Constant"/>
+                                                <ComboBoxItem Content="Linear Down"/>
+                                                <ComboBoxItem Content="Cosine Down"/>
+                                                <ComboBoxItem Content="Half Cosine Down"/>
+                                                <ComboBoxItem Content="Linear Up"/>
+                                                <ComboBoxItem Content="Cosine Up"/>
+                                                <ComboBoxItem Content="Half Cosine Up"/>
+                                                <ComboBoxItem Content="Power Up"/>
+                                                <ComboBoxItem Content="Power Down"/>
+                                                <ComboBoxItem Content="Linear Repeating"/>
+                                                <ComboBoxItem Content="Cosine Repeating"/>
+                                                <ComboBoxItem Content="Sawtooth"/>
+                                            </ComboBox>
+                                            <TextBlock Grid.Row="1" Grid.Column="4" Text="Cfg Scale Min:" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Row="1" Grid.Column="5" x:Name="DynThresCfgScaleMinTextBox" Width="60" Text="0.0"/>
+                                            <TextBlock Grid.Row="1" Grid.Column="6" Text="Sched Val:" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Row="1" Grid.Column="7" x:Name="DynThresSchedValTextBox" Width="60" Text="1.0"/>
+
+                                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Separate Channels:" VerticalAlignment="Center"/>
+                                            <ComboBox Grid.Row="2" Grid.Column="1" x:Name="DynThresSeparateChannelsCombo" Width="120">
+                                                <ComboBoxItem Content="enable"/>
+                                                <ComboBoxItem Content="disable"/>
+                                            </ComboBox>
+                                            <TextBlock Grid.Row="2" Grid.Column="2" Text="Startpoint:" VerticalAlignment="Center"/>
+                                            <ComboBox Grid.Row="2" Grid.Column="3" x:Name="DynThresStartpointCombo" Width="120">
+                                                <ComboBoxItem Content="MEAN"/>
+                                                <ComboBoxItem Content="ZERO"/>
+                                            </ComboBox>
+                                            <TextBlock Grid.Row="2" Grid.Column="4" Text="Variability:" VerticalAlignment="Center"/>
+                                            <ComboBox Grid.Row="2" Grid.Column="5" x:Name="DynThresVariabilityCombo" Width="120">
+                                                <ComboBoxItem Content="AD"/>
+                                                <ComboBoxItem Content="STD"/>
+                                            </ComboBox>
+                                            <TextBlock Grid.Row="2" Grid.Column="6" Text="Interpolate Phi:" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Row="2" Grid.Column="7" x:Name="DynThresPhiTextBox" Width="60" Text="1.0"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Expander>
+
                         </StackPanel>
                     </Border>
 

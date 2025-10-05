@@ -74,6 +74,25 @@
                     </ListBoxItem>
                 </ListBox>
             </TabItem>
+
+            <!-- Built-in Plugins -->
+            <TabItem Header="Built-in Plugins">
+                <ScrollViewer>
+                    <StackPanel Margin="10" Spacing="10">
+                        <TextBlock Text="Backend-safe extensions" FontWeight="Bold"/>
+                        <StackPanel x:Name="BackendSafeExtensionsPanel" Spacing="4"/>
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Button x:Name="ToggleSelectBackendSafeButton" Content="Deselect All"/>
+                            <Button x:Name="ApplySelectedBackendSafeButton" Content="Enable Selected"/>
+                        </StackPanel>
+
+                        <Separator/>
+
+                        <TextBlock Text="Unsafe extensions (UI/JS required)" FontWeight="Bold"/>
+                        <StackPanel x:Name="UnsafeExtensionsPanel" Spacing="4"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
         </TabControl>
     </Grid>
     

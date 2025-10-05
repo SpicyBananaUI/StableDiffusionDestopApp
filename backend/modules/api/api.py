@@ -6,6 +6,7 @@ import datetime
 import uvicorn
 import ipaddress
 import requests
+from modules import extensions_manager
 import gradio as gr
 from threading import Lock, Thread
 from io import BytesIO
@@ -248,6 +249,7 @@ class Api:
         self.add_api_route("/sdapi/v1/scripts", self.get_scripts_list, methods=["GET"], response_model=models.ScriptsList)
         self.add_api_route("/sdapi/v1/script-info", self.get_script_info, methods=["GET"], response_model=list[models.ScriptInfo])
         self.add_api_route("/sdapi/v1/extensions", self.get_extensions_list, methods=["GET"], response_model=list[models.ExtensionItem])
+        self.add_api_route("/sdapi/v1/extensions/enable", self.enable_extensions, methods=["POST"])
         self.add_api_route("/sdapi/v1/download-model", self.download_model, methods=["POST"])
         self.add_api_route("/sdapi/v1/download-model/progress/{download_id}", self.download_model_progress, methods=["GET"])
 
@@ -850,17 +852,27 @@ class Api:
         for ext in extensions.extensions:
             ext: extensions.Extension
             ext.read_info_from_repo()
-            if ext.remote is not None:
-                ext_list.append({
-                    "name": ext.name,
-                    "remote": ext.remote,
-                    "branch": ext.branch,
-                    "commit_hash":ext.commit_hash,
-                    "commit_date":ext.commit_date,
-                    "version":ext.version,
-                    "enabled":ext.enabled
-                })
+            ext_list.append({
+                "name": str(ext.name or ""),
+                "remote": str(ext.remote or ""),
+                "branch": str(ext.branch or ""),
+                "commit_hash": str(ext.commit_hash or ""),
+                "commit_date": int(ext.commit_date or 0),
+                "version": str(ext.version or ""),
+                "enabled": bool(ext.enabled)
+            })
         return ext_list
+
+    def enable_extensions(self, payload: dict = Body(...)):
+        """Enable only the provided extensions by name; all others become disabled.
+        Payload: { "enabled": ["name", ...], "disable_all": "none"|"all"|"extra" }
+        """
+        enabled = payload.get("enabled", []) or []
+        disable_all = payload.get("disable_all", None)
+
+        return extensions_manager.enable_extensions_via_options(enabled, disable_all)
+
+
 
     def launch(self, server_name, port, root_path):
         self.app.include_router(self.router)

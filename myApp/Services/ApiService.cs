@@ -28,22 +28,146 @@ namespace myApp.Services
             };
         }
 
-        // GenerateImage method to call the Stable Diffusion API
-        public async Task<(List<Bitmap>, List<long>)> GenerateImage(string prompt, int steps, double guidanceScale, string negativePrompt = "", int width = 512, int height = 512, string sampler = "Euler", long seed = -1, int batch_size = 1)
+        public class ExtensionInfo
         {
-            // Prompt for API Syntax
-            var requestData = new
+            public string name { get; set; } = string.Empty;
+            public string? remote { get; set; }
+            public string? branch { get; set; }
+            public string? commit_hash { get; set; }
+            public long? commit_date { get; set; }
+            public string? version { get; set; }
+            public bool enabled { get; set; }
+        }
+
+        public async Task<List<ExtensionInfo>> GetExtensionsAsync()
+        {
+            var response = await _httpClient.GetAsync("/sdapi/v1/extensions");
+            response.EnsureSuccessStatusCode();
+
+            var json = await response.Content.ReadAsStringAsync();
+            var list = JsonSerializer.Deserialize<List<ExtensionInfo>>(json, new JsonSerializerOptions
             {
-                prompt = prompt,
-                negative_prompt = negativePrompt,
-                steps = steps,
-                cfg_scale = guidanceScale,
-                width = width,
-                height = height,
-                sampler_name = sampler,
-                seed = seed,
-                batch_size = batch_size,
+                PropertyNameCaseInsensitive = true
+            });
+            return list ?? new List<ExtensionInfo>();
+        }
+
+        public async Task<bool> EnableExtensionsAsync(IEnumerable<string> names)
+        {
+            var payload = new
+            {
+                enabled = names,
+                disable_all = "none"
             };
+            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync("/sdapi/v1/extensions/enable", content);
+            return response.IsSuccessStatusCode;
+        }
+
+        // GenerateImage method to call the Stable Diffusion API
+        public async Task<(List<Bitmap>, List<long>)> GenerateImage(
+            string prompt,
+            int steps,
+            double guidanceScale,
+            string negativePrompt = "",
+            int width = 512,
+            int height = 512,
+            string sampler = "Euler",
+            long seed = -1,
+            int batch_size = 1,
+            // Highres fix
+            bool enableHr = false,
+            string? hrUpscaler = null,
+            double? hrScale = null,
+            // FreeU
+            bool freeuEnabled = false,
+            double freeu_b1 = 1.01,
+            double freeu_b2 = 1.02,
+            double freeu_s1 = 0.99,
+            double freeu_s2 = 0.95,
+            double freeu_start = 0.0,
+            double freeu_end = 1.0,
+            // Dynamic Thresholding
+            bool dynthresEnabled = false,
+            double dynthres_mimic_scale = 7.0,
+            double dynthres_threshold_percentile = 1.0,
+            string dynthres_mimic_mode = "Constant",
+            double dynthres_mimic_scale_min = 0.0,
+            string dynthres_cfg_mode = "Constant",
+            double dynthres_cfg_scale_min = 0.0,
+            double dynthres_sched_val = 1.0,
+            string dynthres_separate_feature_channels = "enable",
+            string dynthres_scaling_startpoint = "MEAN",
+            string dynthres_variability_measure = "AD",
+            double dynthres_interpolate_phi = 1.0
+        )
+        {
+            // Build request payload dynamically
+            var requestData = new Dictionary<string, object?>
+            {
+                ["prompt"] = prompt,
+                ["negative_prompt"] = negativePrompt,
+                ["steps"] = steps,
+                ["cfg_scale"] = guidanceScale,
+                ["width"] = width,
+                ["height"] = height,
+                ["sampler_name"] = sampler,
+                ["seed"] = seed,
+                ["batch_size"] = batch_size,
+            };
+
+            if (enableHr)
+            {
+                requestData["enable_hr"] = true;
+                if (!string.IsNullOrWhiteSpace(hrUpscaler))
+                    requestData["hr_upscaler"] = hrUpscaler;
+                if (hrScale.HasValue)
+                    requestData["hr_scale"] = hrScale.Value;
+                // Ensure list is not None on backend
+                requestData["hr_additional_modules"] = Array.Empty<string>();
+            }
+
+            // alwayson_scripts
+            var alwayson = new Dictionary<string, object?>();
+            try
+            {
+                var scripts = await GetScriptsAsync();
+                var available = new HashSet<string>(scripts.txt2img ?? new List<string>());
+
+                const string freeuTitle = "FreeU Integrated (SD 1.x, SD 2.x, SDXL)";
+                const string dynthTitle = "DynamicThresholding (CFG-Fix) Integrated";
+
+                if (freeuEnabled && available.Contains(freeuTitle))
+                {
+                    alwayson[freeuTitle] = new
+                    {
+                        args = new object?[] { true, freeu_b1, freeu_b2, freeu_s1, freeu_s2, freeu_start, freeu_end }
+                    };
+                }
+                if (dynthresEnabled && available.Contains(dynthTitle))
+                {
+                    alwayson[dynthTitle] = new
+                    {
+                        args = new object?[] {
+                            true,
+                            dynthres_mimic_scale,
+                            dynthres_threshold_percentile,
+                            dynthres_mimic_mode,
+                            dynthres_mimic_scale_min,
+                            dynthres_cfg_mode,
+                            dynthres_cfg_scale_min,
+                            dynthres_sched_val,
+                            dynthres_separate_feature_channels,
+                            dynthres_scaling_startpoint,
+                            dynthres_variability_measure,
+                            dynthres_interpolate_phi
+                        }
+                    };
+                }
+            }
+            catch { }
+            if (alwayson.Count > 0)
+                requestData["alwayson_scripts"] = alwayson;
 
             // Set up the HTTP request
             var content = new StringContent(JsonSerializer.Serialize(requestData), Encoding.UTF8, "application/json");
@@ -292,6 +416,41 @@ namespace myApp.Services
             }
 
             return samplerNames;
+        }
+
+        public async Task<List<string>> GetUpscalersAsync()
+        {
+            var response = await _httpClient.GetAsync("/sdapi/v1/upscalers");
+            response.EnsureSuccessStatusCode();
+
+            var json = await response.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(json);
+
+            var upscalerNames = new List<string>();
+            foreach (var up in doc.RootElement.EnumerateArray())
+            {
+                if (up.TryGetProperty("name", out var nameProp) && nameProp.GetString() is string name)
+                {
+                    upscalerNames.Add(name);
+                }
+            }
+
+            return upscalerNames;
+        }
+
+        public class ScriptsList
+        {
+            public List<string>? txt2img { get; set; }
+            public List<string>? img2img { get; set; }
+        }
+
+        public async Task<ScriptsList> GetScriptsAsync()
+        {
+            var response = await _httpClient.GetAsync("/sdapi/v1/scripts");
+            response.EnsureSuccessStatusCode();
+            var json = await response.Content.ReadAsStringAsync();
+            var data = JsonSerializer.Deserialize<ScriptsList>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            return data ?? new ScriptsList();
         }
 
         public async Task<string> StartDownloadModelAsync(string modelUrl, string? checksum = null)

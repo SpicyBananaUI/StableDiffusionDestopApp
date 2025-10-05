@@ -273,7 +273,38 @@ public partial class DashboardView : UserControl
             }
             else
             {
-                result = await _apiService.GenerateImage(prompt, steps, scale, negativePrompt, width, height, sampler, seed, batchSize);
+                // Gather advanced options
+                var enableHr = this.FindControl<CheckBox>("EnableHrCheckbox")?.IsChecked == true;
+                var hrUpscaler = this.FindControl<ComboBox>("HrUpscalerComboBox")?.SelectedItem as string;
+                double? hrScale = null; if (double.TryParse(this.FindControl<TextBox>("HrScaleTextBox")?.Text, out var hrs)) hrScale = hrs;
+
+                var freeuEnabled = this.FindControl<CheckBox>("FreeUEnabledCheckbox")?.IsChecked == true;
+                double.TryParse(this.FindControl<TextBox>("FreeUB1TextBox")?.Text, out var freeu_b1);
+                double.TryParse(this.FindControl<TextBox>("FreeUB2TextBox")?.Text, out var freeu_b2);
+                double.TryParse(this.FindControl<TextBox>("FreeUS1TextBox")?.Text, out var freeu_s1);
+                double.TryParse(this.FindControl<TextBox>("FreeUS2TextBox")?.Text, out var freeu_s2);
+                double.TryParse(this.FindControl<TextBox>("FreeUStartTextBox")?.Text, out var freeu_start);
+                double.TryParse(this.FindControl<TextBox>("FreeUEndTextBox")?.Text, out var freeu_end);
+
+                var dynEnabled = this.FindControl<CheckBox>("DynThresEnabledCheckbox")?.IsChecked == true;
+                double.TryParse(this.FindControl<TextBox>("DynThresMimicScaleTextBox")?.Text, out var d_ms);
+                double.TryParse(this.FindControl<TextBox>("DynThresThresholdPctTextBox")?.Text, out var d_tp);
+                var d_mm = (this.FindControl<ComboBox>("DynThresMimicModeCombo")?.SelectedItem as ComboBoxItem)?.Content as string ?? "Constant";
+                double.TryParse(this.FindControl<TextBox>("DynThresMimicScaleMinTextBox")?.Text, out var d_msm);
+                var d_cm = (this.FindControl<ComboBox>("DynThresCfgModeCombo")?.SelectedItem as ComboBoxItem)?.Content as string ?? "Constant";
+                double.TryParse(this.FindControl<TextBox>("DynThresCfgScaleMinTextBox")?.Text, out var d_csm);
+                double.TryParse(this.FindControl<TextBox>("DynThresSchedValTextBox")?.Text, out var d_sv);
+                var d_sep = (this.FindControl<ComboBox>("DynThresSeparateChannelsCombo")?.SelectedItem as ComboBoxItem)?.Content as string ?? "enable";
+                var d_sp = (this.FindControl<ComboBox>("DynThresStartpointCombo")?.SelectedItem as ComboBoxItem)?.Content as string ?? "MEAN";
+                var d_var = (this.FindControl<ComboBox>("DynThresVariabilityCombo")?.SelectedItem as ComboBoxItem)?.Content as string ?? "AD";
+                double.TryParse(this.FindControl<TextBox>("DynThresPhiTextBox")?.Text, out var d_phi);
+
+                result = await _apiService.GenerateImage(
+                    prompt, steps, scale, negativePrompt, width, height, sampler, seed, batchSize,
+                    enableHr, hrUpscaler, hrScale,
+                    freeuEnabled, freeu_b1, freeu_b2, freeu_s1, freeu_s2, freeu_start, freeu_end,
+                    dynEnabled, d_ms, d_tp, d_mm, d_msm, d_cm, d_csm, d_sv, d_sep, d_sp, d_var, d_phi
+                );
             }
             //var (images, seeds) = await _apiService.GenerateImage(prompt, steps, scale, negativePrompt, width, height, sampler, seed, batchSize);
 
@@ -433,6 +464,20 @@ public partial class DashboardView : UserControl
             {
                 samplerComboBox.ItemsSource = samplers;
                 samplerComboBox.SelectedValue = "Euler"; // Select the Euler sampler by default
+            }
+
+            // Populate Highres Fix upscalers list from backend API
+            var hrUpscalerCombo = this.FindControl<ComboBox>("HrUpscalerComboBox");
+            if (hrUpscalerCombo != null)
+            {
+                try
+                {
+                    var upscalers = await _apiService.GetUpscalersAsync();
+                    hrUpscalerCombo.ItemsSource = upscalers;
+                    if (upscalers.Count > 0)
+                        hrUpscalerCombo.SelectedIndex = 0;
+                }
+                catch { }
             }
 
             modelComboBox.SelectionChanged += async (s, e) =>
