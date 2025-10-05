@@ -11,6 +11,7 @@ using System.Text.Json;
 using Avalonia.Media.Imaging;
 using System.Collections.Generic;
 using Avalonia.Controls;
+using System.Diagnostics;
 
 namespace myApp.Services
 {
@@ -285,6 +286,27 @@ namespace myApp.Services
             }
 
             return samplerNames;
+        }
+
+        public async Task<string> DownloadModelAsync(string modelUrl, string? checksum = null)
+        {
+            var requestData = new
+            {
+                url = modelUrl,
+                checksum = checksum
+            };
+
+            Debug.WriteLine($"Downloading model from URL: {modelUrl} with checksum: {checksum}");
+
+            var content = new StringContent(JsonSerializer.Serialize(requestData), Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync("/sdapi/v1/download-model", content);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Failed to download model: {response.StatusCode}");
+            }
+
+            return await response.Content.ReadAsStringAsync();
         }
         
     }

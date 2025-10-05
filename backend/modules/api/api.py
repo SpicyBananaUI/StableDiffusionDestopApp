@@ -9,15 +9,17 @@ import requests
 import gradio as gr
 from threading import Lock
 from io import BytesIO
-from fastapi import APIRouter, Depends, FastAPI, Request, Response
+from fastapi import APIRouter, Body, Depends, FastAPI, Request, Response
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.exceptions import HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from secrets import compare_digest
+import hashlib
+import urllib.request
 
 import modules.shared as shared
-from modules import sd_samplers, deepbooru, images, scripts, ui, postprocessing, errors, restart, shared_items, script_callbacks, infotext_utils, sd_models, sd_schedulers
+from modules import paths, sd_samplers, deepbooru, images, scripts, ui, postprocessing, errors, restart, shared_items, script_callbacks, infotext_utils, sd_models, sd_schedulers
 from modules.api import models
 from modules.shared import opts
 from modules.processing import StableDiffusionProcessingTxt2Img, StableDiffusionProcessingImg2Img, process_images, process_extra_images
@@ -242,6 +244,8 @@ class Api:
         self.add_api_route("/sdapi/v1/scripts", self.get_scripts_list, methods=["GET"], response_model=models.ScriptsList)
         self.add_api_route("/sdapi/v1/script-info", self.get_script_info, methods=["GET"], response_model=list[models.ScriptInfo])
         self.add_api_route("/sdapi/v1/extensions", self.get_extensions_list, methods=["GET"], response_model=list[models.ExtensionItem])
+        self.add_api_route("/sdapi/v1/download-model", self.download_model, methods=["POST"])
+        print("Registering route: /sdapi/v1/download-model")
 
         if shared.cmd_opts.api_server_stop:
             self.add_api_route("/sdapi/v1/server-kill", self.kill_webui, methods=["POST"])
@@ -877,4 +881,40 @@ class Api:
     def stop_webui(request):
         shared.state.server_command = "stop"
         return Response("Stopping.")
+
+    def download_model(self, payload: dict = Body(...)):
+        print("Downloading model:", payload)
+
+        model_url = payload.get("url")
+        checksum = payload.get("checksum")
+
+        if not model_url:
+            raise HTTPException(status_code=400, detail="Model URL is required")
+
+        try:
+            model_dir = "Stable-diffusion"
+            target_dir =  os.path.abspath(os.path.join(paths.models_path, model_dir))
+
+            # Extract the file name from the URL
+            file_name = model_url.split("/")[-1]
+            file_path = os.path.join(target_dir, file_name)
+            os.makedirs(target_dir, exist_ok=True)
+
+            # Download the file
+            print("Beginning download...")
+            urllib.request.urlretrieve(model_url, file_path)
+            print("Download completed, checking cheksum...")
+
+            # Verify checksum if provided
+            if checksum:
+                with open(file_path, "rb") as f:
+                    file_hash = hashlib.sha256(f.read()).hexdigest()
+                    print("Downloaded file checksum:", file_hash)
+                if file_hash != checksum:
+                    os.remove(file_path)
+                    raise HTTPException(status_code=400, detail="Checksum verification failed")
+
+            return {"message": f"Model downloaded successfully: {file_path}"}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Error downloading model: {str(e)}")
 

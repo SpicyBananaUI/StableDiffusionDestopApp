@@ -78,6 +78,11 @@ public partial class App : Application
         switch (mode)
         {
             case RunMode.Local:
+                // For now use old macos setup (Copy the backend into Application support and run it)
+                BackendManager.EnsureBackendFromBundleMac();
+                BackendManager.DownloadDreamshaperMac();
+                BackendManager.RunBackendMac();
+
                 // Start backend locally with -listen so frontend can connect
                 BackendLauncher.LaunchLocalBackend();
                 break;
