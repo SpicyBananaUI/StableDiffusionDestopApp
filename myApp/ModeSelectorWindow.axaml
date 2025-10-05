@@ -2,8 +2,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d"
+        Width="400" Height="200"
         x:Class="myApp.ModeSelectorWindow"
+        WindowStartupLocation="CenterScreen"
+        CanResize="False"
         Title="Choose Run Mode">
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
                 <TextBlock Text="How would you like to run the app?" FontSize="16" HorizontalAlignment="Center"/>

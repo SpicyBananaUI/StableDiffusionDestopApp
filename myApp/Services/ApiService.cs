@@ -291,7 +291,7 @@ namespace myApp.Services
         {
             try
             {
-                var response = await _httpClient.GetAsync("http://127.0.0.1:7861/sdapi/v1/options");
+                var response = await _httpClient.GetAsync("/sdapi/v1/options");
                 if (!response.IsSuccessStatusCode)
                     return null;
 
@@ -320,7 +320,7 @@ namespace myApp.Services
 
             var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync("http://127.0.0.1:7861/sdapi/v1/options", content);
+            var response = await _httpClient.PostAsync("/sdapi/v1/options", content);
             return response.IsSuccessStatusCode;
         }
 
@@ -328,7 +328,7 @@ namespace myApp.Services
         {
             try
             {
-                var response = await _httpClient.GetAsync("http://127.0.0.1:7861/sdapi/v1/options");
+                var response = await _httpClient.GetAsync("/sdapi/v1/options");
                 if (!response.IsSuccessStatusCode)
                     return null;
 
@@ -362,7 +362,7 @@ namespace myApp.Services
             };
 
             var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync("http://127.0.0.1:7861/sdapi/v1/options", content);
+            var response = await _httpClient.PostAsync("/sdapi/v1/options", content);
             return response.IsSuccessStatusCode;
         }
         

@@ -402,14 +402,19 @@ public partial class DashboardView : UserControl
 
 
 
-    private async void InitUIAsync()
+    private async Task InitUIAsync()
     {
         try
         {
             await WaitForBackendAsync(App.AppConfig.RemoteAddress);
             
             // Initialize the API service
-            _apiService = new ApiService();
+            //_apiService = new ApiService();
+            if (App.ApiService == null)
+            {
+                App.InitializeApiService();
+            }
+            _apiService = App.ApiService!;
             
             // Initialize UI components here if needed
             var modelComboBox = this.FindControl<ComboBox>("ModelComboBox");

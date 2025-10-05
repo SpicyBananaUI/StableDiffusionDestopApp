@@ -3,12 +3,17 @@
 
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Security;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Media;
+using Avalonia.Platform;
+using myApp.Services;
 
 namespace myApp;
 
@@ -17,6 +22,13 @@ public partial class App : Application
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
+    }
+    
+    public static ApiService? ApiService { get; set; }
+
+    public static void InitializeApiService()
+    {
+        ApiService = new ApiService();
     }
 
     public enum RunMode
@@ -99,7 +111,11 @@ public partial class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
 
-            var dummyWindow = new Window {Opacity = 0, ShowInTaskbar = false, Width = 0, Height = 0};
+            var dummyWindow = new Window
+            {
+                Opacity = 0, ShowInTaskbar = false, Width = 0, Height = 0, WindowStartupLocation = WindowStartupLocation.CenterScreen, Background = Brushes.Transparent,
+                ExtendClientAreaChromeHints = ExtendClientAreaChromeHints.NoChrome, ExtendClientAreaToDecorationsHint = true, TransparencyLevelHint = new List<WindowTransparencyLevel>{WindowTransparencyLevel.Transparent}
+            };
             dummyWindow.Show();
             desktop.MainWindow = dummyWindow;
 
@@ -121,7 +137,7 @@ public partial class App : Application
                         break;
                         
                     case RunMode.RemoteServer:
-                        desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+                        //desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
                         break;
                 }
                 

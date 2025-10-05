@@ -15,7 +15,7 @@ namespace myApp;
 
 public partial class SettingsView : UserControl
 {
-    private readonly ApiService _apiService = new();
+    private ApiService _apiService;
     private readonly Dictionary<ToggleSwitch, BoolOptionBinding> _boolBindings = new();
     private readonly List<BoolOptionBinding> _boolBindingList = new();
     private readonly Dictionary<Slider, NumberOptionBinding> _numberBindings = new();
@@ -23,13 +23,25 @@ public partial class SettingsView : UserControl
 
     public SettingsView()
     {
+        WaitForApiReadyAsync();
         InitializeComponent();
         RegisterBindings();
         this.AttachedToVisualTree += OnAttachedToVisualTree;
     }
 
+    private async void WaitForApiReadyAsync()
+    {
+        while (App.ApiService == null)
+        {
+            await Task.Delay(100);
+        }
+
+        _apiService = App.ApiService!;
+    }
+
     private void RegisterBindings()
     {
+        
         RegisterBoolBinding("UpcastAttentionToggle", "UpcastStatusText", "upcast_attn",
             "Now forcing 32-bit attention.",
             "Using mixed-precision attention.");
@@ -133,6 +145,11 @@ public partial class SettingsView : UserControl
 
     private async void OnAttachedToVisualTree(object? sender, VisualTreeAttachmentEventArgs e)
     {
+        while (_apiService == null)
+        {
+            await Task.Delay(100);
+        }
+        
         this.AttachedToVisualTree -= OnAttachedToVisualTree;
 
         var boolTasks = _boolBindingList.Select(LoadBoolBindingAsync);
