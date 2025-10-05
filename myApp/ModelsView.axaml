@@ -24,25 +24,15 @@
             <TabItem Header="Browse Models">
                 <ScrollViewer>
                     <StackPanel Margin="10" Spacing="10">
-                        <WrapPanel>
-                            <!-- Example Model Card -->
-                            <Border Width="200" Height="280" Background="#2d2d2d" CornerRadius="10" Padding="8">
-                                <StackPanel>
-                                    <Image Source=""
-                                           Stretch="UniformToFill"
-                                           Height="150"
-                                           Margin="0,0,0,5"/>
-                                    <TextBlock Text="DreamShaper v8" FontWeight="Bold" Margin="0,0,0,5"/>
-                                    <TextBlock Text="Style: Realistic" FontSize="12"/>
-                                    <ProgressBar Minimum="0" Maximum="100" Value="0" Height="10" Margin="0,5"/>
-                                    <Button Content="Download" HorizontalAlignment="Stretch"/>
-                                </StackPanel>
-                            </Border>
-                        </WrapPanel>
+                        <WrapPanel x:Name="ModelsWrapPanel"/>
                         <StackPanel Orientation="Horizontal" Spacing="10">
-                            <TextBox x:Name="ModelUrlTextBox" Width="300" Watermark="Enter model URL..." Text="https://huggingface.co/Lykon/DreamShaper/resolve/main/DreamShaper_8_pruned.safetensors" />
+                            <TextBox x:Name="ModelUrlTextBox" Width="300" Watermark="Enter model URL..." />
                             <TextBox x:Name="ChecksumTextBox" Width="200" Watermark="Enter checksum (optional)..." />
                             <Button x:Name="DownloadModelButton" Content="Download Model" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,5,0,0" VerticalAlignment="Center">
+                            <ProgressBar x:Name="ModelDownloadProgress" Height="10" Width="150" IsVisible="False" IsIndeterminate="True"/>
+                            <TextBlock x:Name="ModelDownloadStatus" Text=""/>
                         </StackPanel>
                     </StackPanel>
                 </ScrollViewer>

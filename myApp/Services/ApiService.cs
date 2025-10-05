@@ -266,6 +266,12 @@ namespace myApp.Services
             var response = await _httpClient.PostAsync("/sdapi/v1/options", content);
             response.EnsureSuccessStatusCode();
         }
+        
+        public async Task RefreshCheckpointsAsync()
+        {
+            var response = await _httpClient.PostAsync("/sdapi/v1/refresh-checkpoints", null);
+            response.EnsureSuccessStatusCode();
+        }
     
         public async Task<List<string>> GetAvailableSamplersAsync(){
             //var response = await _httpClient.GetAsync("http://127.0.0.1:7861/sdapi/v1/samplers");
@@ -288,7 +294,7 @@ namespace myApp.Services
             return samplerNames;
         }
 
-        public async Task<string> DownloadModelAsync(string modelUrl, string? checksum = null)
+        public async Task<string> StartDownloadModelAsync(string modelUrl, string? checksum = null)
         {
             var requestData = new
             {
@@ -296,17 +302,61 @@ namespace myApp.Services
                 checksum = checksum
             };
 
-            Debug.WriteLine($"Downloading model from URL: {modelUrl} with checksum: {checksum}");
+            Debug.WriteLine($"Starting model download from URL: {modelUrl} with checksum: {checksum}");
 
             var content = new StringContent(JsonSerializer.Serialize(requestData), Encoding.UTF8, "application/json");
             var response = await _httpClient.PostAsync("/sdapi/v1/download-model", content);
 
             if (!response.IsSuccessStatusCode)
             {
-                throw new Exception($"Failed to download model: {response.StatusCode}");
+                throw new Exception($"Failed to start model download: {response.StatusCode}");
             }
 
-            return await response.Content.ReadAsStringAsync();
+            var json = await response.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(json);
+            var root = doc.RootElement;
+            var status = root.TryGetProperty("status", out var s) && s.ValueKind == JsonValueKind.String ? s.GetString() : "started";
+            if (status == "exists")
+            {
+                throw new InvalidOperationException("File already exists on server.");
+            }
+            var idProp = root.TryGetProperty("download_id", out var idEl) ? idEl.GetString() : null;
+            if (string.IsNullOrEmpty(idProp))
+                throw new Exception("download_id not returned by server");
+            return idProp!;
+        }
+
+        public class DownloadProgress
+        {
+            public string Status { get; set; } = "in_progress"; // in_progress | completed | failed
+            public float Progress { get; set; }
+            public long DownloadedBytes { get; set; }
+            public long TotalBytes { get; set; }
+            public string? Error { get; set; }
+            public string? FilePath { get; set; }
+        }
+
+        public async Task<DownloadProgress> GetDownloadModelProgressAsync(string downloadId)
+        {
+            var response = await _httpClient.GetAsync($"/sdapi/v1/download-model/progress/{downloadId}");
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Failed to get download progress: {response.StatusCode}");
+            }
+
+            var json = await response.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(json);
+
+            var root = doc.RootElement;
+            return new DownloadProgress
+            {
+                Status = root.GetProperty("status").GetString() ?? "in_progress",
+                Progress = root.TryGetProperty("progress", out var p) ? p.GetSingle() : 0f,
+                DownloadedBytes = root.TryGetProperty("downloaded_bytes", out var db) && db.TryGetInt64(out var dbv) ? dbv : 0,
+                TotalBytes = root.TryGetProperty("total_bytes", out var tb) && tb.TryGetInt64(out var tbv) ? tbv : 0,
+                Error = root.TryGetProperty("error", out var e) && e.ValueKind == JsonValueKind.String ? e.GetString() : null,
+                FilePath = root.TryGetProperty("file_path", out var fp) && fp.ValueKind == JsonValueKind.String ? fp.GetString() : null
+            };
         }
         
     }

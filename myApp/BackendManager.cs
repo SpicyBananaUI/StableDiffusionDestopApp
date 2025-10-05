@@ -77,19 +77,20 @@ public static class BackendManager
             Console.WriteLine("Not macOS, skipping backend launch.");
             return;
         }
-        // TODO: automatically switch based on release vs dev build
-        /*
+        // Decide scripts directory based on build configuration
+        string scriptsDir;
+#if DEBUG
+        // Use local scripts in development (Debug)
+        scriptsDir = Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory,
+                "../../../../setup_scripts");
+#else
         // Use bundled scripts in Application Support for release
-        string scriptsDir = Path.Combine(
+        scriptsDir = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
             AppName,
-            "setup_scripts"
-        );
-        */
-        // Use local scripts in development
-        string scriptsDir = Path.Combine(
-                AppDomain.CurrentDomain.BaseDirectory, 
-                "../../../../setup_scripts");
+            "setup_scripts");
+#endif
         Console.WriteLine($"Using scripts directory: {scriptsDir}");
 
         string backendScriptPath = Path.Combine(scriptsDir, scriptName);
