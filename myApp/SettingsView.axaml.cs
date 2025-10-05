@@ -10,6 +10,7 @@ using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Avalonia.VisualTree;
+using Avalonia.Threading;
 using MsBox.Avalonia;
 using myApp.Services;
 
@@ -17,7 +18,7 @@ namespace myApp;
 
 public partial class SettingsView : UserControl
 {
-    private ApiService _apiService;
+    private ApiService _apiService = null!;
     private readonly Dictionary<ToggleSwitch, BoolOptionBinding> _boolBindings = new();
     private readonly List<BoolOptionBinding> _boolBindingList = new();
     private readonly Dictionary<Slider, NumberOptionBinding> _numberBindings = new();
@@ -166,7 +167,7 @@ public partial class SettingsView : UserControl
         if (slider is null || valueText is null || status is null)
             return;
 
-        var binding = new NumberOptionBinding(slider, valueText, status, optionKey, valueFormatter, summaryFormatter, applyThreshold);
+        var binding = new NumberOptionBinding(this, slider, valueText, status, optionKey, valueFormatter, summaryFormatter, applyThreshold);
         _numberBindings[slider] = binding;
         _numberBindingList.Add(binding);
 
@@ -219,6 +220,7 @@ public partial class SettingsView : UserControl
             return;
 
         UpdateNumberBindingValue(binding, slider.Value);
+        ScheduleNumberBindingApply(binding);
     }
 
     private void NumberSliderOnPointerReleased(object? sender, PointerReleasedEventArgs e)
@@ -229,7 +231,17 @@ public partial class SettingsView : UserControl
         if (!_numberBindings.TryGetValue(slider, out var binding))
             return;
 
-        MaybeApplyNumberBinding(binding);
+        binding.ForceNextApply = true;
+        binding.ApplyDebounceTimer.Stop();
+
+        if (!binding.IsApplying)
+        {
+            MaybeApplyNumberBinding(binding, force: true);
+        }
+        else
+        {
+            binding.ApplyDebounceTimer.Start();
+        }
     }
 
     private void NumberSliderOnLostFocus(object? sender, RoutedEventArgs e)
@@ -240,20 +252,54 @@ public partial class SettingsView : UserControl
         if (!_numberBindings.TryGetValue(slider, out var binding))
             return;
 
-        MaybeApplyNumberBinding(binding);
+        binding.ForceNextApply = true;
+        binding.ApplyDebounceTimer.Stop();
+
+        if (!binding.IsApplying)
+        {
+            MaybeApplyNumberBinding(binding, force: true);
+        }
+        else
+        {
+            binding.ApplyDebounceTimer.Start();
+        }
     }
 
-    private void MaybeApplyNumberBinding(NumberOptionBinding binding)
+    private void ScheduleNumberBindingApply(NumberOptionBinding binding)
+    {
+        if (binding.IsUpdatingFromBackend)
+            return;
+
+        binding.ApplyDebounceTimer.Stop();
+        binding.ApplyDebounceTimer.Start();
+    }
+
+    private void MaybeApplyNumberBinding(NumberOptionBinding binding, bool force = false)
     {
         if (binding.IsUpdatingFromBackend || binding.IsApplying)
             return;
 
         var desired = binding.Slider.Value;
-        if (Math.Abs(desired - binding.LastKnownValue) < binding.ApplyThreshold)
+        if (!force && !binding.ForceNextApply && Math.Abs(desired - binding.LastKnownValue) < binding.ApplyThreshold)
             return;
 
+        binding.ForceNextApply = false;
+        binding.ApplyDebounceTimer.Stop();
         binding.IsApplying = true;
         _ = ApplyNumberBindingAsync(binding, desired);
+    }
+
+    private void OnNumberBindingApplyDebounceTick(NumberOptionBinding binding)
+    {
+        if (binding.IsApplying)
+            return;
+
+        if (binding.ApplyDebounceTimer.IsEnabled)
+        {
+            binding.ApplyDebounceTimer.Stop();
+        }
+
+        MaybeApplyNumberBinding(binding, binding.ForceNextApply);
     }
 
     private async Task LoadBoolBindingAsync(BoolOptionBinding binding)
@@ -420,6 +466,16 @@ public partial class SettingsView : UserControl
         {
             binding.Slider.IsEnabled = true;
             binding.IsApplying = false;
+
+            if (binding.ApplyDebounceTimer.IsEnabled)
+            {
+                binding.ApplyDebounceTimer.Stop();
+            }
+
+            if (binding.ForceNextApply || Math.Abs(binding.Slider.Value - binding.LastKnownValue) >= binding.ApplyThreshold)
+            {
+                ScheduleNumberBindingApply(binding);
+            }
         }
     }
 
@@ -465,8 +521,9 @@ public partial class SettingsView : UserControl
 
     private sealed class NumberOptionBinding
     {
-        public NumberOptionBinding(Slider slider, TextBlock valueText, TextBlock statusText, string optionKey, Func<double, string> valueFormatter, Func<double, string> summaryFormatter, double applyThreshold)
+        public NumberOptionBinding(SettingsView owner, Slider slider, TextBlock valueText, TextBlock statusText, string optionKey, Func<double, string> valueFormatter, Func<double, string> summaryFormatter, double applyThreshold)
         {
+            Owner = owner;
             Slider = slider;
             ValueText = valueText;
             StatusText = statusText;
@@ -474,8 +531,14 @@ public partial class SettingsView : UserControl
             ValueFormatter = valueFormatter;
             SummaryFormatter = summaryFormatter;
             ApplyThreshold = applyThreshold;
+            ApplyDebounceTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(100)
+            };
+            ApplyDebounceTimer.Tick += (_, _) => owner.OnNumberBindingApplyDebounceTick(this);
         }
 
+        public SettingsView Owner { get; }
         public Slider Slider { get; }
         public TextBlock ValueText { get; }
         public TextBlock StatusText { get; }
@@ -486,5 +549,7 @@ public partial class SettingsView : UserControl
         public double LastKnownValue { get; set; }
         public bool IsUpdatingFromBackend { get; set; }
         public bool IsApplying { get; set; }
+        public DispatcherTimer ApplyDebounceTimer { get; }
+        public bool ForceNextApply { get; set; }
     }
 }
