@@ -66,6 +66,6 @@ echo Launching sdapi (webui backend)...
 echo You can verify functionality by running: %PYTHON_EXE% test\basic_test.py
 echo.
 
-%PYTHON_EXE% launch_webui_backend.py
+%PYTHON_EXE% launch_webui_backend.py %*
 
 endlocal

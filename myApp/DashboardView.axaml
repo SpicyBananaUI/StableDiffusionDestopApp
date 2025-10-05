@@ -24,7 +24,7 @@
                 <Grid Margin="0,0,0,5">
                     <TextBlock Text="Prompt &amp; Negative Prompt" FontWeight="Bold" VerticalAlignment="Center"/>
                     <Button Grid.Column="1" HorizontalAlignment="Right" Background="Transparent" 
-                            BorderThickness="0" Width="20" Height="20" Margin="0,0,5,0"
+                            BorderThickness="0" Width="25" Height="30" Margin="0,0,5,0"
                             Click="ShowPromptTips">
                         <Button.Content>
                             <TextBlock Text="?" Foreground="LightGray" FontWeight="Bold"/>
@@ -44,7 +44,7 @@
                         <StackPanel>
                             <TextBlock Text="Controls" FontWeight="Bold"/>
                             <Button Grid.Column="1" HorizontalAlignment="Right" Background="Transparent" 
-                                    BorderThickness="0" Width="20" Height="20" Margin="0,0,5,0"
+                                    BorderThickness="0" Width="25" Height="30" Margin="0,0,5,0"
                                     Click="ShowControlTips">
                                 <Button.Content>
                                     <TextBlock Text="?" Foreground="LightGray" FontWeight="Bold"/>
@@ -84,7 +84,13 @@
                             <!-- Image2Image Controls -->
                             <StackPanel x:Name="Image2ImageControls" IsVisible="False" Margin="0,10,0,0" Spacing="8">
                                 <TextBlock Text="Image2Image Settings" FontWeight="Bold"/>
-
+                                <Button Grid.Column="1" HorizontalAlignment="Right" Background="Transparent" 
+                                        BorderThickness="0" Width="25" Height="30" Margin="0,0,5,0"
+                                        Click="ShowImage2ImageTips">
+                                    <Button.Content>
+                                        <TextBlock Text="?" Foreground="LightGray" FontWeight="Bold"/>
+                                    </Button.Content>
+                                </Button>
                                 <StackPanel Orientation="Horizontal" Spacing="10">
                                     <Button x:Name="LoadInitImageButton" Content="Load Initial Image"/>
                                     <Button x:Name="UseCurrentImageButton" Content="Use Current Image" IsEnabled="False"/>
@@ -107,7 +113,7 @@
                         <StackPanel>
                             <TextBlock Text="Configuration" FontWeight="Bold"/>
                             <Button Grid.Column="1" HorizontalAlignment="Right" Background="Transparent" 
-                                    BorderThickness="0" Width="20" Height="20" Margin="0,0,5,0"
+                                    BorderThickness="0" Width="25" Height="30" Margin="0,0,5,0"
                                     Click="ShowConfigurationTips">
                                 <Button.Content>
                                     <TextBlock Text="?" Foreground="LightGray" FontWeight="Bold"/>

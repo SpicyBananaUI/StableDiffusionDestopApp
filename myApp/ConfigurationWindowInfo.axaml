@@ -22,7 +22,7 @@
             <Grid>
                 <Grid x:Name="Slide1" IsVisible="True">
                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <Image Source="/Assets/pic1.jpg" Width="300" Height="200" 
+                        <Image Source="/Assets/modelselection.jpg" Width="300" Height="200" 
                                Margin="0,0,0,20" Stretch="Uniform"/>
                         <TextBlock Text="Model Choice" Foreground="LightGreen" 
                                    FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
@@ -34,7 +34,7 @@
 
                 <Grid x:Name="Slide2" IsVisible="False">
                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <Image Source="/Assets/pic2.jpg" Width="300" Height="200" 
+                        <Image Source="/Assets/sampler.jpg" Width="300" Height="200" 
                                Margin="0,0,0,20" Stretch="Uniform"/>
                         <TextBlock Text="Sampler Choice" Foreground="LightGreen" 
                                    FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
@@ -46,7 +46,7 @@
 
                 <Grid x:Name="Slide3" IsVisible="False">
                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <Image Source="/Assets/pic3.jpg" Width="300" Height="200" 
+                        <Image Source="/Assets/wnh.jpg" Width="300" Height="200" 
                                Margin="0,0,0,20" Stretch="Uniform"/>
                         <TextBlock Text="Width and Height" Foreground="LightGreen" 
                                    FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
@@ -58,7 +58,7 @@
                 
                 <Grid x:Name="Slide4" IsVisible="False">
                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <Image Source="/Assets/pic1.jpg" Width="300" Height="200" 
+                        <Image Source="/Assets/seed.jpg" Width="300" Height="200" 
                                Margin="0,0,0,20" Stretch="Uniform"/>
                         <TextBlock Text="Seed" Foreground="LightGreen" 
                                    FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
