@@ -49,6 +49,8 @@ if MACOS:
         if test_device("mps"):
             device = "mps"
             args += ["--skip-torch-cuda-test", "--upcast-sampling", "--no-half-vae", "--use-cpu interrogate"]
+            # Make sure even UNet and attention are in full precision (MPS is broken with half precision)
+            args += ["--no-half", "--precision full"]
         else:
             logger.warning("MPS is available but failed test. Falling back to CPU.")
     else:
