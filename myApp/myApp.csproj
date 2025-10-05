@@ -25,24 +25,13 @@
       <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
       <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="MessageBox.Avalonia" Version="3.2.0" />
+    <PackageReference Include="OpenAI" Version="2.5.0" />
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(OS)' != 'Windows_NT'">
-    <Content Include="..\backend\**\*"
-          Exclude="..\backend\**\__pycache__\**\*;
-                   ..\backend\cache\**\*;
-                   ..\backend\config_states\**\*;
-                   ..\backend\embeddings\**\*;
-                   ..\backend\extensions\**\*;
-                   ..\backend\log\**\*;
-                   ..\backend\models\**\*;
-                   !..\backend\models\;
-                   !..\backend\models\*\;
-                   ..\backend\outputs\**\*;
-                   ..\backend\repositories\**\*;
-                   ..\backend\venv\**\*;
-                   ..\backend\webui-venv\**\*">
+    <Content Include="..\backend\**\*" Exclude="..\backend\**\__pycache__\**\*;&#xD;&#xA;                   ..\backend\cache\**\*;&#xD;&#xA;                   ..\backend\config_states\**\*;&#xD;&#xA;                   ..\backend\embeddings\**\*;&#xD;&#xA;                   ..\backend\extensions\**\*;&#xD;&#xA;                   ..\backend\log\**\*;&#xD;&#xA;                   ..\backend\models\**\*;&#xD;&#xA;                   !..\backend\models\;&#xD;&#xA;                   !..\backend\models\*\;&#xD;&#xA;                   ..\backend\outputs\**\*;&#xD;&#xA;                   ..\backend\repositories\**\*;&#xD;&#xA;                   ..\backend\venv\**\*;&#xD;&#xA;                   ..\backend\webui-venv\**\*">
       <Link>backend\%(RecursiveDir)%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>

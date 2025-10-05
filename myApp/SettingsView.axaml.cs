@@ -8,7 +8,9 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using Avalonia.Media;
 using Avalonia.VisualTree;
+using MsBox.Avalonia;
 using myApp.Services;
 
 namespace myApp;
@@ -27,6 +29,16 @@ public partial class SettingsView : UserControl
         InitializeComponent();
         RegisterBindings();
         this.AttachedToVisualTree += OnAttachedToVisualTree;
+        
+        ConfigManager.Load();
+        
+        var apiKeyBox = this.FindControl<TextBox>("ApiKeyBox");
+        if (apiKeyBox != null)
+            apiKeyBox.Text = ConfigManager.Settings.ApiKey ??  string.Empty;
+        
+        var saveButton = this.FindControl<Button>("SaveApiKeyButton");
+        if (saveButton != null)
+            saveButton.Click += OnSaveApiKeyClicked;
     }
 
     private async void WaitForApiReadyAsync()
@@ -37,6 +49,30 @@ public partial class SettingsView : UserControl
         }
 
         _apiService = App.ApiService!;
+    }
+
+    private void OnSaveApiKeyClicked(object sender, RoutedEventArgs e)
+    {
+        var apiKeyBox = this.FindControl<TextBox>("ApiKeyBox");
+        var newKey = apiKeyBox?.Text?.Trim();
+
+        if (string.IsNullOrEmpty(newKey))
+        {
+            return;
+        }
+        
+        ConfigManager.Settings.ApiKey = newKey;
+        ConfigManager.Save();
+        
+        try
+        {
+            App.PromptAssistant = new PromptAssistantService(ConfigManager.Settings.ApiKey);
+        }
+        catch (Exception ex)
+        {
+            var box = MessageBoxManager.GetMessageBoxStandard("Error", $"Failed to initialize prompt assistant service. Error: {ex.Message}");
+            return;
+        }
     }
 
     private void RegisterBindings()

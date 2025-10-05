@@ -13,6 +13,7 @@ using System;
 using Avalonia.Media.TextFormatting.Unicode;
 using Avalonia.Threading;
 using System.Collections.Generic;
+using MsBox.Avalonia;
 
 namespace myApp;
 public partial class DashboardView : UserControl
@@ -148,6 +149,59 @@ public partial class DashboardView : UserControl
             };
         }
 
+        if (this.FindControl<Button>("EnhancePromptButton") is Button enhancePromptButton)
+        {
+            enhancePromptButton.Click += EnhancePromptButton_Click;
+        }
+
+    }
+
+    private async void EnhancePromptButton_Click(object sender, RoutedEventArgs e)
+    {
+        var promptBox = this.FindControl<TextBox>("PromptTextBox");
+        if (promptBox == null || string.IsNullOrWhiteSpace(promptBox.Text))
+                return;
+
+        if (string.IsNullOrWhiteSpace(ConfigManager.Settings.ApiKey))
+        {
+            var box = MessageBoxManager.GetMessageBoxStandard("Error",
+                "Please enter your API Key before using this feature");
+            await box.ShowAsync();
+            return;
+        }
+
+        if (App.PromptAssistant == null)
+        {
+            try
+            {
+                App.PromptAssistant = new PromptAssistantService(ConfigManager.Settings.ApiKey);
+            }
+            catch (Exception ex)
+            {
+                var box = MessageBoxManager.GetMessageBoxStandard("Error", $"Failed to initialize prompt assistant service. Error: {ex.Message}");
+                return;
+            }
+        }
+        
+        var enhancePromptButton = sender as Button;
+        enhancePromptButton.IsEnabled = false;
+        enhancePromptButton.Content = "Enhancing...";
+
+        try
+        {
+            string originalPrompt = promptBox.Text;
+            string enhancedPrompt = await App.PromptAssistant.EnhancePromptAsync(promptBox.Text);
+            promptBox.Text = enhancedPrompt;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+        finally
+        {
+            enhancePromptButton.IsEnabled = true;
+            enhancePromptButton.Content = "Enhance Prompt with AI";
+        }
     }
 
     private async void OnGenerateButtonClick(object sender, RoutedEventArgs e)

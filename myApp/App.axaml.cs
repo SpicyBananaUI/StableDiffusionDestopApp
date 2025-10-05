@@ -24,6 +24,8 @@ public partial class App : Application
         AvaloniaXamlLoader.Load(this);
     }
     
+    public static PromptAssistantService? PromptAssistant { get; set; }
+    
     public static ApiService? ApiService { get; set; }
 
     public static void InitializeApiService()
@@ -115,6 +117,14 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
+            ConfigManager.Load();
+
+            var apiKey = ConfigManager.Settings.ApiKey;
+            //var apiKey = "sk-xLB2fdKiR0vHflZWF2az-Q";
+            if (!string.IsNullOrWhiteSpace(apiKey))
+            {
+                PromptAssistant = new PromptAssistantService(apiKey);
+            }
 
             var dummyWindow = new Window
             {
