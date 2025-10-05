@@ -5,8 +5,112 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="myApp.SettingsView">
     
-    <StackPanel>
-        <TextBlock Text="Settings Page" FontSize="20" Margin="10"/>
-        <TextBlock Text="Future settings can go here." Margin="10"/>
-    </StackPanel>
+    <ScrollViewer>
+        <StackPanel Margin="16" Spacing="16">
+            <TextBlock Text="Performance &amp; Hardware" FontSize="20" FontWeight="Bold"/>
+            <TextBlock TextWrapping="Wrap" Margin="0,0,0,8"
+                       Text="Tune GPU-related behaviour for the Stable Diffusion backend. All changes are applied live as long as the backend API is reachable."/>
+
+            <Border BorderBrush="#444" BorderThickness="1" CornerRadius="6" Padding="12" Background="#1E1E1E">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Precision &amp; Kernels" FontSize="16" FontWeight="SemiBold"/>
+                    <TextBlock TextWrapping="Wrap"
+                               Text="Control how inference kernels manage precision. Tighter precision can improve stability, whereas relaxed precision can boost throughput."/>
+
+                    <StackPanel Spacing="6">
+                        <ToggleSwitch x:Name="UpcastAttentionToggle" Content="Force 32-bit attention layers"/>
+                        <TextBlock x:Name="UpcastStatusText" FontStyle="Italic" Foreground="#9CDCFE"/>
+                    </StackPanel>
+
+                    <StackPanel Spacing="6">
+                        <ToggleSwitch x:Name="AutoVaePrecisionToggle" Content="Auto fallback to float32 VAE on errors"/>
+                        <TextBlock x:Name="AutoVaePrecisionStatusText" FontStyle="Italic" Foreground="#9CDCFE"/>
+                    </StackPanel>
+
+                    <StackPanel Spacing="6">
+                        <ToggleSwitch x:Name="AutoVaeBfloatToggle" Content="Allow bfloat16 VAE fallback before float32"/>
+                        <TextBlock x:Name="AutoVaeBfloatStatusText" FontStyle="Italic" Foreground="#9CDCFE"/>
+                    </StackPanel>
+
+                    <StackPanel Spacing="6">
+                        <ToggleSwitch x:Name="QuantizationToggle" Content="Enable quantized sampler kernels"/>
+                        <TextBlock x:Name="QuantizationStatusText" FontStyle="Italic" Foreground="#9CDCFE"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Border BorderBrush="#444" BorderThickness="1" CornerRadius="6" Padding="12" Background="#1E1E1E">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Memory Budget" FontSize="16" FontWeight="SemiBold"/>
+                    <TextBlock TextWrapping="Wrap"
+                               Text="Balance VRAM usage against responsiveness. Helpful when juggling large checkpoints or limited memory GPUs."/>
+
+                    <StackPanel Spacing="6">
+                        <ToggleSwitch x:Name="CheckpointsKeepCpuToggle" Content="Keep idle checkpoints in system RAM"/>
+                        <TextBlock x:Name="CheckpointsKeepCpuStatusText" FontStyle="Italic" Foreground="#9CDCFE"/>
+                    </StackPanel>
+
+                    <StackPanel Spacing="6">
+                        <ToggleSwitch x:Name="CacheFp16Toggle" Content="Cache fp16 weights when using FP8 storage"/>
+                        <TextBlock x:Name="CacheFp16StatusText" FontStyle="Italic" Foreground="#9CDCFE"/>
+                    </StackPanel>
+
+                    <StackPanel Spacing="6">
+                        <ToggleSwitch x:Name="PersistentCondToggle" Content="Keep prompt conditioning in GPU cache"/>
+                        <TextBlock x:Name="PersistentCondStatusText" FontStyle="Italic" Foreground="#9CDCFE"/>
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Checkpoint cache slots:" FontWeight="SemiBold"/>
+                        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <Slider x:Name="CheckpointCacheSlider" Minimum="0" Maximum="10" TickFrequency="1" IsSnapToTickEnabled="True" Width="200"/>
+                            <TextBlock x:Name="CheckpointCacheValueText" VerticalAlignment="Center" FontWeight="Bold"/>
+                        </StackPanel>
+                        <TextBlock x:Name="CheckpointCacheStatusText" FontStyle="Italic" Foreground="#9CDCFE"/>
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="VRAM telemetry frequency:" FontWeight="SemiBold"/>
+                        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <Slider x:Name="MemmonSlider" Minimum="0" Maximum="40" TickFrequency="1" IsSnapToTickEnabled="True" Width="200"/>
+                            <TextBlock x:Name="MemmonValueText" VerticalAlignment="Center" FontWeight="Bold"/>
+                        </StackPanel>
+                        <TextBlock x:Name="MemmonStatusText" FontStyle="Italic" Foreground="#9CDCFE"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Border BorderBrush="#444" BorderThickness="1" CornerRadius="6" Padding="12" Background="#1E1E1E">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Sampler Throughput" FontSize="16" FontWeight="SemiBold"/>
+                    <TextBlock TextWrapping="Wrap"
+                               Text="Tweak sampler behaviour to steer the speed/quality compromise. Some options trade VRAM for faster iterations."/>
+
+                    <StackPanel Spacing="6">
+                        <ToggleSwitch x:Name="BatchCondToggle" Content="Batch conditional &amp; unconditional sampling"/>
+                        <TextBlock x:Name="BatchCondStatusText" FontStyle="Italic" Foreground="#9CDCFE"/>
+                    </StackPanel>
+
+                    <StackPanel Spacing="6">
+                        <ToggleSwitch x:Name="PadCondToggle" Content="Pad prompt and negative prompt lengths"/>
+                        <TextBlock x:Name="PadCondStatusText" FontStyle="Italic" Foreground="#9CDCFE"/>
+                    </StackPanel>
+
+                    <StackPanel Spacing="6">
+                        <ToggleSwitch x:Name="SigmaMinToggle" Content="Skip negative guidance on all steps (NGMS)"/>
+                        <TextBlock x:Name="SigmaMinStatusText" FontStyle="Italic" Foreground="#9CDCFE"/>
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Token merging ratio:" FontWeight="SemiBold"/>
+                        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <Slider x:Name="TokenMergingSlider" Minimum="0" Maximum="0.9" TickFrequency="0.05" IsSnapToTickEnabled="True" Width="200"/>
+                            <TextBlock x:Name="TokenMergingValueText" VerticalAlignment="Center" FontWeight="Bold"/>
+                        </StackPanel>
+                        <TextBlock x:Name="TokenMergingStatusText" FontStyle="Italic" Foreground="#9CDCFE"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
 </UserControl>
