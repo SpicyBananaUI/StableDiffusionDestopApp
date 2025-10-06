@@ -40,7 +40,6 @@ REM Run tests with timeout
 dotnet test myApp.Tests/myApp.Tests.csproj ^
     --verbosity minimal ^
     --logger "console;verbosity=minimal" ^
-    --settings myApp.Tests/xunit.runner.json ^
     --no-build
 
 echo.
