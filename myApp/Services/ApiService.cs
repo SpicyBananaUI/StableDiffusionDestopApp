@@ -122,6 +122,10 @@ namespace myApp.Services
                     requestData["hr_scale"] = hrScale.Value;
                 // Ensure list is not None on backend
                 requestData["hr_additional_modules"] = Array.Empty<string>();
+                // Set default denoising_strength if not already set
+                // TODO: add to UI
+                if (!requestData.ContainsKey("denoising_strength"))
+                    requestData["denoising_strength"] = 0.35;
             }
 
             // alwayson_scripts
