@@ -82,7 +82,7 @@
 
                         <Separator/>
 
-                        <TextBlock Text="Unsafe extensions (UI/JS required for full functionality)" FontWeight="Bold"/>
+                        <TextBlock Text="Unsafe extensions (Gradio UI/JS required for full functionality)" FontWeight="Bold"/>
                         <StackPanel x:Name="UnsafeExtensionsPanel" Spacing="4"/>
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <Button x:Name="DeselectUnsafeButton" Content="Deselect All"/>
