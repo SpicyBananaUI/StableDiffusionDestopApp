@@ -9,12 +9,12 @@
         <!-- Header -->
         <StackPanel Orientation="Horizontal" Margin="10" Spacing="10">
             <TextBlock Text="Models &amp; Plugins" FontSize="22" FontWeight="Bold"/>
-            <ComboBox Width="150" SelectedIndex="0">
+            <!-- <ComboBox Width="150" SelectedIndex="0">
                 <ComboBoxItem Content="Browse Models"/>
                 <ComboBoxItem Content="Browse Plugins"/>
                 <ComboBoxItem Content="Installed"/>
             </ComboBox>
-            <TextBox Width="200" Watermark="Search..." />
+            <TextBox Width="200" Watermark="Search..." /> -->
         </StackPanel>
 
         <!-- Content Area -->
