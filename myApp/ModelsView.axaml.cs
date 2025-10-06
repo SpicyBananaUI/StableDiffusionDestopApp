@@ -23,7 +23,13 @@ public partial class ModelsView : UserControl
 
         InitializeComponent();
 
-        var downloadButton = this.FindControl<Button>("DownloadModelButton");
+        InitUIAsync();
+
+    }
+
+    private async void InitUIAsync()
+    {
+                var downloadButton = this.FindControl<Button>("DownloadModelButton");
         if (downloadButton != null)
         {
             Debug.WriteLine("DownloadModelButton found and event attached.");
@@ -45,11 +51,13 @@ public partial class ModelsView : UserControl
             Debug.WriteLine($"Failed to load models.json: {ex.Message}");
         }
 
-        // Initialize Installed Models tab
-        _ = InitializeInstalledModelsTabAsync();
+        // Initialize Installed Models tab async
+        await InitializeInstalledModelsTabAsync();
+        
+
 
         // Initialize Built-in Plugins UI
-        _ = InitializeBuiltinPluginsUI();
+        await InitializeBuiltinPluginsUI();
     }
 
     private async void OnDownloadModelButtonClick(object? sender, RoutedEventArgs e)
