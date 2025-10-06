@@ -35,8 +35,8 @@ namespace myApp.Tests.Core
         }
 
         [Theory]
-        [InlineData("model1.safetensors", "abc123def456", "def456ghi789")]
-        [InlineData("model2.safetensors", "ghi789jkl012", "jkl012mno345")]
+        [InlineData("model1.safetensors", "abc123def456", "def456ghi789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456")]
+        [InlineData("model2.safetensors", "ghi789jkl012", "jkl012mno345abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456")]
         public void Model_ShouldHaveValidProperties(string name, string hash, string sha256)
         {
             // Arrange
