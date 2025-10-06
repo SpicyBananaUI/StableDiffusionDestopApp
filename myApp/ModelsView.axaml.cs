@@ -10,6 +10,7 @@ using System.Text.Json;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Net.Http;
 
 namespace myApp;
 
@@ -17,17 +18,23 @@ public partial class ModelsView : UserControl
 {
     private record ModelEntry(string name, string url, string? checksum, string? thumbnail);
 
+    private ApiService? _apiService;
+    private bool _backendReady;
+
     public ModelsView()
     {
         Debug.WriteLine("ModelsView constructor called.");
 
         InitializeComponent();
 
+        this.AttachedToVisualTree += OnAttachedToVisualTree;
+
         var downloadButton = this.FindControl<Button>("DownloadModelButton");
         if (downloadButton != null)
         {
             Debug.WriteLine("DownloadModelButton found and event attached.");
             downloadButton.Click += OnDownloadModelButtonClick;
+            downloadButton.IsEnabled = false;
         }
         else
         {
@@ -45,11 +52,32 @@ public partial class ModelsView : UserControl
             Debug.WriteLine($"Failed to load models.json: {ex.Message}");
         }
 
-        // Initialize Installed Models tab
-        _ = InitializeInstalledModelsTabAsync();
+        // Initialization of backend-dependent tabs deferred until backend is ready (see OnAttachedToVisualTree).
+    }
 
-        // Initialize Built-in Plugins UI
-        _ = InitializeBuiltinPluginsUI();
+    private async void OnAttachedToVisualTree(object? sender, VisualTreeAttachmentEventArgs e)
+    {
+        this.AttachedToVisualTree -= OnAttachedToVisualTree;
+
+        try
+        {
+            await EnsureBackendReadyAsync();
+
+            await InitializeInstalledModelsTabAsync();
+            await InitializeBuiltinPluginsUIAsync();
+
+            var downloadButton = this.FindControl<Button>("DownloadModelButton");
+            if (downloadButton != null)
+                downloadButton.IsEnabled = true;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[ModelsView] Failed to finish initialization: {ex.Message}");
+
+            var statusText = this.FindControl<TextBlock>("ModelDownloadStatus");
+            if (statusText != null)
+                statusText.Text = "Backend not reachable. Check connection settings.";
+        }
     }
 
     private async void OnDownloadModelButtonClick(object? sender, RoutedEventArgs e)
@@ -73,7 +101,13 @@ public partial class ModelsView : UserControl
 
         try
         {
-            var apiService = new ApiService();
+            var apiService = _apiService;
+            if (apiService == null)
+            {
+                if (statusText != null)
+                    statusText.Text = "Backend not ready yet";
+                return;
+            }
             if (statusText != null) statusText.Text = "Starting download...";
             if (progressBar != null)
             {
@@ -153,11 +187,53 @@ public partial class ModelsView : UserControl
     private List<string> _backendSafeSelected = new();
     private List<string> _unsafeSelected = new();
 
-    private async Task InitializeBuiltinPluginsUI()
+    private async Task EnsureBackendReadyAsync()
+    {
+        if (_backendReady && _apiService != null)
+            return;
+
+        await WaitForBackendAsync(App.AppConfig.RemoteAddress);
+
+        if (App.ApiService == null)
+        {
+            App.InitializeApiService();
+        }
+
+        _apiService = App.ApiService ?? new ApiService();
+        _backendReady = true;
+    }
+
+    private async Task WaitForBackendAsync(string baseUrl, int timeoutMs = 15000)
+    {
+        using var http = new HttpClient();
+        int attempts = 0;
+        int delayMs = 500;
+
+        while (attempts * delayMs < timeoutMs)
+        {
+            try
+            {
+                var response = await http.GetAsync($"{baseUrl}/sdapi/v1/sd-models");
+                if (response.IsSuccessStatusCode)
+                    return;
+            }
+            catch
+            {
+                // Ignore and retry until timeout
+            }
+
+            await Task.Delay(delayMs);
+            attempts++;
+        }
+
+        throw new TimeoutException("Remote backend did not respond in time.");
+    }
+
+    private async Task InitializeBuiltinPluginsUIAsync()
     {
         try
         {
-            var api = new ApiService();
+            var api = _apiService ?? throw new InvalidOperationException("API service not initialized");
             var extensions = await api.GetExtensionsAsync();
 
             // Separate backend-safe vs unsafe by simple heuristic (same as backend): no javascript folder and no gradio imports known server-side.
@@ -167,6 +243,8 @@ public partial class ModelsView : UserControl
 
             // We cannot locally check file contents; ask backend to compute and return the set by calling the endpoint with dry run behavior.
             // Fallback: classify by known prefixes likely safe.
+            _backendSafeSelected.Clear();
+            _unsafeSelected.Clear();
             foreach (var e in extensions)
             {
                 if (e.name.StartsWith("forge_preprocessor_") || e.name == "SwinIR" || e.name == "ScuNET" || e.name == "soft-inpainting")
@@ -182,14 +260,29 @@ public partial class ModelsView : UserControl
             var btnToggleUnsafe = this.FindControl<Button>("DeselectUnsafeButton");
             var btnApplyUnsafe = this.FindControl<Button>("ApplySelectedUnsafeButton");
 
+            if (btnToggleSelect != null) btnToggleSelect.IsEnabled = false;
+            if (btnApplySelected != null) btnApplySelected.IsEnabled = false;
+            if (btnToggleUnsafe != null) btnToggleUnsafe.IsEnabled = false;
+            if (btnApplyUnsafe != null) btnApplyUnsafe.IsEnabled = false;
+
             if (panelSafe != null)
             {
                 panelSafe.Children.Clear();
                 foreach (var e in backendSafe.OrderBy(x => x.name))
                 {
                     var cb = new CheckBox { Content = e.name, IsChecked = e.enabled };
-                    cb.Checked += (_, __) => { if (!_backendSafeSelected.Contains(e.name)) _backendSafeSelected.Add(e.name); };
-                    cb.Unchecked += (_, __) => { _backendSafeSelected.RemoveAll(x => x == e.name); };
+                    cb.IsCheckedChanged += (_, __) =>
+                    {
+                        if (cb.IsChecked == true)
+                        {
+                            if (!_backendSafeSelected.Contains(e.name))
+                                _backendSafeSelected.Add(e.name);
+                        }
+                        else
+                        {
+                            _backendSafeSelected.RemoveAll(x => x == e.name);
+                        }
+                    };
                     panelSafe.Children.Add(cb);
                     if (e.enabled && !_backendSafeSelected.Contains(e.name)) _backendSafeSelected.Add(e.name);
                 }
@@ -201,14 +294,17 @@ public partial class ModelsView : UserControl
                 foreach (var e in unsafeList.OrderBy(x => x.name))
                 {
                     var cb = new CheckBox { Content = e.name, IsChecked = e.enabled };
-                    cb.Checked += (_, __) =>
+                    cb.IsCheckedChanged += (_, __) =>
                     {
-                        if (!_unsafeSelected.Contains(e.name))
-                            _unsafeSelected.Add(e.name);
-                    };
-                    cb.Unchecked += (_, __) =>
-                    {
-                        _unsafeSelected.RemoveAll(x => x == e.name);
+                        if (cb.IsChecked == true)
+                        {
+                            if (!_unsafeSelected.Contains(e.name))
+                                _unsafeSelected.Add(e.name);
+                        }
+                        else
+                        {
+                            _unsafeSelected.RemoveAll(x => x == e.name);
+                        }
                     };
                     panelUnsafe.Children.Add(cb);
                     if (e.enabled && !_unsafeSelected.Contains(e.name))
@@ -231,6 +327,10 @@ public partial class ModelsView : UserControl
                     }
                     btnToggleSelect.Content = target ? "Deselect All" : "Select All";
                 };
+                btnToggleSelect.IsEnabled = true;
+                btnToggleSelect.Content = panelSafe.Children.OfType<CheckBox>().All(c => c.IsChecked == true)
+                    ? "Deselect All"
+                    : "Select All";
             }
 
             if (btnApplySelected != null)
@@ -251,6 +351,7 @@ public partial class ModelsView : UserControl
                         Debug.WriteLine($"Enable selected backend-safe error: {ex.Message}");
                     }
                 };
+                btnApplySelected.IsEnabled = true;
             }
 
             // UNSAFE extension buttons
@@ -265,6 +366,7 @@ public partial class ModelsView : UserControl
 
                     btnToggleUnsafe.Content = "Deselect All"; // Always stays the same
                 };
+                btnToggleUnsafe.IsEnabled = true;
             }
 
             if (btnApplyUnsafe != null)
@@ -287,6 +389,7 @@ public partial class ModelsView : UserControl
                         Debug.WriteLine($"Enable selected unsafe error: {ex.Message}");
                     }
                 };
+                btnApplyUnsafe.IsEnabled = true;
             }
         }
         catch (Exception ex)
@@ -337,13 +440,15 @@ public partial class ModelsView : UserControl
 
             // TODO: update to also do release path if release build
             var stack = new StackPanel();
-            var img_path =  Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "Assets", m.thumbnail);
+            var imgPath = m.thumbnail != null
+                ? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "Assets", m.thumbnail)
+                : null;
 
 
             var image = new Image
             {
-                Source = m.thumbnail != null && File.Exists(img_path) ?
-                    new Avalonia.Media.Imaging.Bitmap(img_path) :
+                Source = imgPath != null && File.Exists(imgPath) ?
+                    new Avalonia.Media.Imaging.Bitmap(imgPath) :
                     null,
                 Stretch = Avalonia.Media.Stretch.UniformToFill,
                 Height = 150,
@@ -374,7 +479,7 @@ public partial class ModelsView : UserControl
 
     private async Task InitializeInstalledModelsTabAsync()
     {
-        var api = new ApiService();
+        var api = _apiService ?? throw new InvalidOperationException("API service not initialized");
         var listBox = this.FindControl<ListBox>("InstalledModelsList");
         var refreshButton = this.FindControl<Button>("RefreshModelsButton");
 
@@ -386,69 +491,86 @@ public partial class ModelsView : UserControl
 
         async Task LoadModelsAsync()
         {
-            await api.RefreshCheckpointsAsync();
-            var models = await api.GetAvailableModelsAsync();
-            Debug.WriteLine($"[ModelsView] Loaded {models?.Count ?? 0} models: {string.Join(", ", models ?? new List<string>())}");
-
-            listBox.Items.Clear();
-
-            if (models == null || models.Count == 0)
+            try
             {
-                listBox.Items.Add(new TextBlock { Text = "No models found", Margin = new Thickness(5) });
-                return;
-            }
+                if (refreshButton != null)
+                    refreshButton.IsEnabled = false;
 
-            foreach (var modelName in models.OrderBy(x => x))
-            {
-                var row = new StackPanel
-                {
-                    Orientation = Avalonia.Layout.Orientation.Horizontal,
-                    Margin = new Thickness(5),
-                    Spacing = 10
-                };
+                await api.RefreshCheckpointsAsync();
+                var models = await api.GetAvailableModelsAsync();
+                Debug.WriteLine($"[ModelsView] Loaded {models?.Count ?? 0} models: {string.Join(", ", models ?? new List<string>())}");
 
-                var nameText = new TextBlock
-                {
-                    Text = modelName,
-                    VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
-                };
+                listBox.Items.Clear();
 
-                var selectButton = new Button { Content = "Select", Width = 80 };
-                selectButton.Click += async (_, __) =>
+                if (models == null || models.Count == 0)
                 {
-                    try
+                    listBox.Items.Add(new TextBlock { Text = "No models found", Margin = new Thickness(5) });
+                    return;
+                }
+
+                foreach (var modelName in models.OrderBy(x => x))
+                {
+                    var row = new StackPanel
                     {
-                        await api.SetModelAsync(modelName);
-                        Debug.WriteLine($"Switched to model: {modelName}");
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.WriteLine($"Failed to select model {modelName}: {ex.Message}");
-                    }
-                };
+                        Orientation = Avalonia.Layout.Orientation.Horizontal,
+                        Margin = new Thickness(5),
+                        Spacing = 10
+                    };
 
-                var deleteButton = new Button { Content = "Delete", Width = 80 };
-                deleteButton.Click += async (_, __) =>
-                {
-                    try
+                    var nameText = new TextBlock
                     {
-                        var ok = await api.DeleteModelAsync(modelName);
-                        if (ok)
+                        Text = modelName,
+                        VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
+                    };
+
+                    var selectButton = new Button { Content = "Select", Width = 80 };
+                    selectButton.Click += async (_, __) =>
+                    {
+                        try
                         {
-                            Debug.WriteLine($"Deleted model: {modelName}");
-                            await LoadModelsAsync(); // refresh list
+                            await api.SetModelAsync(modelName);
+                            Debug.WriteLine($"Switched to model: {modelName}");
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.WriteLine($"Error deleting model {modelName}: {ex.Message}");
-                    }
-                };
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"Failed to select model {modelName}: {ex.Message}");
+                        }
+                    };
 
-                row.Children.Add(nameText);
-                row.Children.Add(selectButton);
-                row.Children.Add(deleteButton);
-                listBox.Items.Add(row);
+                    var deleteButton = new Button { Content = "Delete", Width = 80 };
+                    deleteButton.Click += async (_, __) =>
+                    {
+                        try
+                        {
+                            var ok = await api.DeleteModelAsync(modelName);
+                            if (ok)
+                            {
+                                Debug.WriteLine($"Deleted model: {modelName}");
+                                await LoadModelsAsync(); // refresh list
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"Error deleting model {modelName}: {ex.Message}");
+                        }
+                    };
+
+                    row.Children.Add(nameText);
+                    row.Children.Add(selectButton);
+                    row.Children.Add(deleteButton);
+                    listBox.Items.Add(row);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[ModelsView] Failed to load installed models: {ex.Message}");
+                listBox.Items.Clear();
+                listBox.Items.Add(new TextBlock { Text = "Failed to load models", Margin = new Thickness(5) });
+            }
+            finally
+            {
+                if (refreshButton != null)
+                    refreshButton.IsEnabled = true;
             }
         }
 
