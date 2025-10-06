@@ -6,6 +6,7 @@ import datetime
 import uvicorn
 import ipaddress
 import requests
+import glob
 from modules import extensions_manager
 import gradio as gr
 from threading import Lock, Thread
@@ -252,6 +253,8 @@ class Api:
         self.add_api_route("/sdapi/v1/extensions/enable", self.enable_extensions, methods=["POST"])
         self.add_api_route("/sdapi/v1/download-model", self.download_model, methods=["POST"])
         self.add_api_route("/sdapi/v1/download-model/progress/{download_id}", self.download_model_progress, methods=["GET"])
+        self.add_api_route("/sdapi/v1/delete-model", self.delete_model, methods=["POST"])
+
 
         if shared.cmd_opts.api_server_stop:
             self.add_api_route("/sdapi/v1/server-kill", self.kill_webui, methods=["POST"])
@@ -923,4 +926,42 @@ class Api:
             return model_downloader.get_download_progress(download_id)
         except KeyError:
             raise HTTPException(status_code=404, detail="Download not found")
+
+    def delete_model(self, name: str):
+        # Validate input
+        if not name or not name.strip():
+            raise HTTPException(status_code=400, detail="Model name is required")
+
+        name = name.strip()
+        print(f"Deleting model: '{name}'")
+
+        # Path to models directory (same logic as download_model)
+        model_dir = "Stable-diffusion"
+        target_dir = os.path.abspath(os.path.join(paths.models_path, model_dir))
+
+        if not os.path.isdir(target_dir):
+            raise HTTPException(status_code=500, detail=f"Models directory not found: {target_dir}")
+
+        # Match both .ckpt and .safetensors (or other variants)
+        patterns = [
+            os.path.join(target_dir, f"{name}.*"),
+            os.path.join(target_dir, "**", f"{name}.*"),
+        ]
+
+        deleted_files = []
+        for pattern in patterns:
+            for file_path in glob.glob(pattern, recursive=True):
+                try:
+                    os.remove(file_path)
+                    deleted_files.append(os.path.basename(file_path))
+                except Exception as e:
+                    print(f"Failed to delete {file_path}: {e}")
+
+        if not deleted_files:
+            raise HTTPException(status_code=404, detail=f"No files found for model '{name}'")
+
+        print(f"Deleted {len(deleted_files)} file(s): {deleted_files}")
+        return {"status": "ok", "deleted": deleted_files}
+
+
 

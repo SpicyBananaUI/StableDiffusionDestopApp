@@ -3,13 +3,13 @@
     "name": "DreamShaper v8",
     "url": "https://huggingface.co/Lykon/DreamShaper/resolve/main/DreamShaper_8_pruned.safetensors",
     "checksum": "879db523c30d3b9017143d56705015e15a2cb5628762c11d086fed9538abd7fd",
-    "thumbnail": null
+    "thumbnail": "dreamshaper.png"
   },
   {
     "name": "DreamShaper v4",
     "url": "https://huggingface.co/Lykon/DreamShaper/resolve/main/DreamShaper_4NoVae_fp16.ckpt?download=true",
     "checksum": "6b776c57d90f894e49549ac4d9bc5a356163fba1645d9561b267740db6b394af",
-    "thumbnail": null
+    "thumbnail": "dreamshaper.png"
   }
 ]
 

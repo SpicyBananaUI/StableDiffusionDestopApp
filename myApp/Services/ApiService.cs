@@ -390,6 +390,31 @@ namespace myApp.Services
             var response = await _httpClient.PostAsync("/sdapi/v1/options", content);
             response.EnsureSuccessStatusCode();
         }
+
+        public async Task<bool> DeleteModelAsync(string modelName)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(modelName))
+                    return false;
+
+                // Send model name as query parameter
+                var response = await _httpClient.PostAsync($"/sdapi/v1/delete-model?name={Uri.EscapeDataString(modelName)}", null);
+
+                if (response.IsSuccessStatusCode)
+                    return true;
+
+                var msg = await response.Content.ReadAsStringAsync();
+                Debug.WriteLine($"Delete model failed: {response.StatusCode} - {msg}");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"DeleteModelAsync exception: {ex.Message}");
+                return false;
+            }
+        }
+
         
         public async Task RefreshCheckpointsAsync()
         {

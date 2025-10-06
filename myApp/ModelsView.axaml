@@ -38,11 +38,11 @@
                 </ScrollViewer>
             </TabItem>
 
+
             <!-- Browse Plugins -->
-            <TabItem Header="Browse Plugins">
+            <!-- <TabItem Header="Browse Plugins">
                 <ScrollViewer>
                     <StackPanel Margin="10" Spacing="10">
-                        <!-- Example Plugin Card -->
                         <Border Background="#2d2d2d" CornerRadius="10" Padding="10">
                             <StackPanel>
                                 <TextBlock Text="ControlNet" FontWeight="Bold" FontSize="16"/>
@@ -53,27 +53,21 @@
                         </Border>
                     </StackPanel>
                 </ScrollViewer>
-            </TabItem>
+            </TabItem> -->
 
             <!-- Installed -->
-            <TabItem Header="Installed">
-                <ListBox Margin="10">
-                    <ListBoxItem>
-                        <StackPanel Orientation="Horizontal" Spacing="10">
-                            <TextBlock Text="DreamShaper v8"/>
-                            <Button Content="Activate"/>
-                            <Button Content="Remove"/>
-                        </StackPanel>
-                    </ListBoxItem>
-                    <ListBoxItem>
-                        <StackPanel Orientation="Horizontal" Spacing="10">
-                            <TextBlock Text="ControlNet Plugin"/>
-                            <Button Content="Update"/>
-                            <Button Content="Remove"/>
-                        </StackPanel>
-                    </ListBoxItem>
-                </ListBox>
+            <TabItem Header="Installed Models">
+                <StackPanel Margin="10">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ListBox x:Name="InstalledModelsList" Margin="10" />
+                    </ScrollViewer>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+                        <Button Name="RefreshModelsButton" Content="Refresh" Width="100"/>
+                    </StackPanel>
+                </StackPanel>
             </TabItem>
+
 
             <!-- Built-in Plugins -->
             <TabItem Header="Built-in Plugins">
@@ -88,8 +82,12 @@
 
                         <Separator/>
 
-                        <TextBlock Text="Unsafe extensions (UI/JS required)" FontWeight="Bold"/>
+                        <TextBlock Text="Unsafe extensions (UI/JS required for full functionality)" FontWeight="Bold"/>
                         <StackPanel x:Name="UnsafeExtensionsPanel" Spacing="4"/>
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Button x:Name="DeselectUnsafeButton" Content="Deselect All"/>
+                            <Button x:Name="ApplySelectedUnsafeButton" Content="Enable Selected"/>
+                        </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>

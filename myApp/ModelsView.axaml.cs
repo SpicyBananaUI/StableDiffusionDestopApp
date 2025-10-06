@@ -45,6 +45,9 @@ public partial class ModelsView : UserControl
             Debug.WriteLine($"Failed to load models.json: {ex.Message}");
         }
 
+        // Initialize Installed Models tab
+        _ = InitializeInstalledModelsTabAsync();
+
         // Initialize Built-in Plugins UI
         _ = InitializeBuiltinPluginsUI();
     }
@@ -148,6 +151,7 @@ public partial class ModelsView : UserControl
     }
 
     private List<string> _backendSafeSelected = new();
+    private List<string> _unsafeSelected = new();
 
     private async Task InitializeBuiltinPluginsUI()
     {
@@ -175,6 +179,8 @@ public partial class ModelsView : UserControl
             var panelUnsafe = this.FindControl<StackPanel>("UnsafeExtensionsPanel");
             var btnToggleSelect = this.FindControl<Button>("ToggleSelectBackendSafeButton");
             var btnApplySelected = this.FindControl<Button>("ApplySelectedBackendSafeButton");
+            var btnToggleUnsafe = this.FindControl<Button>("DeselectUnsafeButton");
+            var btnApplyUnsafe = this.FindControl<Button>("ApplySelectedUnsafeButton");
 
             if (panelSafe != null)
             {
@@ -194,11 +200,23 @@ public partial class ModelsView : UserControl
                 panelUnsafe.Children.Clear();
                 foreach (var e in unsafeList.OrderBy(x => x.name))
                 {
-                    var txt = new TextBlock { Text = e.name };
-                    panelUnsafe.Children.Add(txt);
+                    var cb = new CheckBox { Content = e.name, IsChecked = e.enabled };
+                    cb.Checked += (_, __) =>
+                    {
+                        if (!_unsafeSelected.Contains(e.name))
+                            _unsafeSelected.Add(e.name);
+                    };
+                    cb.Unchecked += (_, __) =>
+                    {
+                        _unsafeSelected.RemoveAll(x => x == e.name);
+                    };
+                    panelUnsafe.Children.Add(cb);
+                    if (e.enabled && !_unsafeSelected.Contains(e.name))
+                        _unsafeSelected.Add(e.name);
                 }
             }
 
+            // BACKEND-SAFE extension buttons
             if (btnToggleSelect != null && panelSafe != null)
             {
                 btnToggleSelect.Click += (_, __) =>
@@ -231,6 +249,42 @@ public partial class ModelsView : UserControl
                     catch (Exception ex)
                     {
                         Debug.WriteLine($"Enable selected backend-safe error: {ex.Message}");
+                    }
+                };
+            }
+
+            // UNSAFE extension buttons
+            if (btnToggleUnsafe != null && panelUnsafe != null)
+            {
+                // Always acts as "Deselect All"
+                btnToggleUnsafe.Click += (_, __) =>
+                {
+                    var checkboxes = panelUnsafe.Children.OfType<CheckBox>().ToList();
+                    foreach (var cb in checkboxes)
+                        cb.IsChecked = false;
+
+                    btnToggleUnsafe.Content = "Deselect All"; // Always stays the same
+                };
+            }
+
+            if (btnApplyUnsafe != null)
+            {
+                btnApplyUnsafe.Click += async (_, __) =>
+                {
+                    try
+                    {
+                        var current = await api.GetExtensionsAsync();
+                        var otherEnabled = current
+                            .Where(x => x.enabled && !_unsafeSelected.Contains(x.name))
+                            .Select(x => x.name);
+                        var target = otherEnabled.Concat(_unsafeSelected).Distinct().ToList();
+
+                        var ok = await api.EnableExtensionsAsync(target);
+                        Debug.WriteLine(ok ? "Enabled selected unsafe extensions" : "Enable selected unsafe failed");
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"Enable selected unsafe error: {ex.Message}");
                     }
                 };
             }
@@ -281,11 +335,16 @@ public partial class ModelsView : UserControl
                 Padding = new Thickness(8)
             };
 
+            // TODO: update to also do release path if release build
             var stack = new StackPanel();
+            var img_path =  Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "Assets", m.thumbnail);
+
 
             var image = new Image
             {
-                Source = null,
+                Source = m.thumbnail != null && File.Exists(img_path) ?
+                    new Avalonia.Media.Imaging.Bitmap(img_path) :
+                    null,
                 Stretch = Avalonia.Media.Stretch.UniformToFill,
                 Height = 150,
                 Margin = new Thickness(0,0,0,5)
@@ -312,4 +371,92 @@ public partial class ModelsView : UserControl
             wrap.Children.Add(border);
         }
     }
+
+    private async Task InitializeInstalledModelsTabAsync()
+    {
+        var api = new ApiService();
+        var listBox = this.FindControl<ListBox>("InstalledModelsList");
+        var refreshButton = this.FindControl<Button>("RefreshModelsButton");
+
+        if (listBox == null)
+        {
+            Debug.WriteLine("InstalledModelsList not found in XAML!");
+            return;
+        }
+
+        async Task LoadModelsAsync()
+        {
+            await api.RefreshCheckpointsAsync();
+            var models = await api.GetAvailableModelsAsync();
+            Debug.WriteLine($"[ModelsView] Loaded {models?.Count ?? 0} models: {string.Join(", ", models ?? new List<string>())}");
+
+            listBox.Items.Clear();
+
+            if (models == null || models.Count == 0)
+            {
+                listBox.Items.Add(new TextBlock { Text = "No models found", Margin = new Thickness(5) });
+                return;
+            }
+
+            foreach (var modelName in models.OrderBy(x => x))
+            {
+                var row = new StackPanel
+                {
+                    Orientation = Avalonia.Layout.Orientation.Horizontal,
+                    Margin = new Thickness(5),
+                    Spacing = 10
+                };
+
+                var nameText = new TextBlock
+                {
+                    Text = modelName,
+                    VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
+                };
+
+                var selectButton = new Button { Content = "Select", Width = 80 };
+                selectButton.Click += async (_, __) =>
+                {
+                    try
+                    {
+                        await api.SetModelAsync(modelName);
+                        Debug.WriteLine($"Switched to model: {modelName}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"Failed to select model {modelName}: {ex.Message}");
+                    }
+                };
+
+                var deleteButton = new Button { Content = "Delete", Width = 80 };
+                deleteButton.Click += async (_, __) =>
+                {
+                    try
+                    {
+                        var ok = await api.DeleteModelAsync(modelName);
+                        if (ok)
+                        {
+                            Debug.WriteLine($"Deleted model: {modelName}");
+                            await LoadModelsAsync(); // refresh list
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"Error deleting model {modelName}: {ex.Message}");
+                    }
+                };
+
+                row.Children.Add(nameText);
+                row.Children.Add(selectButton);
+                row.Children.Add(deleteButton);
+                listBox.Items.Add(row);
+            }
+        }
+
+        if (refreshButton != null)
+            refreshButton.Click += async (_, __) => await LoadModelsAsync();
+
+        await LoadModelsAsync();
+    }
+
+
 }
