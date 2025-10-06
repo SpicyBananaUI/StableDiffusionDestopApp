@@ -24,9 +24,9 @@
                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                         <Image Source="/Assets/icon.png" Width="500" Height="300" 
                                Margin="0,0,0,20" Stretch="Uniform"/>
-                        <TextBlock Text="Welcome to SpicyBananaUI" Foreground="LightGreen" 
+                        <TextBlock Text="Welcome to Stable Diffusion UI" Foreground="LightGreen" 
                                    FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
-                        <TextBlock Text="Welcome to SpicyBananaUI, your gateway to the power of AI art generation. This desktop application puts the advanced capabilities of Stable Diffusion right at your fingertips, completely offline and private. Whether you're an artist seeking inspiration, a designer brainstorming concepts, or just someone who loves to create, this app is designed to be fast, intuitive, and powerful. We've built this tool to demystify AI art, providing you with a professional-grade studio without the complexity."
+                        <TextBlock Text="Welcome to Stable Diffusion UI, your gateway to the power of AI art generation. This desktop application puts the advanced capabilities of Stable Diffusion right at your fingertips, completely offline and private. Whether you're an artist seeking inspiration, a designer brainstorming concepts, or just someone who loves to create, this app is designed to be fast, intuitive, and powerful. We've built this tool to demystify AI art, providing you with a professional-grade studio without the complexity."
                                    TextWrapping="Wrap" HorizontalAlignment="Center" TextAlignment="Center"
                                    Margin="20" Foreground="White" MaxWidth="500"/>
                     </StackPanel>

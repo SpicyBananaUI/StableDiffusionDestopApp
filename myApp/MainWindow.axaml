@@ -29,7 +29,7 @@
                         BorderThickness="0" Width="50" Height="30" Margin="0,0,10,0"
                         Click="ShowIntro" Name="IntroButton">
                     <Button.Content>
-                        <TextBlock Text="intro" Foreground="LightGray" FontWeight="Bold"/>
+                        <TextBlock Text="Intro" Foreground="LightGray" FontWeight="Bold"/>
                     </Button.Content>
                 </Button>
             </Grid>

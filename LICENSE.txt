@@ -4,10 +4,6 @@ Copyright (c) 2023 AUTOMATIC1111
 The backend and API are derived from Stable Diffusion WebUI Forge
 (https://github.com/AUTOMATIC1111/stable-diffusion-webui).
 
-Copyright (c) 2025 Spicy Banana
-All other code, including the custom UI, is original work
-by the Spicy Banana organization (https://github.com/SpicyBananaUI).
-
 
 See /backend/LICENSE.txt for the original license from Stable Diffusion WebUI Forge.
 
