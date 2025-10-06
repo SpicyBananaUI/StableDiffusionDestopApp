@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel.Design;
 using System.IO;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Text;
 using System.Text.Json;
@@ -21,7 +22,8 @@ namespace myApp.Services
         {
             _httpClient = new HttpClient
             {
-                BaseAddress = new Uri(App.AppConfig.RemoteAddress)
+                BaseAddress = new Uri(App.AppConfig.RemoteAddress),
+                Timeout = Timeout.InfiniteTimeSpan
             };
         }
 

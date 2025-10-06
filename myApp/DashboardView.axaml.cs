@@ -283,6 +283,10 @@ public partial class DashboardView : UserControl
             {
                 try
                 {
+                    float lastProgress = 0f;
+                    int noProgressCount = 0;
+                    const int maxNoProgressCalls = 30; // Cancel if no progress for 30 consecutive calls (15 seconds) TODO: make this configurable in settings
+                    const float progressThreshold = 0.001f; // Consider progress if change is at least 0.1%
 
                     while (!_generationCts.Token.IsCancellationRequested && !done && _isGenerating)
                     {
@@ -300,11 +304,35 @@ public partial class DashboardView : UserControl
                             ResultImage.IsVisible = false;
                         });
 
-                        // if (ct)//progressInfo.Progress >= 1.0f)
-                        // {
-                        //     done = true;
-                        //     break;
-                        // }
+                        // Check if progress has been made
+                        if (Math.Abs(progressInfo.Progress - lastProgress) >= progressThreshold)
+                        {
+                            lastProgress = progressInfo.Progress;
+                            noProgressCount = 0;
+                        }
+                        else
+                        {
+                            noProgressCount++;
+                        }
+
+                        // Cancel if no progress for too many consecutive calls
+                        if (noProgressCount >= maxNoProgressCalls)
+                        {
+                            await Dispatcher.UIThread.InvokeAsync(() =>
+                            {
+                                statusText.Text = "Generation appears to be stuck. Cancelling...";
+                            });
+                            await _apiService.StopGenerationAsync();  // Tell backend to stop
+                            _generationCts.Cancel();
+                            break;
+                        }
+
+                        // Check if generation is complete
+                        if (progressInfo.Progress >= 1.0f)
+                        {
+                            done = true;
+                            break;
+                        }
                     
                         await Task.Delay(500, _generationCts.Token);
                     }
