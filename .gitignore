@@ -13,6 +13,7 @@ __pycache__/
 backend/fastAPI/outputImages/*.png
 backend/fastAPI/outputImages/*.jpg
 backend/fastAPI/outputImages/*.jpeg
+backend/auth.json
 most_recent.txt
 test/test_output.png
 

@@ -483,10 +483,14 @@ namespace myApp.Services
 
         public async Task<string> StartDownloadModelAsync(string modelUrl, string? checksum = null)
         {
+            if (string.IsNullOrEmpty(App.AppConfig.BackendPassword))
+                throw new InvalidOperationException("You must enter the backend password in Settings before downloading models.");
+            
             var requestData = new
             {
                 url = modelUrl,
-                checksum = checksum
+                checksum = checksum,
+                api_key = App.AppConfig.BackendPassword
             };
 
             Debug.WriteLine($"Starting model download from URL: {modelUrl} with checksum: {checksum}");
@@ -496,6 +500,8 @@ namespace myApp.Services
 
             if (!response.IsSuccessStatusCode)
             {
+                if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
+                    throw new InvalidOperationException("Backend key is invalid or missing. Please check your settings.");
                 throw new Exception($"Failed to start model download: {response.StatusCode}");
             }
 

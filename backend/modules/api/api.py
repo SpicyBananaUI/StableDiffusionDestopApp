@@ -5,6 +5,7 @@ import time
 import datetime
 import uvicorn
 import ipaddress
+import json
 import requests
 import glob
 from modules import extensions_manager
@@ -906,9 +907,24 @@ class Api:
 
         model_url = payload.get("url")
         checksum = payload.get("checksum")
+        provided_password = payload.get("api_key")
 
         if not model_url:
             raise HTTPException(status_code=400, detail="Model URL is required")
+        
+        auth_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "auth.json"))
+        if not os.path.exists(auth_path):
+            raise HTTPException(status_code=500, detail="Authorization file not found on server")
+
+        try:
+            with open(auth_path, "r") as f:
+                auth_data = json.load(f)
+                stored_password = auth_data.get("api_key")
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Failed to read auth.json: {str(e)}")
+        
+        if not provided_password or provided_password != stored_password:
+            raise HTTPException(status_code=403, detail="Invalid or missing password")
 
         # Prepare target
         model_dir = "Stable-diffusion"

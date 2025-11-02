@@ -40,6 +40,7 @@ public partial class App : Application
     {
         public static RunMode Mode { get; set; }
         public static string RemoteAddress { get; set; } =  "http://127.0.0.1:7861";
+        public static string BackendPassword { get; set; } = "";
     }
     
     public static class BackendLauncher
