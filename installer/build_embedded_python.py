@@ -17,7 +17,7 @@ def download_embedded_python():
     zip_file = "python-embedded.zip"
     
     if embedded_dir.exists():
-        print(f"✓ Python embedded already exists at {embedded_dir}")
+        print(f"Python embedded already exists at {embedded_dir}")
         return embedded_dir
     
     print(f"Downloading Python {python_version} embedded...")
@@ -28,7 +28,7 @@ def download_embedded_python():
         zip_ref.extractall(embedded_dir)
     
     os.remove(zip_file)
-    print(f"✓ Python embedded ready at {embedded_dir}")
+    print(f"Python embedded ready at {embedded_dir}")
     return embedded_dir
 
 def setup_pip_in_embedded(python_dir):
@@ -38,7 +38,7 @@ def setup_pip_in_embedded(python_dir):
     # Find the actual pth file
     pth_files = list(python_dir.glob("python*._pth"))
     if not pth_files:
-        print("⚠ No pth file found, creating one...")
+        print("No pth file found, creating one...")
         pth_file = python_dir / "python310._pth"
     else:
         pth_file = pth_files[0]
@@ -48,7 +48,7 @@ def setup_pip_in_embedded(python_dir):
     if "#import site" in content:
         content = content.replace("#import site", "import site")
         pth_file.write_text(content)
-        print("✓ Enabled site packages in embedded Python")
+        print("Enabled site packages in embedded Python")
     
     # Download and install pip
     python_exe = python_dir / "python.exe"
@@ -57,7 +57,7 @@ def setup_pip_in_embedded(python_dir):
     urllib.request.urlretrieve("https://bootstrap.pypa.io/get-pip.py", "get-pip.py")
     subprocess.check_call([str(python_exe), "get-pip.py"])
     os.remove("get-pip.py")
-    print("✓ Pip installed")
+    print("Pip installed")
 
 def install_requirements(python_dir, requirements_file):
     """Install requirements in embedded Python"""
@@ -69,29 +69,45 @@ def install_requirements(python_dir, requirements_file):
         pip_args = [str(python_exe), "-m", "pip", "install"]
     else:
         pip_args = [str(pip_exe), "install"]
+
+    # Make CUDA wheels available during dependency resolution
+    pip_args += ["--extra-index-url", "https://download.pytorch.org/whl/cu124"]
     
     print(f"Installing requirements from {requirements_file}...")
     
     # Install PyTorch with CUDA first (specific version)
     print("Installing PyTorch with CUDA...")
     subprocess.check_call(pip_args + [
-        "torch>=2.6.0", 
-        "--index-url", "https://download.pytorch.org/whl/cu124"
+        "torch==2.6.0+cu124",
+        "--index-url", "https://download.pytorch.org/whl/cu124",
+        "--upgrade", "--no-deps"
     ])
     
     # Install other requirements
     if Path(requirements_file).exists():
         subprocess.check_call(pip_args + ["-r", requirements_file])
     else:
-        print(f"⚠ Requirements file not found: {requirements_file}")
+        print(f"Requirements file not found: {requirements_file}")
         # Install minimal requirements
         minimal_deps = [
             "fastapi", "uvicorn", "gradio", "numpy", "Pillow",
-            "transformers", "diffusers", "safetensors", "accelerate"
+            "transformers", "diffusers", "safetensors", "accelerate", "sentencepiece", "pytorch-lightning"
         ]
         subprocess.check_call(pip_args + minimal_deps)
+
+    # Re-install CUDA-enabled torch to ensure requirements didn't overwrite it
+    subprocess.check_call(pip_args + [
+        "torch==2.6.0+cu124",
+        "--index-url", "https://download.pytorch.org/whl/cu124",
+        "--upgrade", "--no-deps"
+    ])
+    subprocess.check_call(pip_args + [
+        "torchvision==0.21.0+cu124",
+        "--index-url", "https://download.pytorch.org/whl/cu124",
+        "--upgrade", "--no-deps"
+    ])
     
-    print("✓ All requirements installed")
+    print("All requirements installed")
 
 def create_launcher_script(python_dir, backend_dir):
     """Create simple launcher script"""
@@ -115,7 +131,7 @@ pause
     
     launcher_file = Path("launch_backend_embedded.bat")
     launcher_file.write_text(launcher_script)
-    print(f"✓ Launcher created: {launcher_file}")
+    print(f"Launcher created: {launcher_file}")
 
 def main():
     print("=== Embedded Python Build for Stable Diffusion ===\n")
@@ -127,7 +143,7 @@ def main():
     setup_pip_in_embedded(python_dir)
     
     # Step 3: Install requirements
-    backend_dir = Path("backend")
+    backend_dir = Path("../backend")
     requirements_file = backend_dir / "requirements_versions.txt"
     install_requirements(python_dir, requirements_file)
     
@@ -144,16 +160,11 @@ def main():
         ], capture_output=True, text=True)
         print("Test output:", result.stdout)
         if result.returncode == 0:
-            print("✓ Embedded Python installation successful!")
+            print("Embedded Python installation successful!")
         else:
-            print("⚠ Test failed:", result.stderr)
+            print("Test failed:", result.stderr)
     except Exception as e:
-        print(f"⚠ Test error: {e}")
-    
-    # Calculate size
-    import shutil
-    size_gb = shutil.disk_usage(python_dir)[1] / (1024**3)
-    print(f"\nEmbedded Python size: ~{size_gb:.1f}GB")
+        print(f"Test error: {e}")
 
 if __name__ == "__main__":
     main()

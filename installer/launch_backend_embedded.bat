@@ -3,7 +3,7 @@ REM Stable Diffusion Backend Launcher
 REM No venv activation needed!
 
 set PYTHON_PATH=C:\Users\Taylo\StableDiffusionDestopApp\installer\python-embedded\python.exe
-set BACKEND_DIR=C:\Users\Taylo\StableDiffusionDestopApp\installer\backend
+set BACKEND_DIR=C:\Users\Taylo\StableDiffusionDestopApp\backend
 
 echo Starting Stable Diffusion Backend...
 echo Python: %PYTHON_PATH%
