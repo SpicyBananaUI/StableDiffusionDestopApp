@@ -77,13 +77,21 @@ public partial class DashboardView : UserControl
         
         var modeComboBox = this.FindControl<ComboBox>("ModeComboBox");
         var image2ImageControls = this.FindControl<StackPanel>("Image2ImageControls");
-        modeComboBox.SelectionChanged += (s, e) =>
+        ModeComboBox.SelectionChanged += (s, e) =>
         {
-            if (modeComboBox.SelectedIndex == 1) // Image2Image
-                image2ImageControls.IsVisible = true;
-            else
-                image2ImageControls.IsVisible = false;
+            // Ignore null or empty selection events (happens when switching items)
+            if (ModeComboBox?.SelectedItem is not ComboBoxItem item)
+                return;
+
+            string selected = item.Content?.ToString() ?? "";
+
+            // Ensure Image2ImagePanel exists before using it
+            if (Image2ImagePanel is null)
+                return;
+
+            Image2ImagePanel.IsVisible = selected == "Image to Image";
         };
+
         
         if (this.FindControl<Slider>("StrengthSlider") is Slider strengthSlider)
         {

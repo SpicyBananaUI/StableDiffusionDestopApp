@@ -1,10 +1,39 @@
-<Application xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             x:Class="myApp.App"
-             RequestedThemeVariant="Dark">
-             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+<Application
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="myApp.App"
+    RequestedThemeVariant="Dark">
+
+    <Application.Resources>
+        <Color x:Key="SystemAccentColor">#00A2A8</Color>
+        <Color x:Key="SystemAccentColorDark1">#009499</Color>
+        <FontFamily x:Key="DefaultFontFamily">Segoe UI, Ubuntu, Helvetica, sans-serif</FontFamily>
+    </Application.Resources>
 
     <Application.Styles>
         <FluentTheme />
+
+        <Style Selector="Button">
+            <Setter Property="Background" Value="{DynamicResource SystemAccentColor}" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontFamily" Value="{DynamicResource DefaultFontFamily}" />
+            <Setter Property="Padding" Value="10,6" />
+            <Setter Property="CornerRadius" Value="6" />
+
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.15"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        
+        <Style Selector="Button:pointerover">
+            <Setter Property="RenderTransform">
+                <Setter.Value>
+                    <ScaleTransform ScaleX="1.05" ScaleY="1.05"/>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Background" Value="{DynamicResource SystemAccentColorDark1}" />
+        </Style>
     </Application.Styles>
 </Application>
