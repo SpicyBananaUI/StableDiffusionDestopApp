@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
@@ -48,7 +49,16 @@ namespace myApp
                 ComponentsContainer.Children.Clear();
                 _renderedComponents.Clear();
 
-                Console.WriteLine($"{treeResponse.Tree.root_nodes.Count} Root nodes");
+                Console.WriteLine($"Component tree has {treeResponse.Tree.Components.Count} total components");
+                Console.WriteLine($"Component tree has {treeResponse.Tree.root_nodes.Count} root nodes");
+                
+                if (treeResponse.Tree.root_nodes.Count == 0)
+                {
+                    StatusText.Text = "No root nodes found. Components may not have been registered from extensions.";
+                    Console.WriteLine("WARNING: No root nodes in component tree!");
+                    return;
+                }
+                
                 // Render root nodes
                 foreach (var rootId in treeResponse.Tree.root_nodes)
                 {
@@ -60,12 +70,19 @@ namespace myApp
                         if (control != null)
                         {
                             ComponentsContainer.Children.Add(control);
+                            Console.WriteLine($"Added root control {rootNode.Type} to container");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Root control {rootNode.Type} returned null - not added");
                         }
                     }
                     else{
                         Console.WriteLine($"Root node {rootId} not found in tree");
                     }
                 }
+                
+                Console.WriteLine($"Final container has {ComponentsContainer.Children.Count} child controls");
             }
             catch (Exception ex)
             {
@@ -78,16 +95,13 @@ namespace myApp
             Panel parentPanel,
             System.Collections.Generic.Dictionary<string, TranslationLayerService.ComponentNode> allComponents)
         {
-            // Prevent circular references and duplicate rendering
             if (_renderedComponents.Contains(node.Id))
             {
-                return new TextBlock 
-                { 
-                    Text = $"[Already rendered: {node.Type}]", 
-                    Foreground = Avalonia.Media.Brushes.Orange,
-                    FontSize = 10
-                };
+                Console.WriteLine($"Skipping already rendered component: {node.Id} ({node.Type})");
+                return null;
             }
+            
+            Console.WriteLine($"Rendering component: {node.Id} ({node.Type})");
             _renderedComponents.Add(node.Id);
 
             var control = node.Type switch
@@ -105,6 +119,8 @@ namespace myApp
                 "number" => RenderNumber(node, parentPanel, allComponents),
                 _ => RenderPlaceholder(node, parentPanel, allComponents)
             };
+
+            return control;
         }
 
         private Control RenderBlocks(
