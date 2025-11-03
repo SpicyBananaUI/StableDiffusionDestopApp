@@ -1,0 +1,17 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:myApp.ViewModels"
+        x:Class="myApp.TranslationLayerView"
+        Title="Gradio Extension Components"
+        Width="800" Height="600">
+  <Grid RowDefinitions="Auto,*">
+    <StackPanel Orientation="Horizontal" Margin="10" Spacing="10" Grid.Row="0">
+      <Button Content="Refresh" Click="OnRefreshClick"/>
+      <TextBlock VerticalAlignment="Center" x:Name="StatusText"/>
+    </StackPanel>
+    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="10">
+      <StackPanel x:Name="ComponentsContainer" Orientation="Vertical" Spacing="10"/>
+    </ScrollViewer>
+  </Grid>
+</Window>
+

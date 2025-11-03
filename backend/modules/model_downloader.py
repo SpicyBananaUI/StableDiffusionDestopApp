@@ -70,6 +70,7 @@ def _background_download(download_id: str, model_url: str, checksum: str | None,
                     _update_download_progress(download_id, downloaded, total)
 
         # Verify checksum if provided
+        # TODO: check file type too
         if checksum is not None and checksum != "":
             with open(file_path, "rb") as f:
                 file_hash = hashlib.sha256(f.read()).hexdigest()

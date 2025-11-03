@@ -285,6 +285,18 @@ class Api:
         self.embedding_db.add_embedding_dir(cmd_opts.embeddings_dir)
         self.embedding_db.load_textual_inversion_embeddings(force_reload=True, sync_with_sd_model=False)
 
+        # Activate gradio translation layer api
+        try:
+            from translation_layer.init import activate_translation_layer
+            activate_translation_layer(self.app)
+        except ImportError as e:
+            print("Failed to import translation layer:", e)
+            pass
+
+        # Debug print all routes
+        for route in self.app.routes:
+            print(f"{route.path} - {route.methods}")
+
 
 
     def add_api_route(self, path: str, endpoint, **kwargs):
