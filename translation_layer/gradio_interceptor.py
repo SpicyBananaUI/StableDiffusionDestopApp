@@ -187,21 +187,23 @@ class GradioInterceptor:
         intercepted_init._interceptor_patched = True
         gr.components.Component.__init__ = intercepted_init
         
-    def _get_current_extension(self) -> Optional[str]:
-        """Get the name of the currently active extension/script"""
-        try:
-            from modules import scripts
-            basedir_path = scripts.basedir()
 
-            # Extract extension name from path
-            if basedir_path:
-                path_str = str(basedir_path).replace('\\', '/')
-                parts = path_str.split('/')
+    def _get_current_extension(self) -> Optional[str]:
+        """Try to infer the current extension name by inspecting the call stack."""
+        try:
+            for frame_info in inspect.stack():
+                filename = frame_info.filename.replace("\\", "/")
+                parts = filename.split("/")
+
+                # Look for the 'extensions' or 'extensions-builtin' folder
                 for i, part in enumerate(parts):
-                    if part in ['extensions', 'extensions-builtin'] and i + 1 < len(parts):
-                        return parts[i + 1]
-        except Exception:
-            pass
+                    if part in ["extensions", "extensions-builtin"] and i + 1 < len(parts):
+                        ext_name = parts[i + 1]
+                        print(f"[Interceptor] Detected extension '{ext_name}' from file: {filename}")
+                        return ext_name
+        except Exception as e:
+            print(f"[Interceptor] Failed to detect extension: {e}")
+        
         return None
 
     def _register_context(self, component: Any):
