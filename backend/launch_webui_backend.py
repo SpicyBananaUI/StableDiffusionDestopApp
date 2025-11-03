@@ -83,6 +83,13 @@ os.environ["COMMANDLINE_ARGS"] = " ".join(args)
 logger.info(f"Launching with device: {device}")
 logger.debug(f"COMMANDLINE_ARGS: {os.environ['COMMANDLINE_ARGS']}")
 
+# Activate the translation layer before launching the backend
+try:
+    import translation_layer
+    print("[translation_layer] Interceptor auto-activated in launch_webui_backend.py")
+except Exception as e:
+    print(f"[translation_layer] Failed to import/activate: {e}")
+
 # Launch backend
 import launch
 print("Launching Stable Diffusion WebUI backend...")
