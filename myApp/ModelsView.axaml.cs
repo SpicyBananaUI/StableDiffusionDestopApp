@@ -241,7 +241,7 @@ public partial class ModelsView : UserControl
             var backendSafe = new List<ApiService.ExtensionInfo>();
             var unsafeList = new List<ApiService.ExtensionInfo>();
 
-            // We cannot locally check file contents; ask backend to compute and return the set by calling the endpoint with dry run behavior.
+            // TODO: ask backend to compute and return the set by calling the endpoint with dry run behavior.
             // Fallback: classify by known prefixes likely safe.
             _backendSafeSelected.Clear();
             _unsafeSelected.Clear();
