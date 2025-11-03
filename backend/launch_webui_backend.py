@@ -4,6 +4,29 @@ import torch
 import sys
 import subprocess
 import logging
+import json
+import secrets
+
+AUTH_FILE = os.path.join(os.path.dirname(__file__), "auth.json")
+
+def generate_api_key():
+    return secrets.token_hex(16)  # 32-character random key
+
+def setup_auth():
+    if not os.path.exists(AUTH_FILE):
+        key = generate_api_key()
+        data = {"api_key": key}
+        with open(AUTH_FILE, "w") as f:
+            json.dump(data, f)
+        print(f"[SECURITY] Generated new API key: {key}")
+        print("[SECURITY] Share this key with trusted clients to allow privileged operations.")
+    else:
+        with open(AUTH_FILE) as f:
+            data = json.load(f)
+        print(f"[SECURITY] Using existing API key from auth.json: {data['api_key']}")
+    return data["api_key"]
+
+API_KEY = setup_auth()
 
 # Setup logger
 logging.basicConfig(level=logging.INFO)
@@ -82,6 +105,13 @@ os.environ["COMMANDLINE_ARGS"] = " ".join(args)
 # Optional debug
 logger.info(f"Launching with device: {device}")
 logger.debug(f"COMMANDLINE_ARGS: {os.environ['COMMANDLINE_ARGS']}")
+
+# Activate the translation layer before launching the backend
+try:
+    import translation_layer
+    print("[translation_layer] Interceptor auto-activated in launch_webui_backend.py")
+except Exception as e:
+    print(f"[translation_layer] Failed to import/activate: {e}")
 
 # Launch backend
 import launch

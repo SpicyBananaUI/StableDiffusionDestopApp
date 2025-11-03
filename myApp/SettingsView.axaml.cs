@@ -40,6 +40,12 @@ public partial class SettingsView : UserControl
         var saveButton = this.FindControl<Button>("SaveApiKeyButton");
         if (saveButton != null)
             saveButton.Click += OnSaveApiKeyClicked;
+        
+        var passwordBox = this.FindControl<TextBox>("PasswordBox");
+        
+        var savePasswordButton = this.FindControl<Button>("SavePasswordButton");
+        if (savePasswordButton != null)
+            savePasswordButton.Click += OnSavePasswordClicked;
     }
 
     private async void WaitForApiReadyAsync()
@@ -74,6 +80,19 @@ public partial class SettingsView : UserControl
             var box = MessageBoxManager.GetMessageBoxStandard("Error", $"Failed to initialize prompt assistant service. Error: {ex.Message}");
             return;
         }
+    }
+    
+    private void OnSavePasswordClicked(object sender, RoutedEventArgs e)
+    {
+        var passwordBox = this.FindControl<TextBox>("PasswordBox");
+        var newKey = passwordBox?.Text?.Trim();
+
+        if (string.IsNullOrEmpty(newKey))
+        {
+            return;
+        }
+        
+        App.AppConfig.BackendPassword = newKey;
     }
 
     private void RegisterBindings()

@@ -1,5 +1,5 @@
 [Setup]
-AppId={{5CF91F71-3F8C-4F74-A46A-F1E8CBFD5E3C}
+AppId={{5CF91F71-3F8C-4F74-A46A-F1E8CBFD5E3C}}
 AppName=Stable Diffusion Desktop App
 AppVersion=1.0
 AppPublisher=Spicy Banana
@@ -17,7 +17,7 @@ WizardStyle=modern
 ; Embedded Python environment (much smaller than venv!)
 ; Add the icon file for installer and shortcuts
 Source: "desktopIcon.ico"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\python-embedded\*"; DestDir: "{app}\python-embedded"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "python-embedded\*"; DestDir: "{app}\python-embedded"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 ; Backend application (excluding large model files completely)
 Source: "..\backend\*"; DestDir: "{app}\backend"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "webui-venv,fastAPI,models,__pycache__,*.pyc,*.pyo"
@@ -38,7 +38,6 @@ Source: "batch_scripts_embedded\*"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name: "{group}\Stable Diffusion Desktop App"; Filename: "{app}\launch_app.bat"; IconFilename: "{app}\desktopIcon.ico"
-Name: "{group}\Launch Backend Only"; Filename: "{app}\launch_backend.bat"
 Name: "{group}\Download Models"; Filename: "{app}\download_models.bat"
 Name: "{userdesktop}\Stable Diffusion Desktop App"; Filename: "{app}\launch_app.bat"; Tasks: desktopicon; IconFilename: "{app}\desktopIcon.ico"
 

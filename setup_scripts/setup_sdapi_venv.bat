@@ -63,6 +63,12 @@ if exist "requirements_versions.txt" (
     echo requirements_versions.txt not found! Skipping package installation.
 )
 
+REM Install the translation layer
+echo "Installing translation layer..."
+cd ..
+pip install -e .
+
+
 REM TODO: Create any directories that are .gitignored
 
 echo.

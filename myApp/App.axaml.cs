@@ -40,15 +40,42 @@ public partial class App : Application
     {
         public static RunMode Mode { get; set; }
         public static string RemoteAddress { get; set; } =  "http://127.0.0.1:7861";
+        public static string BackendPassword { get; set; } = "";
     }
     
     public static class BackendLauncher
     {
-        private static string GetBatchPath() =>
-            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..", "setup_scripts", "launch_sdapi_server.bat");
+        private static string GetBatchPath()
+        {
+            // Base directory of the running app (frontend publish folder)
+            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
 
-        private static string GetProjectRoot() =>
-            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", ".."); // folder containing backend, myApp, setup_scripts
+            // Candidate: installed layout - batch scripts are placed into the application root by the installer
+            var installedRoot = Path.GetFullPath(Path.Combine(baseDir, "..")); // {app}
+            var installedLaunchBackend = Path.Combine(installedRoot, "launch_backend.bat");
+            var installedLaunchApp = Path.Combine(installedRoot, "launch_app.bat");
+            var installedSetupScript = Path.Combine(installedRoot, "setup_scripts", "launch_sdapi_server.bat");
+
+            if (File.Exists(installedLaunchBackend)) return installedLaunchBackend;
+            if (File.Exists(installedLaunchApp)) return installedLaunchApp;
+            if (File.Exists(installedSetupScript)) return installedSetupScript;
+
+            // Fallback: development layout (project root relative to output folder)
+            return Path.Combine(baseDir, "..", "..", "..", "..", "setup_scripts", "launch_sdapi_server.bat");
+        }
+
+        private static string GetProjectRoot()
+        {
+            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            var installedRoot = Path.GetFullPath(Path.Combine(baseDir, "..")); // {app}\
+            // If installer layout exists (there's a launch_backend.bat in the app root), run from app root
+            if (File.Exists(Path.Combine(installedRoot, "launch_backend.bat")) || File.Exists(Path.Combine(installedRoot, "launch_app.bat")))
+            {
+                return installedRoot;
+            }
+            // Otherwise fallback to project root for development
+            return Path.Combine(baseDir, "..", "..", "..", ".."); // folder containing backend, myApp, setup_scripts
+        }
 
         public static void LaunchLocalBackend()
         {

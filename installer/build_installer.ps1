@@ -8,6 +8,9 @@ param(
 
 Write-Host "=== Stable Diffusion Installer Build (Embedded Python) ===" -ForegroundColor Green
 
+# Base directory for this script (installer folder)
+$scriptDir = $PSScriptRoot
+
 # Check if Inno Setup is installed
 $innoPath = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
 if (-not (Test-Path $innoPath)) {
@@ -37,27 +40,6 @@ if ($BuildFrontend) {
     Write-Host "Frontend build completed" -ForegroundColor Green
 }
 
-Write-Host "Current directory: $(Get-Location)"
-
-# Verify embedded Python exists
-if (-not (Test-Path "..\python-embedded\python.exe")) {
-    Write-Host "ERROR: Embedded Python not found!" -ForegroundColor Red
-    Write-Host "Building embedded Python environment first..." -ForegroundColor Yellow
-    
-    Write-Host "Current directory: $(Get-Location)"
-
-    # Run the embedded Python build script
-    python build_embedded_python.py
-    
-    Write-Host "Current directory: $(Get-Location)"
-
-    if (-not (Test-Path "..\\python-embedded\\python.exe")) {
-        Write-Host "ERROR: Failed to create embedded Python environment!" -ForegroundColor Red
-        exit 1
-    }
-    Write-Host "Embedded Python environment created successfully" -ForegroundColor Green
-}
-
 # Verify frontend exists
 if (-not (Test-Path "..\myApp\bin\Release\net9.0\publish\myApp.exe")) {
     Write-Host "ERROR: Frontend not found!" -ForegroundColor Red
@@ -65,14 +47,34 @@ if (-not (Test-Path "..\myApp\bin\Release\net9.0\publish\myApp.exe")) {
     exit 1
 }
 
-# Calculate sizes for info
-$embeddedSize = (Get-ChildItem "..\python-embedded" -Recurse | Measure-Object -Sum Length).Sum / 1GB
-$backendSize = (Get-ChildItem "..\backend" -Recurse | Where-Object {$_.FullName -notlike "*\models\*" -and $_.FullName -notlike "*webui-venv*"} | Measure-Object -Sum Length).Sum / 1MB
+# Check if embedded Python already exists (relative to the installer folder)
+$embeddedPythonExe = Join-Path $scriptDir "python-embedded\python.exe"
+if (-not (Test-Path $embeddedPythonExe)) {
+    Write-Host "Building embedded Python environment first..." -ForegroundColor Yellow
+    
+    # Run the embedded Python build script
+    # Run script from installer directory so relative paths are consistent
+    Push-Location $scriptDir
+    python build_embedded_python.py
+    Pop-Location
+
+    if (-not (Test-Path $embeddedPythonExe)) {
+        Write-Host "ERROR: Failed to create embedded Python environment!" -ForegroundColor Red
+        exit 1
+    }
+    Write-Host "Embedded Python environment created successfully" -ForegroundColor Green
+}
+
+# Calculate sizes for info (use paths relative to installer folder)
+$embeddedPath = Join-Path $scriptDir "\python-embedded"
+$embeddedSize = (Get-ChildItem $embeddedPath -Recurse | Measure-Object -Sum Length).Sum / 1GB
+$backendPath = Join-Path $scriptDir "..\backend"
+$backendSize = (Get-ChildItem $backendPath -Recurse | Where-Object {$_.FullName -notlike "*\models\*" -and $_.FullName -notlike "*webui-venv*"} | Measure-Object -Sum Length).Sum / 1GB
 
 Write-Host ""
 Write-Host "Build Summary:" -ForegroundColor Cyan
 Write-Host "  Embedded Python: $($embeddedSize.ToString('F1')) GB"
-Write-Host "  Backend: $($backendSize.ToString('F1')) MB" 
+Write-Host "  Backend: $($backendSize.ToString('F1')) GB" 
 
 # Build installer
 Write-Host ""

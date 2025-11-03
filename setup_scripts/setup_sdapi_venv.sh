@@ -36,6 +36,11 @@ pip install --upgrade pip
 echo "Installing required packages..."
 pip install -r requirements_versions.txt
 
+# Install the translation layer
+echo "Installing translation layer..."
+cd ..
+pip install -e .
+
 
 echo ""
 echo "Setup complete!"
