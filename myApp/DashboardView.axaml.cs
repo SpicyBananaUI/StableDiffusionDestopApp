@@ -154,6 +154,16 @@ public partial class DashboardView : UserControl
             enhancePromptButton.Click += EnhancePromptButton_Click;
         }
 
+        if (this.FindControl<Button>("TranslationLayerButton") is Button translationLayerButton)
+        {
+            translationLayerButton.Click += OnTranslationLayerButtonClick;
+        }
+    }
+
+    private void OnTranslationLayerButtonClick(object? sender, RoutedEventArgs e)
+    {
+        var translationLayerView = new TranslationLayerView();
+        translationLayerView.Show();
     }
 
     private async void EnhancePromptButton_Click(object sender, RoutedEventArgs e)
