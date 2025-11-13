@@ -235,6 +235,17 @@
                         </StackPanel>
                     </Border>
 
+                    <Expander Header="Last Generation Info" Background="#1a1a1a" CornerRadius="6" Padding="10" BorderBrush="#333" BorderThickness="1">
+                        <StackPanel Spacing="5">
+                            <TextBlock x:Name="InfoPromptText" FontSize="12" Foreground="#ccc"/>
+                            <TextBlock x:Name="InfoNegativePromptText" FontSize="12" Foreground="#ccc"/>
+                            <TextBlock x:Name="InfoStepsText" FontSize="12" Foreground="#ccc"/>
+                            <TextBlock x:Name="InfoSamplerText" FontSize="12" Foreground="#ccc"/>
+                            <TextBlock x:Name="InfoSeedText" FontSize="12" Foreground="#ccc"/>
+                            <TextBlock x:Name="InfoSizeText" FontSize="12" Foreground="#ccc"/>
+                        </StackPanel>
+                    </Expander>
+
                 </StackPanel>
             </ScrollViewer>
 

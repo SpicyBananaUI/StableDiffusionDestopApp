@@ -357,6 +357,7 @@ public partial class DashboardView : UserControl
                 }
                 catch (OperationCanceledException){
                     //Expected
+                    Console.WriteLine($"Expected OperationCanceledException in OnGenerateButtonClick");
                 }
             });
             
@@ -424,6 +425,7 @@ public partial class DashboardView : UserControl
         catch (Exception ex)
         {
             statusText.Text = $"Error: {ex.Message}";
+            Console.WriteLine($"Exception in OnGenerateButtonClick: {ex}");
         }
         finally
         {
