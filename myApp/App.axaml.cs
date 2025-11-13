@@ -1,8 +1,11 @@
 using System;
+using System.Runtime.InteropServices;
+
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Security;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -45,7 +48,9 @@ public partial class App : Application
     
     public static class BackendLauncher
     {
-        private static string GetBatchPath()
+        private static string AppName = "SDApp";
+        
+        private static string GetBatchPath() // Windows only
         {
             // Base directory of the running app (frontend publish folder)
             var baseDir = AppDomain.CurrentDomain.BaseDirectory;
@@ -63,8 +68,35 @@ public partial class App : Application
             // Fallback: development layout (project root relative to output folder)
             return Path.Combine(baseDir, "..", "..", "..", "..", "setup_scripts", "launch_sdapi_server.bat");
         }
+        private static string GetShellPathMac()
+        {
+          #if DEBUG
+            // Use local scripts in development (Debug)
+            var scriptsDir = Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory,
+                "../../../../setup_scripts");
+          #else
+            // Use bundled scripts in Application Support for release
+            var scriptsDir = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                AppName,
+                "setup_scripts");
+            // Base directory of the running app (frontend publish folder)
+            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+          #endif
+            
+            Console.WriteLine($"Using scripts directory: {scriptsDir}");
 
-        private static string GetProjectRoot()
+            return Path.Combine(scriptsDir, "launch_sdapi_server.sh");
+
+        }
+        private static string GetShellPathLinux()
+        {
+            // TODO: Linux implementation
+            return "";
+        }
+
+        private static string GetProjectRootWindows()
         {
             var baseDir = AppDomain.CurrentDomain.BaseDirectory;
             var installedRoot = Path.GetFullPath(Path.Combine(baseDir, "..")); // {app}\
@@ -76,14 +108,78 @@ public partial class App : Application
             // Otherwise fallback to project root for development
             return Path.Combine(baseDir, "..", "..", "..", ".."); // folder containing backend, myApp, setup_scripts
         }
+        private static string GetProjectRootMac()
+        {
+          #if DEBUG
+            // Use local scripts in development (Debug)
+            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            return Path.Combine(baseDir, "..", "..", "..", "..");
+          #else
+            // Use bundled scripts in Application Support for release
+            return Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                AppName
+            );
+          #endif
+        }
+        private static string GetProjectRootLinux()
+        {
+            // TODO: Linux implementation
+            return "";
+        }
+
 
         public static void LaunchLocalBackend()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                LaunchLocalBackendMac();
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                LaunchLocalBackendWindows();
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                LaunchLocalBackendLinux();
+            }
+            else
+            {
+                throw new NotSupportedException("Local backend launch is not supported on this platform.");
+            }
+        }
+        private static void LaunchLocalBackendWindows()
         {
             var psi = new ProcessStartInfo
             {
                 FileName = GetBatchPath(),
                 Arguments = "",
-                WorkingDirectory = GetProjectRoot(),
+                WorkingDirectory = GetProjectRootWindows(),
+                UseShellExecute = true,
+                CreateNoWindow = false
+            };
+            Process.Start(psi);
+        }
+        private static void LaunchLocalBackendMac()
+        {
+            var scriptPath = GetShellPathMac();
+            var psi = new ProcessStartInfo
+            {
+                FileName = "/bin/bash",
+                Arguments = $"\"{scriptPath}\" --local-backend",
+                WorkingDirectory = GetProjectRootMac(),
+                UseShellExecute = true,
+                CreateNoWindow = false
+            };
+            Process.Start(psi);
+        }
+        private static void LaunchLocalBackendLinux()
+        {
+            var psi = new ProcessStartInfo
+            {
+                FileName = GetShellPathLinux(),
+                Arguments = "",
+                WorkingDirectory = GetProjectRootLinux(),
                 UseShellExecute = true,
                 CreateNoWindow = false
             };
@@ -92,15 +188,177 @@ public partial class App : Application
 
         public static void LaunchRemoteServer()
         {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                LaunchRemoteServerMac();
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                LaunchRemoteServerWindows();
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                LaunchRemoteServerLinux();
+            }
+            else
+            {
+                throw new NotSupportedException("Remote server launch is not supported on this platform.");
+            }
+        }
+        private static void LaunchRemoteServerWindows()
+        {
             var psi = new ProcessStartInfo
             {
                 FileName = GetBatchPath(),
                 Arguments = "--listen",
-                WorkingDirectory = GetProjectRoot(),
+                WorkingDirectory = GetProjectRootWindows(),
                 UseShellExecute = true,
                 CreateNoWindow = false
             };
             Process.Start(psi);
+        }
+        private static void LaunchRemoteServerLinux()
+        {
+            var psi = new ProcessStartInfo
+            {
+                FileName = GetShellPathLinux(),
+                Arguments = "--listen",
+                WorkingDirectory = GetProjectRootLinux(),
+                UseShellExecute = true,
+                CreateNoWindow = false
+            };
+            Process.Start(psi);
+        }
+        private static void LaunchRemoteServerMac()
+        {
+            var scriptPath = GetShellPathMac();
+            var workingDir = GetProjectRootMac();
+            
+            // Run the script directly - UseShellExecute=true will open it in Terminal on macOS
+            // The script runs in foreground so it stays alive
+            var psi = new ProcessStartInfo
+            {
+                FileName = "/bin/bash",
+                Arguments = $"\"{scriptPath}\" --remote-server",
+                WorkingDirectory = workingDir,
+                UseShellExecute = true,
+                CreateNoWindow = false
+            };
+            
+            Process.Start(psi);
+        }
+
+        private static string GetInstallerScriptPathMac()
+        {
+            // In app bundle, setup_scripts is in Contents/setup_scripts
+            // BaseDirectory is Contents/MacOS, so we need to go up one level
+            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            #if DEBUG
+                return Path.Combine(baseDir, "..", "..", "..", "..", "setup_scripts", "setup_app_support.sh");
+            #else
+                return Path.Combine(baseDir, "..", "setup_scripts", "setup_app_support.sh");
+            #endif
+        }
+        
+        private static string GetAppBundleRootMac()
+        {
+            // Get the app bundle root (Contents directory parent)
+            var baseDir = AppDomain.CurrentDomain.BaseDirectory; // Contents/MacOS
+            #if DEBUG
+                return Path.Combine(baseDir, "..", "..", "..", ".."); // project root
+            #else
+                return Path.Combine(baseDir, "..", ".."); // .app/Contents
+            #endif
+        }
+        
+        public static void FinishInstallMac()
+        {
+            var scriptPath = GetInstallerScriptPathMac();
+            var appBundleRoot = GetAppBundleRootMac();
+            
+            // Verify script exists
+            if (!File.Exists(scriptPath))
+            {
+                Console.WriteLine($"ERROR: Setup script not found at: {scriptPath}");
+                return;
+            }
+            
+            // Get absolute paths
+            var absoluteScriptPath = Path.GetFullPath(scriptPath);
+            var absoluteAppBundleRoot = Path.GetFullPath(appBundleRoot);
+            
+            // Create a wrapper script that opens in Terminal and runs the setup
+            var wrapperScript = Path.Combine(Path.GetTempPath(), $"setup_backend_{Guid.NewGuid()}.sh");
+            var escapedScriptPath = absoluteScriptPath.Replace("'", "'\\''");
+            var escapedAppBundleRoot = absoluteAppBundleRoot.Replace("'", "'\\''");
+            
+            var wrapperContent = $"#!/bin/bash\n" +
+                               $"echo '=== SDApp Backend Setup ==='\n" +
+                               $"echo ''\n" +
+                               $"echo 'App Bundle Root: {escapedAppBundleRoot}'\n" +
+                               $"echo 'Script Path: {escapedScriptPath}'\n" +
+                               $"echo ''\n" +
+                               $"cd '{escapedAppBundleRoot}'\n" +
+                               $"if [ ! -f '{escapedScriptPath}' ]; then\n" +
+                               $"  echo 'ERROR: Script not found at {escapedScriptPath}'\n" +
+                               $"  exit 1\n" +
+                               $"fi\n" +
+                               $"bash '{escapedScriptPath}' '{escapedAppBundleRoot}'\n" +
+                               $"EXIT_CODE=$?\n" +
+                               $"echo ''\n" +
+                               $"if [ $EXIT_CODE -eq 0 ]; then\n" +
+                               $"  echo 'Setup completed successfully!'\n" +
+                               $"else\n" +
+                               $"  echo 'Setup failed with exit code:' $EXIT_CODE\n" +
+                               $"fi\n" +
+                               $"echo ''\n" +
+                               $"echo 'Press Enter to close...'\n" +
+                               $"read\n";
+            
+            File.WriteAllText(wrapperScript, wrapperContent);
+            
+            // Make it executable
+            var chmod = new ProcessStartInfo
+            {
+                FileName = "/bin/chmod",
+                Arguments = $"+x \"{wrapperScript}\"",
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
+            };
+            Process.Start(chmod)?.WaitForExit();
+            
+            // Use osascript to open Terminal and execute the script
+            // This is the most reliable method from app bundles
+            var escapedWrapperScript = wrapperScript.Replace("\\", "\\\\").Replace("\"", "\\\"");
+            
+            var osaPsi = new ProcessStartInfo
+            {
+                FileName = "/usr/bin/osascript",
+                UseShellExecute = false,
+                CreateNoWindow = false
+            };
+            
+            osaPsi.ArgumentList.Add("-e");
+            osaPsi.ArgumentList.Add("tell application \"Terminal\"");
+            osaPsi.ArgumentList.Add("-e");
+            osaPsi.ArgumentList.Add("activate");
+            osaPsi.ArgumentList.Add("-e");
+            osaPsi.ArgumentList.Add($"do script \"{escapedWrapperScript}\"");
+            osaPsi.ArgumentList.Add("-e");
+            osaPsi.ArgumentList.Add("end tell");
+            
+            try
+            {
+                Process.Start(osaPsi);
+            }
+            catch (Exception ex)
+            {
+                // If osascript fails (e.g., permission issues), log error but continue
+                Console.WriteLine($"Warning: Could not open Terminal via osascript: {ex.Message}");
+                Console.WriteLine($"You may need to run the setup manually:");
+                Console.WriteLine($"  {wrapperScript}");
+            }
         }
 
         public static void ConnectToRemoteServer()
@@ -115,11 +373,6 @@ public partial class App : Application
         switch (mode)
         {
             case RunMode.Local:
-                // For now use old macos setup (Copy the backend into Application support and run it)
-                BackendManager.EnsureBackendFromBundleMac();
-                BackendManager.DownloadDreamshaperMac();
-                BackendManager.RunBackendMac();
-
                 // Start backend locally with -listen so frontend can connect
                 BackendLauncher.LaunchLocalBackend();
                 break;
@@ -140,6 +393,12 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                BackendLauncher.FinishInstallMac();
+            }
+
             ConfigManager.Load();
 
             var apiKey = ConfigManager.Settings.ApiKey;

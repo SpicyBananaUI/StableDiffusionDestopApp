@@ -54,6 +54,7 @@ backend/models/
 # Installer output
 installer_output/
 installer/publish/
+installer/dmg_build/
 
 # Cache and temporary files
 backend/cache/
@@ -67,3 +68,6 @@ backend/repositories/
 **/torch/lib/*.lib
 **/llvmlite/binding/*.dll
 **/cv2/*.pyd
+
+# Authentication files
+backend/auth.json

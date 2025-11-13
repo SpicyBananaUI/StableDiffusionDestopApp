@@ -79,18 +79,18 @@ public static class BackendManager
         }
         // Decide scripts directory based on build configuration
         string scriptsDir;
-#if DEBUG
+      #if DEBUG
         // Use local scripts in development (Debug)
         scriptsDir = Path.Combine(
                 AppDomain.CurrentDomain.BaseDirectory,
                 "../../../../setup_scripts");
-#else
+      #else
         // Use bundled scripts in Application Support for release
         scriptsDir = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
             AppName,
             "setup_scripts");
-#endif
+      #endif
         Console.WriteLine($"Using scripts directory: {scriptsDir}");
 
         string backendScriptPath = Path.Combine(scriptsDir, scriptName);
@@ -176,12 +176,10 @@ public static class BackendManager
         RunSetupScriptMac("setup_sdapi_model.sh", "Exiting default model download script.");
     }
 
-    /// <summary>
     /// Launches the backend on macOS. Waits until it prints "Application startup complete".
-    /// </summary>
     public static void RunBackendMac()
     {
         RunSetupScriptMac("launch_sdapi_server.sh", "Application startup complete");
     }
-    
+
 }
