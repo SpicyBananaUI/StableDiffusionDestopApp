@@ -1,6 +1,5 @@
 @echo off
 REM Stable Diffusion Backend Launcher - Embedded Python Version
-REM No venv activation needed!
 
 echo ======================================
 echo   Stable Diffusion Backend Server    
