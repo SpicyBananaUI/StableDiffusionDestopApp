@@ -2,203 +2,271 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="myApp.DashboardView">
-    
-    <DockPanel>
+             mc:Ignorable="d"
+             x:Class="myApp.DashboardView"
+             d:DesignWidth="1200"
+             d:DesignHeight="700">
 
-        <!-- Main Content Grid -->
-        <Grid Margin="10">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="2*" />
-                <ColumnDefinition Width="3*" />
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
+    <DockPanel Background="#111">
 
-            <!-- Prompt Inputs -->
-            <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,10">
-                
-                <Grid Margin="0,0,0,5">
-                    
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />   <!-- TextBlock stretches -->
-                        <ColumnDefinition Width="Auto"/> <!-- Enhance Button -->
-                        <ColumnDefinition Width="Auto"/> <!-- Help Button -->
-                    </Grid.ColumnDefinitions>
-                    
-                    <TextBlock Grid.Column="0" Text="Prompt &amp; Negative Prompt" FontWeight="Bold" VerticalAlignment="Center"/>
-                    <Button Grid.Column="1" Name="EnhancePromptButton" Content="Enhance Prompt with AI" Width = "180"/>
-                    <Button Grid.Column="2" HorizontalAlignment="Right" Background="Transparent" 
-                            BorderThickness="0" Width="25" Height="30" Margin="0,0,5,0"
-                            Click="ShowPromptTips">
-                        <Button.Content>
-                            <TextBlock Text="?" Foreground="LightGray" FontWeight="Bold"/>
-                        </Button.Content>
-                    </Button>
-                </Grid>
-                
-                <TextBox x:Name="PromptTextBox" Watermark="Enter prompt..." Background="#333" Foreground="White"/>
-                <TextBox x:Name="NegativePromptTextBox" Watermark="Enter negative prompt..." Background="#333" Foreground="White" Margin="0,5,0,0"/>
-            </StackPanel>
+        <Grid Margin="20" ColumnDefinitions="2*,3*" RowDefinitions="*">
+            <!-- LEFT SIDE -->
+            <ScrollViewer Grid.Column="0"
+                          VerticalScrollBarVisibility="Hidden"
+                          HorizontalScrollBarVisibility="Disabled">
+                <StackPanel Spacing="15" Margin="0,0,20,0">
 
-            <!-- Controls Section -->
-            <ScrollViewer Grid.Row="1" Grid.Column="0" VerticalScrollBarVisibility="Auto">
-                <StackPanel Spacing="10">
-                    <!-- Controls -->
-                    <Border BorderBrush="Gray" BorderThickness="1" Padding="10">
-                        <StackPanel>
-                            <TextBlock Text="Controls" FontWeight="Bold"/>
-                            <Button Grid.Column="1" HorizontalAlignment="Right" Background="Transparent" 
-                                    BorderThickness="0" Width="25" Height="30" Margin="0,0,5,0"
-                                    Click="ShowControlTips">
-                                <Button.Content>
-                                    <TextBlock Text="?" Foreground="LightGray" FontWeight="Bold"/>
-                                </Button.Content>
-                            </Button>
+                    <!-- PROMPT INPUT -->
+                    <Border CornerRadius="10"
+                            Padding="15"
+                            Background="#1c1c1c"
+                            BorderBrush="#333"
+                            BorderThickness="1">
+                        <StackPanel Spacing="8">
+                            <Grid ColumnDefinitions="*,Auto,Auto">
+                                <TextBlock Text="Prompt"
+                                           FontSize="16"
+                                           FontWeight="Bold"
+                                           VerticalAlignment="Center"
+                                           Foreground="White"/>
+
+                                <Button Grid.Column="1"
+                                        Content="Enhance Prompt with AI"
+                                        Width="180"
+                                        Margin="10,0,0,0"/>
+
+                                <Button Grid.Column="2"
+                                        Width="30"
+                                        Height="30"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        VerticalAlignment="Center"
+                                        Click="ShowPromptTips">
+                                    <TextBlock Text="?" Foreground="LightGray" FontWeight="Bold"
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Center"/>
+                                </Button>
+                            </Grid>
+
+                            <TextBox x:Name="PromptTextBox"
+                                     AcceptsReturn="True"
+                                     TextWrapping="Wrap"
+                                     MinHeight="60"
+                                     MaxHeight="300"
+                                     Background="#2b2b2b"
+                                     Foreground="White"
+                                     CornerRadius="6"
+                                     Padding="8"
+                                     Watermark="Enter prompt..."
+                                     HorizontalAlignment="Stretch"
+                                     VerticalAlignment="Top"/>
+
+                            <TextBox x:Name="NegativePromptTextBox"
+                                     AcceptsReturn="True"
+                                     TextWrapping="Wrap"
+                                     MinHeight="60"
+                                     MaxHeight="300"
+                                     Background="#2b2b2b"
+                                     Foreground="White"
+                                     CornerRadius="6"
+                                     Padding="8"
+                                     Watermark="Enter negative prompt..."
+                                     HorizontalAlignment="Stretch"
+                                     VerticalAlignment="Top"/>
+
+                        </StackPanel>
+                    </Border>
+
+                    <!-- CONTROLS -->
+                    <Border Background="#1c1c1c"
+                            CornerRadius="10"
+                            Padding="15"
+                            BorderBrush="#333"
+                            BorderThickness="1">
+                        <StackPanel Spacing="10">
+                            <DockPanel LastChildFill="False" VerticalAlignment="Center">
+                                <TextBlock Text="Controls"
+                                           FontSize="16"
+                                           FontWeight="Bold"
+                                           Foreground="White"
+                                           VerticalAlignment="Center"
+                                           DockPanel.Dock="Left"/>
+
+                                <Button Width="30"
+                                        Height="30"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        DockPanel.Dock="Right"
+                                        VerticalAlignment="Center"
+                                        Click="ShowControlTips">
+                                    <TextBlock Text="?"
+                                               Foreground="LightGray"
+                                               FontWeight="Bold"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"/>
+                                </Button>
+                            </DockPanel>
+
 
                             <!-- Mode Toggle -->
-                            <StackPanel Orientation="Horizontal" Margin="0,5,0,10" Spacing="10">
-                                <TextBlock Text="Mode:" VerticalAlignment="Center"/>
-                                <ComboBox x:Name="ModeComboBox" Width="150" SelectedIndex="0">
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <TextBlock Text="Mode:" VerticalAlignment="Center" Foreground="#ddd"/>
+                                <ComboBox x:Name="ModeComboBox" Width="180" SelectedIndex="0">
                                     <ComboBoxItem Content="Text to Image"/>
                                     <ComboBoxItem Content="Image to Image"/>
                                 </ComboBox>
                             </StackPanel>
-                            
-                            <!-- Steps Slider -->
-                            <Grid Margin="0,5,0,0" ColumnDefinitions="Auto,*,Auto">
-                                <TextBlock Text="Steps:" VerticalAlignment="Center" Grid.Column="0" Margin="0,0,10,0"/>
-                                <Slider x:Name="StepsSlider" Minimum="1" Maximum="150" Value="20" Grid.Column="1" />
-                                <TextBlock x:Name="StepsValueText" Text="20" VerticalAlignment="Center" Margin="10,0,0,0" Grid.Column="2"/>
-                            </Grid>
 
-                            <!-- Scale Slider -->
-                            <Grid Margin="0,5,0,0" ColumnDefinitions="Auto,*,Auto">
-                                <TextBlock Text="Scale:" VerticalAlignment="Center" Grid.Column="0" Margin="0,0,10,0"/>
-                                <Slider x:Name="ScaleSlider" Minimum="1" Maximum="30" Value="7.5" Grid.Column="1" />
-                                <TextBlock x:Name="ScaleValueText" Text="7.5" VerticalAlignment="Center" Margin="10,0,0,0" Grid.Column="2"/>
-                            </Grid>
-
-                            <!-- Batch Size Slider -->
-                            <Grid Margin="0,5,0,0" ColumnDefinitions="Auto,*,Auto">
-                                <TextBlock Text="# of Images:" VerticalAlignment="Center" Grid.Column="0" Margin="0,0,10,0"/>
-                                <Slider x:Name="BatchSlider" Minimum="1" Maximum="8" Value="1" Grid.Column="1"/>
-                                <TextBlock x:Name="BatchValueText" Text="1" Margin="10,0,0,0" VerticalAlignment="Center" Grid.Column="2"/>
-                            </Grid>
-                            
-                            <!-- Image2Image Controls -->
-                            <StackPanel x:Name="Image2ImageControls" IsVisible="False" Margin="0,10,0,0" Spacing="8">
-                                <TextBlock Text="Image2Image Settings" FontWeight="Bold"/>
-                                <Button Grid.Column="1" HorizontalAlignment="Right" Background="Transparent" 
-                                        BorderThickness="0" Width="25" Height="30" Margin="0,0,5,0"
-                                        Click="ShowImage2ImageTips">
-                                    <Button.Content>
-                                        <TextBlock Text="?" Foreground="LightGray" FontWeight="Bold"/>
-                                    </Button.Content>
-                                </Button>
-                                <StackPanel Orientation="Horizontal" Spacing="10">
-                                    <Button x:Name="LoadInitImageButton" Content="Load Initial Image"/>
-                                    <Button x:Name="UseCurrentImageButton" Content="Use Current Image" IsEnabled="False"/>
-                                    <Image x:Name="InitImagePreview" Width="100" Height="100"
-                                           Stretch="Uniform" Margin="5"/>
-                                </StackPanel>
+                            <!-- Sliders -->
+                            <StackPanel Spacing="6">
+                                <Grid ColumnDefinitions="Auto,*,Auto">
+                                    <TextBlock Text="Steps:" Foreground="#ddd" VerticalAlignment="Center"/>
+                                    <Slider x:Name="StepsSlider" Minimum="1" Maximum="150" Value="20" VerticalAlignment="Top" Grid.Column="1" Height="48"/>
+                                    <TextBlock x:Name="StepsValueText" Text="20" Foreground="#ccc" VerticalAlignment="Center" Grid.Column="2" Margin="10,0,0,0"/>
+                                </Grid>
 
                                 <Grid ColumnDefinitions="Auto,*,Auto">
-                                    <TextBlock Text="Strength:" VerticalAlignment="Center" Grid.Column="0"/>
-                                    <Slider x:Name="StrengthSlider" Minimum="0" Maximum="1" Value="0.75" Grid.Column="1"/>
-                                    <TextBlock x:Name="StrengthValueText" Text="0.75" Grid.Column="2" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                                    <TextBlock Text="Scale:" Foreground="#ddd" VerticalAlignment="Center"/>
+                                    <Slider x:Name="ScaleSlider" Minimum="1" Maximum="30" Value="7.5" VerticalAlignment="Top" Grid.Column="1" Height="48"/>
+                                    <TextBlock x:Name="ScaleValueText" Text="7.5" Foreground="#ccc" VerticalAlignment="Center" Grid.Column="2" Margin="10,0,0,0"/>
+                                </Grid>
+
+                                <Grid ColumnDefinitions="Auto,*,Auto">
+                                    <TextBlock Text="# of Images:" Foreground="#ddd" VerticalAlignment="Center"/>
+                                    <Slider x:Name="BatchSlider" Minimum="1" Maximum="8" Value="1" VerticalAlignment="Top" Grid.Column="1" Height="48"/>
+                                    <TextBlock x:Name="BatchValueText" Text="1" Foreground="#ccc" VerticalAlignment="Center" Grid.Column="2" Margin="10,0,0,0"/>
                                 </Grid>
                             </StackPanel>
 
-                            <Expander Header="Advanced options" Background="#1a1a1a" CornerRadius="6" Padding="10" BorderBrush="#333" BorderThickness="1">
-                                <StackPanel Spacing="10">
-                                    <!-- Highres Fix -->
-                                    <StackPanel Spacing="6">
-                                        <TextBlock Text="Highres Fix" FontWeight="Bold"/>
-                                        <CheckBox x:Name="EnableHrCheckbox" Content="Enable Highres Fix"/>
-                                        <StackPanel Orientation="Horizontal" Spacing="10">
-                                            <TextBlock Text="Upscaler:" VerticalAlignment="Center"/>
-                                            <ComboBox x:Name="HrUpscalerComboBox" Width="180"/>
-                                            <TextBlock Text="Scale:" VerticalAlignment="Center"/>
-                                            <TextBox x:Name="HrScaleTextBox" Width="60" Watermark="1.5"/>
-                                        </StackPanel>
-                                    </StackPanel>
+                            <!-- Image2Image Section -->
+                            <StackPanel x:Name="Image2ImageControls" IsVisible="False" Spacing="8">
+                                    <Grid ColumnDefinitions="*,Auto,Auto">
+                                        <TextBlock Text="Image2Image Settings"
+                                                   FontSize="16"
+                                                   FontWeight="Bold"
+                                                   VerticalAlignment="Center"
+                                                   Foreground="White"/>
 
+                                        <Button Grid.Column="1"
+                                                Width="30"
+                                                Height="30"
+                                                Background="Transparent"
+                                                BorderThickness="0"
+                                                VerticalAlignment="Center"
+                                                Click="ShowImage2ImageTips">
+                                            <TextBlock Text="?" Foreground="LightGray" FontWeight="Bold"
+                                                       VerticalAlignment="Center"
+                                                       HorizontalAlignment="Center"/>
+                                        </Button>
+                                    </Grid>
+                                
+                                
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <Button x:Name="LoadInitImageButton" Content="Load Initial Image"/>
+                                    <Button x:Name="UseCurrentImageButton" Content="Use Current Image" IsEnabled="False"/>
+                                    <Image x:Name="InitImagePreview" Width="100" Height="100" Stretch="Uniform"/>
+                                </StackPanel>
+                                <Grid ColumnDefinitions="Auto,*,Auto">
+                                    <TextBlock Text="Strength:" Foreground="#ddd" VerticalAlignment="Center"/>
+                                    <Slider x:Name="StrengthSlider" Minimum="0" Maximum="1" Value="0.75" VerticalAlignment="Top" Grid.Column="1" Height="48"/>
+                                    <TextBlock x:Name="StrengthValueText" Text="0.75" Foreground="#ccc" VerticalAlignment="Center" Grid.Column="2" Margin="10,0,0,0"/>
+                                </Grid>
+                            </StackPanel>
+
+                            <!-- Advanced Options -->
+                            <Expander Header="Advanced Options"
+                                      Background="#1a1a1a"
+                                      Padding="10"
+                                      BorderBrush="#333"
+                                      BorderThickness="1">
+                                <StackPanel Spacing="10">
+                                    <TextBlock Text="Highres Fix" FontWeight="Bold" Foreground="White"/>
+                                    <CheckBox x:Name="EnableHrCheckbox" Content="Enable Highres Fix"/>
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <TextBlock Text="Upscaler:" VerticalAlignment="Center" Foreground="#ddd"/>
+                                        <ComboBox x:Name="HrUpscalerComboBox" Width="150"/>
+                                        <TextBlock Text="Scale:" VerticalAlignment="Center" Foreground="#ddd"/>
+                                        <TextBox x:Name="HrScaleTextBox" Width="60" Watermark="1.5"/>
+                                    </StackPanel>
                                 </StackPanel>
                             </Expander>
-
                         </StackPanel>
                     </Border>
 
-                    <!-- Configuration -->
-                    <Border BorderBrush="Gray" BorderThickness="1" Padding="10">
-                        <StackPanel>
-                            <TextBlock Text="Configuration" FontWeight="Bold"/>
-                            <Button Grid.Column="1" HorizontalAlignment="Right" Background="Transparent" 
-                                    BorderThickness="0" Width="25" Height="30" Margin="0,0,5,0"
-                                    Click="ShowConfigurationTips">
-                                <Button.Content>
-                                    <TextBlock Text="?" Foreground="LightGray" FontWeight="Bold"/>
-                                </Button.Content>
-                            </Button>
-                            <ComboBox x:Name="ModelComboBox" PlaceholderText="Choose Model" Margin="0,5,0,0"/>
-                            <ComboBox x:Name="SamplerComboBox" PlaceholderText="Choose Sampler" Margin="0,5,0,0"/>
-                            <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                                <TextBox x:Name="WidthTextBox" Width="50" Watermark="Width"/>
-                                <TextBox x:Name="HeightTextBox" Width="50" Watermark="Height" Margin="5,0,0,0"/>
-                                <TextBox x:Name="SeedTextBox" Width="100" Watermark="Seed" Margin="5,0,0,0" ToolTip.Tip="Leave blank or -1 for random seed"/>
+                    <!-- CONFIGURATION -->
+                    <Border Background="#1c1c1c" CornerRadius="10" Padding="15" BorderBrush="#333" BorderThickness="1">
+                        <StackPanel Spacing="10">
+                            <Grid ColumnDefinitions="*,Auto,Auto">
+                                <TextBlock Text="Configuration"
+                                           FontSize="16"
+                                           FontWeight="Bold"
+                                           VerticalAlignment="Center"
+                                           Foreground="White"/>
+
+                                <Button Grid.Column="1"
+                                        Width="30"
+                                        Height="30"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        VerticalAlignment="Center"
+                                        Click="ShowConfigurationTips">
+                                    <TextBlock Text="?" Foreground="LightGray" FontWeight="Bold"
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Center"/>
+                                </Button>
+                            </Grid>
+
+                            <ComboBox x:Name="ModelComboBox" PlaceholderText="Choose Model" Width="290"/>
+                            <ComboBox x:Name="SamplerComboBox" PlaceholderText="Choose Sampler" Width="290"/>
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <TextBox x:Name="WidthTextBox" Width="70" Watermark="Width"/>
+                                <TextBox x:Name="HeightTextBox" Width="70" Watermark="Height"/>
+                                <TextBox x:Name="SeedTextBox" Width="130" Watermark="Seed" ToolTip.Tip="Leave blank or -1 for random seed"/>
                             </StackPanel>
                         </StackPanel>
                     </Border>
 
-                    <!-- Progress -->
-                    <Border BorderBrush="Gray" BorderThickness="1" Padding="10">
-                        <StackPanel>
-                            <Button x:Name="GenerateButton" Content="Generate" Background="DarkGray" Foreground="White" Margin="0,10,0,0" HorizontalAlignment="Stretch"/>
-                            <Button x:Name="SaveButton" Content="Save" Background="DarkGray" Foreground="White" Margin="0,5,0,0" HorizontalAlignment="Stretch" IsEnabled="False"/>
-                            <Button x:Name="TranslationLayerButton" Content="View Extension Components" Background="DarkGray" Foreground="White" Margin="0,5,0,0" HorizontalAlignment="Stretch"/>
+                    <!-- ACTION BUTTONS -->
+                    <Border Background="#1c1c1c" CornerRadius="10" Padding="15" BorderBrush="#333" BorderThickness="1">
+                        <StackPanel Spacing="8">
+                            <Button x:Name="GenerateButton" Content="Generate" Background="#00A2A8" Foreground="White" FontWeight="Bold" Height="35" Width="290"/>
+                            <Button x:Name="SaveButton" Content="Save" Background="Gray" Foreground="White" IsEnabled="False" Height="35" Width="290"/>
+                            <Button x:Name="TranslationLayerButton" Content="View Extension Components" Background="Gray" Foreground="White" Height="35" Width="290"/>
                         </StackPanel>
                     </Border>
-
-                    <Expander Header="Last Generation Info" Background="#1a1a1a" CornerRadius="6" Padding="10" BorderBrush="#333" BorderThickness="1">
-                        <StackPanel Spacing="5">
-                            <TextBlock x:Name="InfoPromptText" FontSize="12" Foreground="#ccc"/>
-                            <TextBlock x:Name="InfoNegativePromptText" FontSize="12" Foreground="#ccc"/>
-                            <TextBlock x:Name="InfoStepsText" FontSize="12" Foreground="#ccc"/>
-                            <TextBlock x:Name="InfoSamplerText" FontSize="12" Foreground="#ccc"/>
-                            <TextBlock x:Name="InfoSeedText" FontSize="12" Foreground="#ccc"/>
-                            <TextBlock x:Name="InfoSizeText" FontSize="12" Foreground="#ccc"/>
-                        </StackPanel>
-                    </Expander>
 
                 </StackPanel>
             </ScrollViewer>
 
-            <!-- Image Display Section -->
-            <Border Grid.Row="1" Grid.Column="1" BorderBrush="Gray" BorderThickness="1" Padding="10">
-                <Grid Background="#111">
-
-                    <Image x:Name="ResultImage"
-                           Stretch="Uniform"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"/>
-
-                    <StackPanel x:Name="ProgressOverlay" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="False">
-                        <ProgressBar x:Name="LoadingBar" Minimum="0" Maximum="100" Height="20" HorizontalAlignment="Stretch"/>
-                        <TextBlock x:Name="ProgressText" Text="" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+            <!-- RIGHT SIDE (IMAGE PREVIEW) -->
+            <Border Grid.Column="1"
+                    Background="#111"
+                    CornerRadius="10"
+                    BorderBrush="#333"
+                    BorderThickness="1"
+                    Padding="10">
+                <Grid>
+                    <Image x:Name="ResultImage" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <StackPanel x:Name="ProgressOverlay" IsVisible="False" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10">
+                        <ProgressBar x:Name="LoadingBar" Minimum="0" Maximum="100" Height="20"/>
+                        <TextBlock x:Name="ProgressText" Foreground="White" FontWeight="Bold"/>
                     </StackPanel>
 
-                    <StackPanel x:Name="ImageNavPanel" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,60,0,10" Spacing="10" IsVisible="False">
-                        <Button x:Name="PrevImageButton" Content="←" Width="30"/>
-                        <TextBlock x:Name="ImageIndexLabel" Text="Image 1 of 1" Foreground="LightGreen" VerticalAlignment="Center" FontWeight="Bold"/>
-                        <Button x:Name="NextImageButton" Content="→" Width="30"/>
+                    <StackPanel x:Name="ImageNavPanel"
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Bottom"
+                                Spacing="10"
+                                Margin="0,0,0,10"
+                                IsVisible="False">
+                        <Button x:Name="PrevImageButton" Content="←" Width="35"/>
+                        <TextBlock x:Name="ImageIndexLabel" Foreground="LightGreen" FontWeight="Bold"/>
+                        <Button x:Name="NextImageButton" Content="→" Width="35"/>
                     </StackPanel>
 
                     <TextBlock x:Name="StatusText"
                                Text="No image generated yet"
+                               Foreground="#777"
                                HorizontalAlignment="Center"
                                VerticalAlignment="Bottom"
                                Margin="0,10,0,10"/>
@@ -206,5 +274,4 @@
             </Border>
         </Grid>
     </DockPanel>
-    
 </UserControl>

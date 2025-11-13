@@ -95,5 +95,7 @@
     <AvaloniaResource Include="Assets\wnh.jpg" />
     <None Remove="Assets\icon.png" />
     <AvaloniaResource Include="Assets\icon.png" />
+    <None Remove="Assets\icon.jpg" />
+    <None Include="Assets\icon.ico" />
   </ItemGroup>
 </Project>

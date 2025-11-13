@@ -86,10 +86,10 @@ public partial class DashboardView : UserControl
             string selected = item.Content?.ToString() ?? "";
 
             // Ensure Image2ImagePanel exists before using it
-            if (Image2ImagePanel is null)
+            if (Image2ImageControls is null)
                 return;
 
-            Image2ImagePanel.IsVisible = selected == "Image to Image";
+            Image2ImageControls.IsVisible = selected == "Image to Image";
         };
 
         
