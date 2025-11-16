@@ -272,7 +272,7 @@
                                 Margin="0,0,0,10"
                                 IsVisible="False">
                         <Button x:Name="PrevImageButton" Content="←" Width="35"/>
-                        <TextBlock x:Name="ImageIndexLabel" Foreground="LightGreen" FontWeight="Bold"/>
+                        <TextBlock x:Name="ImageIndexLabel" Foreground="#39FF14" FontWeight="Bold"/>
                         <Button x:Name="NextImageButton" Content="→" Width="35"/>
                     </StackPanel>
 

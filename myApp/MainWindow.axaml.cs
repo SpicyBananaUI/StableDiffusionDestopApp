@@ -6,12 +6,17 @@ namespace myApp
 {
     public partial class MainWindow : Window
     {
+        private readonly DashboardView _dashboardView = new DashboardView();
+        private readonly SettingsView _settingsView = new SettingsView();
+        private readonly ModelsView _modelsView = new ModelsView();
+        private readonly GalleryView _galleryView = new GalleryView();
+
         public MainWindow()
         {
             InitializeComponent();
 
             // Load DashboardView by default
-            MainContent.Content = new DashboardView();
+            MainContent.Content = _dashboardView;
             
             
         }
@@ -35,23 +40,23 @@ namespace myApp
 
         private void ShowDashboard_Click(object sender, RoutedEventArgs e)
         {
-            MainContent.Content = new DashboardView();
+            MainContent.Content = _dashboardView;
         
         }
         
         private void ShowSettings_Click(object sender, RoutedEventArgs e)
         {
-            MainContent.Content = new SettingsView();
+            MainContent.Content = _settingsView;
         }
         
         private void ShowModels_Click(object sender, RoutedEventArgs e)
         {
-            MainContent.Content = new ModelsView();
+            MainContent.Content = _modelsView;
         }
         
         private void ShowGallery_Click(object sender, RoutedEventArgs e)
         {
-            MainContent.Content = new GalleryView();
+            MainContent.Content = _galleryView;
         }
     }
 }
