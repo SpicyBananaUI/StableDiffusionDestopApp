@@ -1,18 +1,44 @@
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using myApp.Services;
+using System.Net.Http;
+using System.Text;
+using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
+using System.IO;
+using Avalonia.Media.Imaging;
+using Avalonia;
+using System;
+using Avalonia.Media.TextFormatting.Unicode;
+using Avalonia.Threading;
+using System.Diagnostics;
+using System.Collections.Generic;
 
 namespace myApp
 {
     public partial class MainWindow : Window
     {
+        private readonly DashboardView _dashboardView = new DashboardView();
+        private readonly SettingsView _settingsView = new SettingsView();
+        private readonly ModelsView _modelsView = new ModelsView();
+        private readonly GalleryView _galleryView = new GalleryView();
+
         public MainWindow()
         {
             InitializeComponent();
 
             // Load DashboardView by default
-            MainContent.Content = new DashboardView();
+            MainContent.Content = _dashboardView;
             
+            GalleryService.Img2ImgSelected += bmp =>
+            {
+                Dispatcher.UIThread.Post(() =>
+                {
+                    MainContent.Content = _dashboardView;
+                    _dashboardView.SetInitImage(bmp);
+                });
+            };
             
         }
 
@@ -35,23 +61,30 @@ namespace myApp
 
         private void ShowDashboard_Click(object sender, RoutedEventArgs e)
         {
-            MainContent.Content = new DashboardView();
-        
+            MainContent.Content = _dashboardView;
+            if (SideMenu != null)
+                SideMenu.IsVisible = !SideMenu.IsVisible;
         }
         
         private void ShowSettings_Click(object sender, RoutedEventArgs e)
         {
-            MainContent.Content = new SettingsView();
+            MainContent.Content = _settingsView;
+            if (SideMenu != null)
+                SideMenu.IsVisible = !SideMenu.IsVisible;
         }
         
         private void ShowModels_Click(object sender, RoutedEventArgs e)
         {
-            MainContent.Content = new ModelsView();
+            MainContent.Content = _modelsView;
+            if (SideMenu != null)
+                SideMenu.IsVisible = !SideMenu.IsVisible;
         }
         
         private void ShowGallery_Click(object sender, RoutedEventArgs e)
         {
-            MainContent.Content = new GalleryView();
+            MainContent.Content = _galleryView;
+            if (SideMenu != null)
+                SideMenu.IsVisible = !SideMenu.IsVisible;
         }
     }
 }

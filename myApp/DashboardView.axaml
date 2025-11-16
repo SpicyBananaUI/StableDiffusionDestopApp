@@ -31,6 +31,7 @@
                                            Foreground="White"/>
 
                                 <Button Grid.Column="1"
+                                        Name="EnhancePromptButton"
                                         Content="Enhance Prompt with AI"
                                         Width="180"
                                         Margin="10,0,0,0"/>
@@ -271,7 +272,7 @@
                                 Margin="0,0,0,10"
                                 IsVisible="False">
                         <Button x:Name="PrevImageButton" Content="←" Width="35"/>
-                        <TextBlock x:Name="ImageIndexLabel" Foreground="LightGreen" FontWeight="Bold"/>
+                        <TextBlock x:Name="ImageIndexLabel" Foreground="#39FF14" FontWeight="Bold"/>
                         <Button x:Name="NextImageButton" Content="→" Width="35"/>
                     </StackPanel>
 

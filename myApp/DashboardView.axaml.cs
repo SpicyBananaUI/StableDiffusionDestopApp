@@ -226,6 +226,8 @@ public partial class DashboardView : UserControl
     {
         var generateButton = this.FindControl<Button>("GenerateButton");
 
+        this.FindControl<StackPanel>("ImageNavPanel").IsVisible = false;
+
         if (_isGenerating)
         {
             // Since a generation was ongoing, this press must have been a cancel
