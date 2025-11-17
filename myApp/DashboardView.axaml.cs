@@ -305,7 +305,7 @@ public partial class DashboardView : UserControl
                 {
                     float lastProgress = 0f;
                     int noProgressCount = 0;
-                    const int maxNoProgressCalls = 30; // Cancel if no progress for 30 consecutive calls (15 seconds) TODO: make this configurable in settings
+                    const int maxNoProgressCalls = 50; // Cancel if no progress for 30 consecutive calls (15 seconds) TODO: make this configurable in settings
                     const float progressThreshold = 0.001f; // Consider progress if change is at least 0.1%
 
                     while (!_generationCts.Token.IsCancellationRequested && !done && _isGenerating)
@@ -344,6 +344,9 @@ public partial class DashboardView : UserControl
                             });
                             await _apiService.StopGenerationAsync();  // Tell backend to stop
                             _generationCts.Cancel();
+                            generateButton.IsEnabled = true;
+                            _isGenerating = false;
+                            generateButton.Content = "Generate";
                             break;
                         }
 
