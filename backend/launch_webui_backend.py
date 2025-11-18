@@ -6,6 +6,7 @@ import subprocess
 import logging
 import json
 import secrets
+import getpass
 
 # Ensure backend modules are importable when running under the embedded Python distribution
 BACKEND_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -23,19 +24,58 @@ AUTH_FILE = os.path.join(os.path.dirname(__file__), "auth.json")
 def generate_api_key():
     return secrets.token_hex(16)  # 32-character random key
 
+def secure_auth_file(path):
+    """Restrict auth.json permissions to the current user."""
+    try:
+        if os.name == "nt":
+            current_user = getpass.getuser()
+            subprocess.run(["icacls", path, "/inheritance:r"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.run(["icacls", path, "/grant:r", f"{current_user}:(F)"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        else:
+            os.chmod(path, 0o600)
+    except Exception as exc:
+        print(f"[SECURITY] Warning: Unable to restrict auth.json permissions ({exc})")
+
+def prompt_copy_api_key(key):
+    print("[SECURITY] Generated a new API key. Copy and store it securely; it will not be displayed again.")
+    print(f"[SECURITY] API key: {key}")
+    try:
+        if sys.stdin and sys.stdin.isatty():
+            input("Press Enter after copying the key...")
+    except EOFError:
+        # Non-interactive shells cannot prompt; best effort only.
+        pass
+
 def setup_auth():
+    data = None
     if not os.path.exists(AUTH_FILE):
         key = generate_api_key()
         data = {"api_key": key}
-        with open(AUTH_FILE, "w") as f:
+        with open(AUTH_FILE, "w", encoding="utf-8") as f:
             json.dump(data, f)
-        print(f"[SECURITY] Generated new API key: {key}")
-        print("[SECURITY] Share this key with trusted clients to allow privileged operations.")
-    else:
-        with open(AUTH_FILE) as f:
+        secure_auth_file(AUTH_FILE)
+        prompt_copy_api_key(key)
+        return key
+
+    try:
+        with open(AUTH_FILE, encoding="utf-8") as f:
             data = json.load(f)
-        print(f"[SECURITY] Using existing API key from auth.json: {data['api_key']}")
-    return data["api_key"]
+    except (json.JSONDecodeError, FileNotFoundError, KeyError):
+        print("[SECURITY] auth.json was missing or invalid; generating a new API key.")
+        try:
+            os.remove(AUTH_FILE)
+        except FileNotFoundError:
+            pass
+        return setup_auth()
+
+    api_key = data.get("api_key")
+    if not api_key:
+        print("[SECURITY] auth.json did not contain an api_key; generating a new one.")
+        os.remove(AUTH_FILE)
+        return setup_auth()
+
+    secure_auth_file(AUTH_FILE)
+    return api_key
 
 API_KEY = setup_auth()
 
