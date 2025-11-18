@@ -47,6 +47,20 @@ if (-not (Test-Path "..\myApp\bin\Release\net9.0\publish\myApp.exe")) {
     exit 1
 }
 
+# Ensure translation_layer code is mirrored into backend before packaging
+$translationLayerSource = Join-Path $scriptDir "..\translation_layer"
+$translationLayerDest = Join-Path $scriptDir "..\backend\translation_layer"
+if (Test-Path $translationLayerSource) {
+    Write-Host "Copying translation_layer into backend..." -ForegroundColor Yellow
+    if (Test-Path $translationLayerDest) {
+        Remove-Item $translationLayerDest -Recurse -Force
+    }
+    Copy-Item $translationLayerSource -Destination $translationLayerDest -Recurse -Force
+    Write-Host "translation_layer copied" -ForegroundColor Green
+} else {
+    Write-Host "WARNING: translation_layer source folder not found at $translationLayerSource" -ForegroundColor Yellow
+}
+
 # Check if embedded Python already exists (relative to the installer folder)
 $embeddedPythonExe = Join-Path $scriptDir "python-embedded\python.exe"
 if (-not (Test-Path $embeddedPythonExe)) {

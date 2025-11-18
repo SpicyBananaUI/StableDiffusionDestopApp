@@ -20,7 +20,10 @@ Source: "desktopIcon.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: "python-embedded\*"; DestDir: "{app}\python-embedded"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 ; Backend application (excluding large model files completely)
-Source: "..\backend\*"; DestDir: "{app}\backend"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "webui-venv,fastAPI,models,__pycache__,*.pyc,*.pyo"
+Source: "..\backend\*"; DestDir: "{app}\backend"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "webui-venv,fastAPI,models\*,__pycache__,*.pyc,*.pyo"
+
+; Re-include annotator assets skipped by the generic models exclusion
+Source: "..\backend\extensions-builtin\forge_preprocessor_normalbae\annotator\*"; DestDir: "{app}\backend\extensions-builtin\forge_preprocessor_normalbae\annotator"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 ; Include essential code modules that were excluded above
 Source: "..\backend\modules\models\*"; DestDir: "{app}\backend\modules\models"; Flags: ignoreversion recursesubdirs createallsubdirs
@@ -37,19 +40,15 @@ Source: "batch_scripts_embedded\*"; DestDir: "{app}"; Flags: ignoreversion
 [Dirs]
 
 [Icons]
-Name: "{group}\Stable Diffusion Desktop App"; Filename: "{app}\launch_app.bat"; IconFilename: "{app}\desktopIcon.ico"
-Name: "{group}\Download Models"; Filename: "{app}\download_models.bat"
-Name: "{userdesktop}\Stable Diffusion Desktop App"; Filename: "{app}\launch_app.bat"; Tasks: desktopicon; IconFilename: "{app}\desktopIcon.ico"
+Name: "{group}\Stable Diffusion Desktop App"; Filename: "{app}\frontend\myApp.exe"; WorkingDir: "{app}\frontend"; IconFilename: "{app}\desktopIcon.ico"
+Name: "{userdesktop}\Stable Diffusion Desktop App"; Filename: "{app}\frontend\myApp.exe"; WorkingDir: "{app}\frontend"; Tasks: desktopicon; IconFilename: "{app}\desktopIcon.ico"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: checkedonce
 
 [Run]
-; Create models directory and run model download
-Filename: "{app}\download_models.bat"; Parameters: ""; WorkingDir: "{app}"; Flags: runascurrentuser postinstall; Description: "Download example models (recommended)"
-
 ; Launch the application
-Filename: "{app}\launch_app.bat"; Parameters: ""; WorkingDir: "{app}"; Flags: runascurrentuser postinstall nowait; Description: "Launch Stable Diffusion Desktop App"
+Filename: "{app}\frontend\myApp.exe"; Parameters: ""; WorkingDir: "{app}\frontend"; Flags: runascurrentuser postinstall nowait; Description: "Launch Stable Diffusion Desktop App"
 
 [Code]
 procedure CurStepChanged(CurStep: TSetupStep);

@@ -8,7 +8,6 @@ This folder contains helper files to build an Inno Setup installer for the Stabl
   - Creates an optimized embedded Python environment with minimal dependencies
   - Publishes the .NET frontend as a single-file EXE (win-x64)
   - Copies and optimizes the backend folder (excluding models, cache, repositories)
-  - Generates helper batch scripts (`launch_frontend.bat`, `launch_backend.bat`, `launch_app.bat`, `download_models.bat`)
   - Optionally compiles the final installer EXE with Inno Setup
 
 - **`installer.iss`** - Inno Setup script that packages everything under `installer/publish` into a single installer EXE with Start Menu and Desktop shortcuts

@@ -7,6 +7,17 @@ import logging
 import json
 import secrets
 
+# Ensure backend modules are importable when running under the embedded Python distribution
+BACKEND_ROOT = os.path.dirname(os.path.abspath(__file__))
+if BACKEND_ROOT not in sys.path:
+    sys.path.insert(0, BACKEND_ROOT)
+
+DEBUG_PATHS = os.environ.get("SDAPP_DEBUG_PATHS") == "1"
+if DEBUG_PATHS:
+    print(f"[debug] BACKEND_ROOT set to: {BACKEND_ROOT}")
+    print(f"[debug] sys.path[:5] => {sys.path[:5]}")
+    print(f"[debug] translation_layer present: {os.path.isdir(os.path.join(BACKEND_ROOT, 'translation_layer'))}")
+
 AUTH_FILE = os.path.join(os.path.dirname(__file__), "auth.json")
 
 def generate_api_key():
@@ -107,11 +118,16 @@ logger.info(f"Launching with device: {device}")
 logger.debug(f"COMMANDLINE_ARGS: {os.environ['COMMANDLINE_ARGS']}")
 
 # Activate the translation layer before launching the backend
+translation_layer_imported = False
 try:
     import translation_layer
+    translation_layer_imported = True
     print("[translation_layer] Interceptor auto-activated in launch_webui_backend.py")
 except Exception as e:
     print(f"[translation_layer] Failed to import/activate: {e}")
+finally:
+    if DEBUG_PATHS:
+        print(f"[debug] translation_layer import success: {translation_layer_imported}")
 
 # Launch backend
 import launch

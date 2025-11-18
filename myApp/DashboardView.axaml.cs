@@ -38,7 +38,7 @@ public partial class DashboardView : UserControl
         _instance = this;
 
         // Set up default model and watch for changes
-        InitUIAsync();
+        InitializeDashboardAsync();
         
         
         // Set up event handlers
@@ -261,6 +261,12 @@ public partial class DashboardView : UserControl
         var seedTextBox = this.FindControl<TextBox>("SeedTextBox");
         var modeComboBox = this.FindControl<ComboBox>("ModeComboBox");
     
+        if (_apiService == null)
+        {
+            statusText.Text = "Backend still starting. Please wait...";
+            return;
+        }
+
 
         // Validate input
         if (string.IsNullOrWhiteSpace(promptTextBox?.Text))
@@ -517,41 +523,69 @@ public partial class DashboardView : UserControl
 
 
 
-    private async Task InitUIAsync()
+    private async void InitializeDashboardAsync()
+    {
+        const int maxAttempts = 8;
+        for (var attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            var initialized = await InitUIAsync();
+            if (initialized)
+            {
+                await ReloadModelsAsync();
+                return;
+            }
+
+            var delayMs = attempt < 4 ? 2000 : 5000;
+            Console.WriteLine($"Dashboard init attempt {attempt} failed; retrying in {delayMs}ms");
+            await Task.Delay(delayMs);
+        }
+
+        // Give the user something actionable if the backend never came up
+        var statusText = this.FindControl<TextBlock>("StatusText");
+        if (statusText != null)
+            statusText.Text = "Backend not reachable. Please start the server and click Reload.";
+    }
+
+    private async Task<bool> InitUIAsync()
     {
         try
         {
             await WaitForBackendAsync(App.AppConfig.RemoteAddress);
             
-            // Initialize the API service
-            //_apiService = new ApiService();
             if (App.ApiService == null)
             {
                 App.InitializeApiService();
             }
             _apiService = App.ApiService!;
             
-            // Initialize UI components here if needed
             var modelComboBox = this.FindControl<ComboBox>("ModelComboBox");
-            var models = await _apiService.GetAvailableModelsAsync();
-
             var samplerComboBox = this.FindControl<ComboBox>("SamplerComboBox");
+            var hrUpscalerCombo = this.FindControl<ComboBox>("HrUpscalerComboBox");
+
+            var models = await _apiService.GetAvailableModelsAsync();
             var samplers = await _apiService.GetAvailableSamplersAsync();
-        
+
             if (modelComboBox != null)
             {
                 modelComboBox.ItemsSource = models;
-                modelComboBox.SelectedIndex = 0; // Select the first model by default
+                if (models.Count > 0)
+                    modelComboBox.SelectedIndex = 0;
+
+                modelComboBox.SelectionChanged += async (s, e) =>
+                {
+                    if (modelComboBox.SelectedItem is string selectedModel)
+                    {
+                        await _apiService.SetModelAsync(selectedModel);
+                    }
+                };
             }
 
             if (samplerComboBox != null)
             {
                 samplerComboBox.ItemsSource = samplers;
-                samplerComboBox.SelectedValue = "Euler"; // Select the Euler sampler by default
+                samplerComboBox.SelectedValue = "Euler";
             }
 
-            // Populate Highres Fix upscalers list from backend API
-            var hrUpscalerCombo = this.FindControl<ComboBox>("HrUpscalerComboBox");
             if (hrUpscalerCombo != null)
             {
                 try
@@ -561,24 +595,19 @@ public partial class DashboardView : UserControl
                     if (upscalers.Count > 0)
                         hrUpscalerCombo.SelectedIndex = 0;
                 }
-                catch { }
+                catch (Exception upscalerEx)
+                {
+                    Console.WriteLine($"Failed to load upscalers: {upscalerEx.Message}");
+                }
             }
 
-            modelComboBox.SelectionChanged += async (s, e) =>
-            {
-                if (modelComboBox.SelectedItem is string selectedModel)
-                {
-                    // Handle model selection change if needed
-                    await _apiService.SetModelAsync(selectedModel);
-                }
-            };
-
+            return true;
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Failed to load models: {ex.Message}");
+            return false;
         }
-    
     }
 
     public async Task ReloadModelsAsync()

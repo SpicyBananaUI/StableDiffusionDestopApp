@@ -71,3 +71,8 @@ backend/repositories/
 
 # Authentication files
 backend/auth.json
+
+# Other backend files
+backend/config.json
+backend/params.txt
+backend/ui-config.json
