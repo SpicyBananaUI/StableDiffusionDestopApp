@@ -7,6 +7,13 @@ echo ======================================
 
 set "PYTHON_PATH=%~dp0python-embedded\python.exe"
 set "BACKEND_DIR=%~dp0backend"
+set "PYTHONPATH=%BACKEND_DIR%;%PYTHONPATH%"
+
+REM Ensure backend model directories exist inside the installation root
+if not exist "%BACKEND_DIR%\models" mkdir "%BACKEND_DIR%\models"
+if not exist "%BACKEND_DIR%\models\Stable-diffusion" mkdir "%BACKEND_DIR%\models\Stable-diffusion"
+if not exist "%BACKEND_DIR%\models\VAE" mkdir "%BACKEND_DIR%\models\VAE"
+if not exist "%BACKEND_DIR%\models\LoRA" mkdir "%BACKEND_DIR%\models\LoRA"
 
 echo Starting Stable Diffusion Backend...
 echo Python: %PYTHON_PATH%
@@ -28,7 +35,7 @@ echo.
 
 REM Launch the backend with embedded Python
 cd /d "%BACKEND_DIR%"
-"%PYTHON_PATH%" -c "import sys; sys.path.insert(0, '.'); import launch_webui_backend"
+"%PYTHON_PATH%" "%BACKEND_DIR%\launch_webui_backend.py" %*
 
 REM If we get here, the backend stopped
 echo.

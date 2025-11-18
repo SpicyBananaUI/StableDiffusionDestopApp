@@ -20,7 +20,10 @@ Source: "desktopIcon.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: "python-embedded\*"; DestDir: "{app}\python-embedded"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 ; Backend application (excluding large model files completely)
-Source: "..\backend\*"; DestDir: "{app}\backend"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "webui-venv,fastAPI,models,__pycache__,*.pyc,*.pyo"
+Source: "..\backend\*"; DestDir: "{app}\backend"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "webui-venv,fastAPI,models\*,__pycache__,*.pyc,*.pyo"
+
+; Re-include annotator assets skipped by the generic models exclusion
+Source: "..\backend\extensions-builtin\forge_preprocessor_normalbae\annotator\*"; DestDir: "{app}\backend\extensions-builtin\forge_preprocessor_normalbae\annotator"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 ; Include essential code modules that were excluded above
 Source: "..\backend\modules\models\*"; DestDir: "{app}\backend\modules\models"; Flags: ignoreversion recursesubdirs createallsubdirs
