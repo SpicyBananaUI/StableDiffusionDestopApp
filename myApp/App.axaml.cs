@@ -57,12 +57,9 @@ public partial class App : Application
 
             // Candidate: installed layout - batch scripts are placed into the application root by the installer
             var installedRoot = Path.GetFullPath(Path.Combine(baseDir, "..")); // {app}
-            var installedLaunchBackend = Path.Combine(installedRoot, "launch_backend.bat");
-            var installedLaunchApp = Path.Combine(installedRoot, "launch_app.bat");
-            var installedSetupScript = Path.Combine(installedRoot, "setup_scripts", "launch_sdapi_server.bat");
+            var installedLaunchBackend = Path.Combine(installedRoot, "launch_backend.bat");            var installedSetupScript = Path.Combine(installedRoot, "setup_scripts", "launch_sdapi_server.bat");
 
             if (File.Exists(installedLaunchBackend)) return installedLaunchBackend;
-            if (File.Exists(installedLaunchApp)) return installedLaunchApp;
             if (File.Exists(installedSetupScript)) return installedSetupScript;
 
             // Fallback: development layout (project root relative to output folder)

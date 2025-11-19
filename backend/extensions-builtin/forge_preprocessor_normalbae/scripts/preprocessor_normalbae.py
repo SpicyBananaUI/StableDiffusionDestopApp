@@ -1,3 +1,6 @@
+import os
+import sys
+
 from modules_forge.supported_preprocessor import Preprocessor, PreprocessorParameter
 from modules_forge.shared import preprocessor_dir, add_supported_preprocessor
 from modules_forge.utils import resize_image_with_pad
@@ -8,6 +11,12 @@ import torch
 import numpy as np
 
 from einops import rearrange
+
+script_dir = os.path.dirname(os.path.realpath(__file__))
+annotator_path = os.path.abspath(os.path.join(script_dir, "..", "annotator"))
+if annotator_path not in sys.path:
+    sys.path.insert(0, annotator_path)
+
 from annotator.normalbae.models.NNET import NNET
 from annotator.normalbae import load_checkpoint
 from torchvision import transforms
