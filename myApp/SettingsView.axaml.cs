@@ -46,6 +46,30 @@ public partial class SettingsView : UserControl
         var savePasswordButton = this.FindControl<Button>("SavePasswordButton");
         if (savePasswordButton != null)
             savePasswordButton.Click += OnSavePasswordClicked;
+
+        var timeoutSlider = this.FindControl<Slider>("TimeoutSlider");
+        var timeoutValueText = this.FindControl<TextBlock>("TimeoutValueText");
+
+        if (timeoutSlider != null && timeoutValueText != null)
+        {
+            timeoutSlider.Value = ConfigManager.Settings.GenerationTimeoutSeconds;
+            timeoutValueText.Text = $"{ConfigManager.Settings.GenerationTimeoutSeconds}s";
+
+            timeoutSlider.PropertyChanged += (s, e) =>
+            {
+                if (e.Property == Slider.ValueProperty)
+                {
+                    int val = (int)timeoutSlider.Value;
+                    timeoutValueText.Text = $"{val}s";
+                    ConfigManager.Settings.GenerationTimeoutSeconds = val;
+                }
+            };
+
+            timeoutSlider.AddHandler(InputElement.PointerReleasedEvent, (s, e) =>
+            {
+                ConfigManager.Save();
+            }, RoutingStrategies.Bubble);
+        }
     }
 
     private async void WaitForApiReadyAsync()

@@ -8,6 +8,7 @@ using System.Text.Json;
 public class AppSettings
 {
     public string ApiKey { get; set; } = string.Empty;
+    public int GenerationTimeoutSeconds { get; set; } = 25;
 }
 
 public static class ConfigManager

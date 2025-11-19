@@ -311,7 +311,7 @@ public partial class DashboardView : UserControl
                 {
                     float lastProgress = 0f;
                     int noProgressCount = 0;
-                    const int maxNoProgressCalls = 50; // Cancel if no progress for 30 consecutive calls (15 seconds) TODO: make this configurable in settings
+                    int maxNoProgressCalls = ConfigManager.Settings.GenerationTimeoutSeconds * 2; // Check every 500ms
                     const float progressThreshold = 0.001f; // Consider progress if change is at least 0.1%
 
                     while (!_generationCts.Token.IsCancellationRequested && !done && _isGenerating)

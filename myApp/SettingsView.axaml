@@ -129,6 +129,22 @@
             
             <Border BorderBrush="#444" BorderThickness="1" CornerRadius="6" Padding="12" Background="#1E1E1E" Margin="0,12,0,0">
                 <StackPanel Spacing="12">
+                    <TextBlock Text="Application Settings" FontSize="16" FontWeight="SemiBold"/>
+                    <TextBlock TextWrapping="Wrap" Text="Configure general application behavior."/>
+                    
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Generation Timeout (seconds):" FontWeight="SemiBold"/>
+                        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <Slider x:Name="TimeoutSlider" Minimum="10" Maximum="300" TickFrequency="5" IsSnapToTickEnabled="True" Width="200"/>
+                            <TextBlock x:Name="TimeoutValueText" VerticalAlignment="Center" FontWeight="Bold"/>
+                        </StackPanel>
+                        <TextBlock Text="Time to wait for progress before cancelling generation." FontStyle="Italic" Foreground="#9CDCFE"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+            
+            <Border BorderBrush="#444" BorderThickness="1" CornerRadius="6" Padding="12" Background="#1E1E1E" Margin="0,12,0,0">
+                <StackPanel Spacing="12">
                     <TextBlock Text="Restricted Password" FontSize="16" FontWeight="SemiBold"/>
                     <TextBlock TextWrapping="Wrap" Text="Provide the password the backend you are attempting to connect to has provided for access to restricted features like downloading models."/>
                     
