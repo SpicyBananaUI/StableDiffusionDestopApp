@@ -34,7 +34,7 @@ async def get_component_tree():
             'tree': interceptor.get_component_tree()
         }
     print("Translation layer active. Getting component tree...")
-    print(interceptor.get_component_tree())
+    # print(interceptor.get_component_tree())
     return {
         'active': True,
         'tree': interceptor.get_component_tree()

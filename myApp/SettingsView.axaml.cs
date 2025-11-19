@@ -74,6 +74,7 @@ public partial class SettingsView : UserControl
         var showBaseAppCheckBox = this.FindControl<CheckBox>("ShowBaseAppComponentsCheckBox");
         if (showBaseAppCheckBox != null)
         {
+            // TODO: Clean memory if unchecked
             showBaseAppCheckBox.IsChecked = ConfigManager.Settings.ShowBaseAppComponents;
             showBaseAppCheckBox.IsCheckedChanged += (s, e) =>
             {

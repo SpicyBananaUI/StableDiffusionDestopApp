@@ -81,7 +81,45 @@ namespace myApp
 
                     if (!ConfigManager.Settings.ShowBaseAppComponents && extName == "_base_app")
                     {
-                        Console.WriteLine("Skipping rendering for base app components. Can be disabled in settings.");
+                        Console.WriteLine("Base app components hidden. Can be enabled in settings.");
+                        
+                        // Create a notification box instead of rendering the extension
+                        var notificationBorder = new Border
+                        {
+                            Margin = new Avalonia.Thickness(0, 5, 0, 5),
+                            Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.FromRgb(40, 40, 40)),
+                            BorderBrush = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.FromRgb(100, 100, 100)),
+                            BorderThickness = new Avalonia.Thickness(1),
+                            Padding = new Avalonia.Thickness(15),
+                            CornerRadius = new Avalonia.CornerRadius(4)
+                        };
+                        
+                        var notificationPanel = new StackPanel
+                        {
+                            Spacing = 8
+                        };
+                        
+                        var titleText = new TextBlock
+                        {
+                            Text = "ℹ️ Base App Components Hidden",
+                            FontSize = 14,
+                            FontWeight = Avalonia.Media.FontWeight.SemiBold,
+                            Foreground = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.FromRgb(156, 220, 254))
+                        };
+                        
+                        var messageText = new TextBlock
+                        {
+                            Text = $"Base application components ({extTree.component_count} components) are currently hidden.\nYou can enable them in Settings → Translation Layer → Show Base App Components.",
+                            TextWrapping = Avalonia.Media.TextWrapping.Wrap,
+                            FontSize = 12,
+                            Foreground = Avalonia.Media.Brushes.LightGray
+                        };
+                        
+                        notificationPanel.Children.Add(titleText);
+                        notificationPanel.Children.Add(messageText);
+                        notificationBorder.Child = notificationPanel;
+                        
+                        ComponentsContainer.Children.Add(notificationBorder);
                         continue;
                     }
                     // Create expander for this extension
@@ -147,7 +185,7 @@ namespace myApp
                 return null;
             }
             
-            Console.WriteLine($"Rendering component: {node.Id} ({node.Type})");
+            // Console.WriteLine($"Rendering component: {node.Id} ({node.Type})");
             _renderedComponents.Add(node.Id);
 
             var control = node.Type switch
@@ -587,7 +625,7 @@ namespace myApp
                     var control = RenderComponent(childNode, parentPanel, allComponents);
                     if (control != null)
                     {
-                        Console.WriteLine($"Rendering {childNode.Type} ({childNode.Id})");
+                        // Console.WriteLine($"Rendering {childNode.Type} ({childNode.Id})");
                         parentPanel.Children.Add(control);
                     }
                     else
