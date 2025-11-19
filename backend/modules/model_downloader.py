@@ -4,6 +4,8 @@ from threading import Lock, Thread
 from uuid import uuid4
 import requests
 
+ALLOWED_EXTENSIONS = {".safetensors", ".ckpt", ".pt", ".pth", ".bin", ".onnx"}
+
 
 # Public API of this module
 # - start_model_download(model_url, checksum, target_dir, file_name) -> str (download_id)
@@ -52,6 +54,10 @@ def _background_download(download_id: str, model_url: str, checksum: str | None,
     file_path = os.path.join(target_dir, file_name)
     _init_download_state(download_id, file_path)
 
+    if not any(file_name.lower().endswith(ext) for ext in ALLOWED_EXTENSIONS):
+        _finalize_download(download_id, "failed", f"Invalid file extension. Allowed: {', '.join(sorted(ALLOWED_EXTENSIONS))}")
+        return
+
     try:
         os.makedirs(target_dir, exist_ok=True)
 
@@ -69,8 +75,20 @@ def _background_download(download_id: str, model_url: str, checksum: str | None,
                     downloaded += len(chunk)
                     _update_download_progress(download_id, downloaded, total)
 
+
+        # Verify file type (content check)
+        with open(file_path, "rb") as f:
+            header = f.read(1024)
+        
+        if b"<!DOCTYPE html" in header or b"<html" in header.lower():
+             try:
+                os.remove(file_path)
+             except OSError:
+                pass
+             _finalize_download(download_id, "failed", "File appears to be HTML (possible download error)")
+             return
+
         # Verify checksum if provided
-        # TODO: check file type too
         if checksum is not None and checksum != "":
             with open(file_path, "rb") as f:
                 file_hash = hashlib.sha256(f.read()).hexdigest()
@@ -113,6 +131,7 @@ def start_model_download(model_url: str, checksum: str | None, target_dir: str, 
     with DOWNLOADS_LOCK:
         # If file already exists on disk, do not start
         if os.path.exists(file_path):
+            print(f"File already exists at path: {file_path}")
             return {"status": "exists", "message": "File already exists", "file_path": file_path}
 
         # If a download for the same target path is active, return existing id
