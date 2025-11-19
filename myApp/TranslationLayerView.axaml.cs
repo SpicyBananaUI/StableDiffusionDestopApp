@@ -72,12 +72,18 @@ namespace myApp
 
                 // Sort extensions alphabetically
                 var sortedExtensions = extensions.OrderBy(kvp => kvp.Key);
+                
 
                 // Render each extension in its own expander
                 foreach (var (extName, extTree) in sortedExtensions)
                 {
                     Console.WriteLine($"Rendering extension: {extName} with {extTree.component_count} components");
 
+                    if (!ConfigManager.Settings.ShowBaseAppComponents && extName == "_base_app")
+                    {
+                        Console.WriteLine("Skipping rendering for base app components. Can be disabled in settings.");
+                        continue;
+                    }
                     // Create expander for this extension
                     var expander = new Expander
                     {

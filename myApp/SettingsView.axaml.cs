@@ -70,6 +70,17 @@ public partial class SettingsView : UserControl
                 ConfigManager.Save();
             }, RoutingStrategies.Bubble);
         }
+        
+        var showBaseAppCheckBox = this.FindControl<CheckBox>("ShowBaseAppComponentsCheckBox");
+        if (showBaseAppCheckBox != null)
+        {
+            showBaseAppCheckBox.IsChecked = ConfigManager.Settings.ShowBaseAppComponents;
+            showBaseAppCheckBox.IsCheckedChanged += (s, e) =>
+            {
+                ConfigManager.Settings.ShowBaseAppComponents = showBaseAppCheckBox.IsChecked ?? false;
+                ConfigManager.Save();
+            };
+        }
     }
 
     private async void WaitForApiReadyAsync()

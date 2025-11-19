@@ -9,6 +9,7 @@ public class AppSettings
 {
     public string ApiKey { get; set; } = string.Empty;
     public int GenerationTimeoutSeconds { get; set; } = 25;
+    public bool ShowBaseAppComponents { get; set; } = false;
 }
 
 public static class ConfigManager

@@ -145,6 +145,19 @@
             
             <Border BorderBrush="#444" BorderThickness="1" CornerRadius="6" Padding="12" Background="#1E1E1E" Margin="0,12,0,0">
                 <StackPanel Spacing="12">
+                    <TextBlock Text="Translation Layer" FontSize="16" FontWeight="SemiBold"/>
+                    <TextBlock TextWrapping="Wrap" Text="Configure how extension components are displayed in the Translation Layer view."/>
+                    
+                    <StackPanel Spacing="6">
+                        <CheckBox x:Name="ShowBaseAppComponentsCheckBox" Content="Show Base App Components"/>
+                        <TextBlock TextWrapping="Wrap" FontStyle="Italic" Foreground="#9CDCFE"
+                                   Text="When enabled, components from the base application (not from extensions) will be shown in the Translation Layer view."/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+            
+            <Border BorderBrush="#444" BorderThickness="1" CornerRadius="6" Padding="12" Background="#1E1E1E" Margin="0,12,0,0">
+                <StackPanel Spacing="12">
                     <TextBlock Text="Restricted Password" FontSize="16" FontWeight="SemiBold"/>
                     <TextBlock TextWrapping="Wrap" Text="Provide the password the backend you are attempting to connect to has provided for access to restricted features like downloading models."/>
                     
