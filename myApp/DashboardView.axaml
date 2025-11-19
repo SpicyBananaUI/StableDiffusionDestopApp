@@ -174,8 +174,12 @@
                                 </Grid>
                             </StackPanel>
 
-                            <!-- Advanced Options -->
-                            <Expander Header="Advanced Options"
+                            <!-- Advanced Controls Toggle -->
+                            <CheckBox x:Name="ShowAdvancedCheckbox" Content="Show Advanced Controls" Margin="0,5,0,0"/>
+
+                            <StackPanel IsVisible="{Binding #ShowAdvancedCheckbox.IsChecked}" Spacing="10">
+                                <!-- Hires Fix -->
+                                <Expander Header="Hires Fix"
                                       Background="#1a1a1a"
                                       Padding="10"
                                       BorderBrush="#333"
@@ -189,8 +193,145 @@
                                         <TextBlock Text="Scale:" VerticalAlignment="Center" Foreground="#ddd"/>
                                         <TextBox x:Name="HrScaleTextBox" Width="60" Watermark="1.5"/>
                                     </StackPanel>
+                                    <Grid ColumnDefinitions="Auto,*,Auto">
+                                        <TextBlock Text="Denoising:" Foreground="#ddd" VerticalAlignment="Center"/>
+                                        <Slider x:Name="HrDenoisingSlider" Minimum="0" Maximum="1" Value="0.35" VerticalAlignment="Top" Grid.Column="1" Height="48"/>
+                                        <TextBlock x:Name="HrDenoisingValueText" Text="0.35" Foreground="#ccc" VerticalAlignment="Center" Grid.Column="2" Margin="10,0,0,0"/>
+                                    </Grid>
                                 </StackPanel>
                             </Expander>
+
+                            <!-- FreeU -->
+                            <Expander Header="FreeU"
+                                      Background="#1a1a1a"
+                                      Padding="10"
+                                      BorderBrush="#333"
+                                      BorderThickness="1">
+                                <StackPanel Spacing="10">
+                                    <CheckBox x:Name="FreeUEnabledCheckbox" Content="Enable FreeU"/>
+                                    
+                                    <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">
+                                        <TextBlock Text="B1:" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Foreground="#ddd"/>
+                                        <Slider x:Name="FreeUB1Slider" Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="2" Value="1.01" Margin="5,0"/>
+                                        <TextBlock x:Name="FreeUB1Text" Grid.Row="0" Grid.Column="2" Text="{Binding #FreeUB1Slider.Value, StringFormat={}{0:F2}}" VerticalAlignment="Center" Foreground="#ccc"/>
+
+                                        <TextBlock Text="B2:" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Foreground="#ddd"/>
+                                        <Slider x:Name="FreeUB2Slider" Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="2" Value="1.02" Margin="5,0"/>
+                                        <TextBlock x:Name="FreeUB2Text" Grid.Row="1" Grid.Column="2" Text="{Binding #FreeUB2Slider.Value, StringFormat={}{0:F2}}" VerticalAlignment="Center" Foreground="#ccc"/>
+
+                                        <TextBlock Text="S1:" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" Foreground="#ddd"/>
+                                        <Slider x:Name="FreeUS1Slider" Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="2" Value="0.99" Margin="5,0"/>
+                                        <TextBlock x:Name="FreeUS1Text" Grid.Row="2" Grid.Column="2" Text="{Binding #FreeUS1Slider.Value, StringFormat={}{0:F2}}" VerticalAlignment="Center" Foreground="#ccc"/>
+
+                                        <TextBlock Text="S2:" Grid.Row="3" Grid.Column="0" VerticalAlignment="Center" Foreground="#ddd"/>
+                                        <Slider x:Name="FreeUS2Slider" Grid.Row="3" Grid.Column="1" Minimum="0" Maximum="2" Value="0.95" Margin="5,0"/>
+                                        <TextBlock x:Name="FreeUS2Text" Grid.Row="3" Grid.Column="2" Text="{Binding #FreeUS2Slider.Value, StringFormat={}{0:F2}}" VerticalAlignment="Center" Foreground="#ccc"/>
+
+                                        <TextBlock Text="Start:" Grid.Row="4" Grid.Column="0" VerticalAlignment="Center" Foreground="#ddd"/>
+                                        <Slider x:Name="FreeUStartSlider" Grid.Row="4" Grid.Column="1" Minimum="0" Maximum="1" Value="0.0" Margin="5,0"/>
+                                        <TextBlock x:Name="FreeUStartText" Grid.Row="4" Grid.Column="2" Text="{Binding #FreeUStartSlider.Value, StringFormat={}{0:F2}}" VerticalAlignment="Center" Foreground="#ccc"/>
+
+                                        <TextBlock Text="End:" Grid.Row="5" Grid.Column="0" VerticalAlignment="Center" Foreground="#ddd"/>
+                                        <Slider x:Name="FreeUEndSlider" Grid.Row="5" Grid.Column="1" Minimum="0" Maximum="1" Value="1.0" Margin="5,0"/>
+                                        <TextBlock x:Name="FreeUEndText" Grid.Row="5" Grid.Column="2" Text="{Binding #FreeUEndSlider.Value, StringFormat={}{0:F2}}" VerticalAlignment="Center" Foreground="#ccc"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Expander>
+
+                            <!-- Dynamic Thresholding -->
+                            <Expander Header="Dynamic Thresholding"
+                                      Background="#1a1a1a"
+                                      Padding="10"
+                                      BorderBrush="#333"
+                                      BorderThickness="1">
+                                <StackPanel Spacing="10">
+                                    <CheckBox x:Name="DynThresEnabledCheckbox" Content="Enable Dynamic Thresholding"/>
+                                    
+                                    <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">
+                                        <TextBlock Text="Mimic Scale:" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Foreground="#ddd"/>
+                                        <Slider x:Name="DynThresMimicScaleSlider" Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="30" Value="7.0" Margin="5,0"/>
+                                        <TextBlock Text="{Binding #DynThresMimicScaleSlider.Value, StringFormat={}{0:F1}}" Grid.Row="0" Grid.Column="2" VerticalAlignment="Center" Foreground="#ccc"/>
+
+                                        <TextBlock Text="Threshold %:" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Foreground="#ddd"/>
+                                        <Slider x:Name="DynThresThresholdSlider" Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="100" Value="100" Margin="5,0"/>
+                                        <TextBlock Text="{Binding #DynThresThresholdSlider.Value, StringFormat={}{0:F1}}" Grid.Row="1" Grid.Column="2" VerticalAlignment="Center" Foreground="#ccc"/>
+
+                                        <TextBlock Text="Mimic Min:" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" Foreground="#ddd"/>
+                                        <Slider x:Name="DynThresMimicScaleMinSlider" Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="30" Value="0.0" Margin="5,0"/>
+                                        <TextBlock Text="{Binding #DynThresMimicScaleMinSlider.Value, StringFormat={}{0:F1}}" Grid.Row="2" Grid.Column="2" VerticalAlignment="Center" Foreground="#ccc"/>
+
+                                        <TextBlock Text="CFG Min:" Grid.Row="3" Grid.Column="0" VerticalAlignment="Center" Foreground="#ddd"/>
+                                        <Slider x:Name="DynThresCfgScaleMinSlider" Grid.Row="3" Grid.Column="1" Minimum="0" Maximum="30" Value="0.0" Margin="5,0"/>
+                                        <TextBlock Text="{Binding #DynThresCfgScaleMinSlider.Value, StringFormat={}{0:F1}}" Grid.Row="3" Grid.Column="2" VerticalAlignment="Center" Foreground="#ccc"/>
+                                        
+                                        <TextBlock Text="Sched Val:" Grid.Row="4" Grid.Column="0" VerticalAlignment="Center" Foreground="#ddd"/>
+                                        <Slider x:Name="DynThresSchedValSlider" Grid.Row="4" Grid.Column="1" Minimum="0" Maximum="30" Value="1.0" Margin="5,0"/>
+                                        <TextBlock Text="{Binding #DynThresSchedValSlider.Value, StringFormat={}{0:F1}}" Grid.Row="4" Grid.Column="2" VerticalAlignment="Center" Foreground="#ccc"/>
+
+                                        <TextBlock Text="Phi:" Grid.Row="5" Grid.Column="0" VerticalAlignment="Center" Foreground="#ddd"/>
+                                        <Slider x:Name="DynThresPhiSlider" Grid.Row="5" Grid.Column="1" Minimum="0" Maximum="1" Value="1.0" Margin="5,0"/>
+                                        <TextBlock Text="{Binding #DynThresPhiSlider.Value, StringFormat={}{0:F2}}" Grid.Row="5" Grid.Column="2" VerticalAlignment="Center" Foreground="#ccc"/>
+                                    </Grid>
+                                    
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <TextBlock Text="Mimic Mode:" VerticalAlignment="Center" Foreground="#ddd"/>
+                                        <ComboBox x:Name="DynThresMimicModeCombo" SelectedIndex="0" Width="120">
+                                            <ComboBoxItem Content="Constant"/>
+                                            <ComboBoxItem Content="Linear Down"/>
+                                            <ComboBoxItem Content="Cosine Down"/>
+                                            <ComboBoxItem Content="Half Cosine Down"/>
+                                            <ComboBoxItem Content="Linear Up"/>
+                                            <ComboBoxItem Content="Cosine Up"/>
+                                            <ComboBoxItem Content="Half Cosine Up"/>
+                                            <ComboBoxItem Content="Power Up"/>
+                                            <ComboBoxItem Content="Power Down"/>
+                                        </ComboBox>
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <TextBlock Text="CFG Mode:" VerticalAlignment="Center" Foreground="#ddd"/>
+                                        <ComboBox x:Name="DynThresCfgModeCombo" SelectedIndex="0" Width="120">
+                                            <ComboBoxItem Content="Constant"/>
+                                            <ComboBoxItem Content="Linear Down"/>
+                                            <ComboBoxItem Content="Cosine Down"/>
+                                            <ComboBoxItem Content="Half Cosine Down"/>
+                                            <ComboBoxItem Content="Linear Up"/>
+                                            <ComboBoxItem Content="Cosine Up"/>
+                                            <ComboBoxItem Content="Half Cosine Up"/>
+                                            <ComboBoxItem Content="Power Up"/>
+                                            <ComboBoxItem Content="Power Down"/>
+                                        </ComboBox>
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <TextBlock Text="Separate Channels:" VerticalAlignment="Center" Foreground="#ddd"/>
+                                        <ComboBox x:Name="DynThresSeparateFeatureChannelsCombo" SelectedIndex="0" Width="100">
+                                            <ComboBoxItem Content="enable"/>
+                                            <ComboBoxItem Content="disable"/>
+                                        </ComboBox>
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <TextBlock Text="Startpoint:" VerticalAlignment="Center" Foreground="#ddd"/>
+                                        <ComboBox x:Name="DynThresScalingStartpointCombo" SelectedIndex="0" Width="100">
+                                            <ComboBoxItem Content="MEAN"/>
+                                            <ComboBoxItem Content="ZERO"/>
+                                        </ComboBox>
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <TextBlock Text="Variability:" VerticalAlignment="Center" Foreground="#ddd"/>
+                                        <ComboBox x:Name="DynThresVariabilityMeasureCombo" SelectedIndex="0" Width="100">
+                                            <ComboBoxItem Content="AD"/>
+                                            <ComboBoxItem Content="STD"/>
+                                        </ComboBox>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Expander>
+
+                                <!-- Extension Components Button -->
+                                <Button x:Name="TranslationLayerButton" Content="View Extension Components" Background="Gray" Foreground="White" Height="35" Width="290"/>
+                            </StackPanel>
                         </StackPanel>
                     </Border>
 
@@ -232,7 +373,6 @@
                         <StackPanel Spacing="8">
                             <Button x:Name="GenerateButton" Content="Generate" Background="#00A2A8" Foreground="White" FontWeight="Bold" Height="35" Width="290"/>
                             <Button x:Name="SaveButton" Content="Save" Background="Gray" Foreground="White" IsEnabled="False" Height="35" Width="290"/>
-                            <Button x:Name="TranslationLayerButton" Content="View Extension Components" Background="Gray" Foreground="White" Height="35" Width="290"/>
                         </StackPanel>
                     </Border>
 

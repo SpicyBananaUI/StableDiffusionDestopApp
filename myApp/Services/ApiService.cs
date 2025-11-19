@@ -98,9 +98,9 @@ namespace myApp.Services
 
         // GenerateImage method to call the Stable Diffusion API
         public async Task<(List<Bitmap>, List<long>)> GenerateImage(
-            string prompt,
-            int steps,
-            double guidanceScale,
+            string prompt = "",
+            int steps = 20,
+            double guidanceScale = 7.5,
             string negativePrompt = "",
             int width = 512,
             int height = 512,
@@ -111,6 +111,7 @@ namespace myApp.Services
             bool enableHr = false,
             string? hrUpscaler = null,
             double? hrScale = null,
+            double hrDenoisingStrength = 0.35,
             // FreeU
             bool freeuEnabled = false,
             double freeu_b1 = 1.01,
@@ -157,10 +158,8 @@ namespace myApp.Services
                     requestData["hr_scale"] = hrScale.Value;
                 // Ensure list is not None on backend
                 requestData["hr_additional_modules"] = Array.Empty<string>();
-                // Set default denoising_strength if not already set
-                // TODO: add to UI
-                if (!requestData.ContainsKey("denoising_strength"))
-                    requestData["denoising_strength"] = 0.35;
+                
+                requestData["denoising_strength"] = hrDenoisingStrength;
             }
 
             // alwayson_scripts

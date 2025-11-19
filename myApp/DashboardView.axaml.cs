@@ -389,10 +389,55 @@ public partial class DashboardView : UserControl
                 var enableHr = this.FindControl<CheckBox>("EnableHrCheckbox")?.IsChecked == true;
                 var hrUpscaler = this.FindControl<ComboBox>("HrUpscalerComboBox")?.SelectedItem as string;
                 double? hrScale = null; if (double.TryParse(this.FindControl<TextBox>("HrScaleTextBox")?.Text, out var hrs)) hrScale = hrs;
+                double hrDenoising = this.FindControl<Slider>("HrDenoisingSlider")?.Value ?? 0.35;
+
+                // FreeU
+                bool freeuEnabled = this.FindControl<CheckBox>("FreeUEnabledCheckbox")?.IsChecked == true;
+                double freeuB1 = this.FindControl<Slider>("FreeUB1Slider")?.Value ?? 1.01;
+                double freeuB2 = this.FindControl<Slider>("FreeUB2Slider")?.Value ?? 1.02;
+                double freeuS1 = this.FindControl<Slider>("FreeUS1Slider")?.Value ?? 0.99;
+                double freeuS2 = this.FindControl<Slider>("FreeUS2Slider")?.Value ?? 0.95;
+                double freeuStart = this.FindControl<Slider>("FreeUStartSlider")?.Value ?? 0.0;
+                double freeuEnd = this.FindControl<Slider>("FreeUEndSlider")?.Value ?? 1.0;
+
+                // Dynamic Thresholding
+                bool dynThresEnabled = this.FindControl<CheckBox>("DynThresEnabledCheckbox")?.IsChecked == true;
+                double dynThresMimicScale = this.FindControl<Slider>("DynThresMimicScaleSlider")?.Value ?? 7.0;
+                double dynThresThreshold = this.FindControl<Slider>("DynThresThresholdSlider")?.Value ?? 100.0; // Percentile
+                
+                string dynThresMimicMode = "Constant";
+                if (this.FindControl<ComboBox>("DynThresMimicModeCombo")?.SelectedItem is ComboBoxItem mimicItem)
+                    dynThresMimicMode = mimicItem.Content?.ToString() ?? "Constant";
+
+                double dynThresMimicScaleMin = this.FindControl<Slider>("DynThresMimicScaleMinSlider")?.Value ?? 0.0;
+                
+                string dynThresCfgMode = "Constant";
+                if (this.FindControl<ComboBox>("DynThresCfgModeCombo")?.SelectedItem is ComboBoxItem cfgItem)
+                    dynThresCfgMode = cfgItem.Content?.ToString() ?? "Constant";
+
+                double dynThresCfgScaleMin = this.FindControl<Slider>("DynThresCfgScaleMinSlider")?.Value ?? 0.0;
+                double dynThresSchedVal = this.FindControl<Slider>("DynThresSchedValSlider")?.Value ?? 1.0;
+                double dynThresPhi = this.FindControl<Slider>("DynThresPhiSlider")?.Value ?? 1.0;
+
+                string dynThresSeparate = "enable";
+                if (this.FindControl<ComboBox>("DynThresSeparateFeatureChannelsCombo")?.SelectedItem is ComboBoxItem sepItem)
+                    dynThresSeparate = sepItem.Content?.ToString() ?? "enable";
+
+                string dynThresStartpoint = "MEAN";
+                if (this.FindControl<ComboBox>("DynThresScalingStartpointCombo")?.SelectedItem is ComboBoxItem startItem)
+                    dynThresStartpoint = startItem.Content?.ToString() ?? "MEAN";
+
+                string dynThresVariability = "AD";
+                if (this.FindControl<ComboBox>("DynThresVariabilityMeasureCombo")?.SelectedItem is ComboBoxItem varItem)
+                    dynThresVariability = varItem.Content?.ToString() ?? "AD";
+
 
                 result = await _apiService.GenerateImage(
                     prompt, steps, scale, negativePrompt, width, height, sampler, seed, batchSize,
-                    enableHr, hrUpscaler, hrScale
+                    enableHr, hrUpscaler, hrScale, hrDenoising,
+                    freeuEnabled, freeuB1, freeuB2, freeuS1, freeuS2, freeuStart, freeuEnd,
+                    dynThresEnabled, dynThresMimicScale, dynThresThreshold, dynThresMimicMode, dynThresMimicScaleMin,
+                    dynThresCfgMode, dynThresCfgScaleMin, dynThresSchedVal, dynThresSeparate, dynThresStartpoint, dynThresVariability, dynThresPhi
                 );
             }
             //var (images, seeds) = await _apiService.GenerateImage(prompt, steps, scale, negativePrompt, width, height, sampler, seed, batchSize);
