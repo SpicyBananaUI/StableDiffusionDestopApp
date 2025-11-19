@@ -32,6 +32,15 @@ namespace myApp
 
         private async Task LoadComponentTreeAsync()
         {
+            if (!App.AppConfig.EnableTranslationLayer)
+            {
+                StatusText.Text = "";
+                DisabledMessageText.Text = "Translation Layer is disabled in startup settings.";
+                DisabledMessageText.IsVisible = true;
+                ComponentsContainer.Children.Clear();
+                return;
+            }
+
             try
             {
                 StatusText.Text = "Loading...";

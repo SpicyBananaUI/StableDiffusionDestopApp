@@ -4,6 +4,7 @@
 #   --local-backend: Run in background, dies when parent process dies
 
 MODE="${1:---local-backend}"  # Default to local-backend if no argument
+EXTRA_ARGS="${@:2}"       # Capture all arguments starting from the second one
 
 BACKEND_DIR="./backend"
 SCRIPT_DIR="$(dirname "$0")"
@@ -78,7 +79,7 @@ if [ "$MODE" = "--remote-server" ]; then
     echo "Launching backend..."
     
     # Run Python and capture exit code
-    "$PYTHON_EXEC" launch_webui_backend.py
+    "$PYTHON_EXEC" launch_webui_backend.py $EXTRA_ARGS
     EXIT_CODE=$?
     
     if [ $EXIT_CODE -ne 0 ]; then
@@ -94,7 +95,7 @@ elif [ "$MODE" = "--local-backend" ]; then
     echo "Running in local backend mode (background, attached to parent)."
     
     # Run in background, output goes to terminal
-    "$PYTHON_EXEC" launch_webui_backend.py &
+    "$PYTHON_EXEC" launch_webui_backend.py $EXTRA_ARGS &
     
     # Get the PID
     BACKEND_PID=$!

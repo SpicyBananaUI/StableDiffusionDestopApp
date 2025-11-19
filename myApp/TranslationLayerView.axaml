@@ -8,6 +8,7 @@
     <StackPanel Orientation="Horizontal" Margin="10" Spacing="10" Grid.Row="0">
       <Button Content="Refresh" Click="OnRefreshClick"/>
       <TextBlock VerticalAlignment="Center" x:Name="StatusText"/>
+      <TextBlock VerticalAlignment="Center" x:Name="DisabledMessageText" Foreground="Red" IsVisible="False" Margin="20,0,0,0"/>
     </StackPanel>
     <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="10">
       <StackPanel x:Name="ComponentsContainer" Orientation="Vertical" Spacing="10"/>

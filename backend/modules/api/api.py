@@ -286,12 +286,14 @@ class Api:
         self.embedding_db.load_textual_inversion_embeddings(force_reload=True, sync_with_sd_model=False)
 
         # Activate gradio translation layer api
-        try:
-            from translation_layer.init import activate_translation_layer
-            activate_translation_layer(self.app)
-        except ImportError as e:
-            print("Failed to import translation layer:", e)
-            pass
+        if not shared.cmd_opts.disable_translation_layer:
+            try:
+                from translation_layer.init import activate_translation_layer
+                activate_translation_layer(self.app)
+            except Exception as e:
+                print("Failed to import translation layer:", e)
+        else:
+            print("Translation layer disabled by command line argument.")
 
         # Debug print all routes
         for route in self.app.routes:

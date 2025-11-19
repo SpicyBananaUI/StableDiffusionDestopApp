@@ -15,6 +15,12 @@ public partial class ModeSelectorWindow : Window
     
     private void Local_Click(object? sender, RoutedEventArgs e)
     {
+        var checkBox = this.FindControl<CheckBox>("TranslationLayerCheckBox");
+        bool enableTranslation = checkBox?.IsChecked ?? true;
+        
+        // Store the preference in AppConfig so it can be used by the launcher
+        App.AppConfig.EnableTranslationLayer = enableTranslation;
+        
         Close(App.RunMode.Local);
     }
 

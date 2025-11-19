@@ -103,6 +103,11 @@ LINUX = system == "Linux"
 # Base commandline args
 args = []
 
+# Pass any arguments received by this script to the backend
+if len(sys.argv) > 1:
+    print(f"launch_webui_backend.py args: {sys.argv}")
+    args.extend(sys.argv[1:])
+
 device = "cpu"  # Default fallback
 
 # debug torch/cuda
@@ -159,15 +164,18 @@ logger.debug(f"COMMANDLINE_ARGS: {os.environ['COMMANDLINE_ARGS']}")
 
 # Activate the translation layer before launching the backend
 translation_layer_imported = False
-try:
-    import translation_layer
-    translation_layer_imported = True
-    print("[translation_layer] Interceptor auto-activated in launch_webui_backend.py")
-except Exception as e:
-    print(f"[translation_layer] Failed to import/activate: {e}")
-finally:
-    if DEBUG_PATHS:
-        print(f"[debug] translation_layer import success: {translation_layer_imported}")
+if "--disable-translation-layer" not in sys.argv:
+    try:
+        import translation_layer
+        translation_layer_imported = True
+        print("[translation_layer] Interceptor auto-activated in launch_webui_backend.py")
+    except Exception as e:
+        print(f"[translation_layer] Failed to import/activate: {e}")
+else:
+    print("[translation_layer] Disabled by command line argument.")
+
+if DEBUG_PATHS:
+    print(f"[debug] translation_layer import success: {translation_layer_imported}")
 
 # Launch backend
 import launch

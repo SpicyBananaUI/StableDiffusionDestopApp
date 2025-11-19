@@ -44,6 +44,7 @@ public partial class App : Application
         public static RunMode Mode { get; set; }
         public static string RemoteAddress { get; set; } =  "http://127.0.0.1:7861";
         public static string BackendPassword { get; set; } = "";
+        public static bool EnableTranslationLayer { get; set; } = true;
     }
     
     public static class BackendLauncher
@@ -147,10 +148,16 @@ public partial class App : Application
         }
         private static void LaunchLocalBackendWindows()
         {
+            var args = "";
+            if (!AppConfig.EnableTranslationLayer)
+            {
+                args += " --disable-translation-layer";
+            }
+
             var psi = new ProcessStartInfo
             {
                 FileName = GetBatchPath(),
-                Arguments = "",
+                Arguments = args,
                 WorkingDirectory = GetProjectRootWindows(),
                 UseShellExecute = true,
                 CreateNoWindow = false
@@ -160,10 +167,17 @@ public partial class App : Application
         private static void LaunchLocalBackendMac()
         {
             var scriptPath = GetShellPathMac();
+            var args = $"\"{scriptPath}\" --local-backend";
+            
+            if (!AppConfig.EnableTranslationLayer)
+            {
+                args += " --disable-translation-layer";
+            }
+            
             var psi = new ProcessStartInfo
             {
                 FileName = "/bin/bash",
-                Arguments = $"\"{scriptPath}\" --local-backend",
+                Arguments = args,
                 WorkingDirectory = GetProjectRootMac(),
                 UseShellExecute = true,
                 CreateNoWindow = false

@@ -13,5 +13,6 @@
                 <Button Content="Local (Frontend + Backend)" Click="Local_Click"/>
                 <Button Content="Remote Server (Backend only)" Click="Server_Click"/>
                 <Button Content="Remote Client (Frontend only)" Click="Client_Click"/>
+                <CheckBox Name="TranslationLayerCheckBox" Content="Enable Translation Layer" IsChecked="True" HorizontalAlignment="Center"/>
         </StackPanel>
 </Window>
