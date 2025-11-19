@@ -126,6 +126,7 @@ namespace myApp
                 "checkbox" => RenderCheckbox(node, parentPanel, allComponents),
                 "dropdown" => RenderDropdown(node, parentPanel, allComponents),
                 "number" => RenderNumber(node, parentPanel, allComponents),
+                "inputaccordionimpl" => RenderInputAccordionImpl(node, parentPanel, allComponents),
                 _ => RenderPlaceholder(node, parentPanel, allComponents)
             };
 
@@ -201,6 +202,56 @@ namespace myApp
             expander.Content = panel;
 
             return expander;
+        }
+
+        private Control RenderInputAccordionImpl(
+            TranslationLayerService.ComponentNode node,
+            Panel parentPanel,
+            System.Collections.Generic.Dictionary<string, TranslationLayerService.ComponentNode> allComponents)
+        {
+            // InputAccordionImpl is essentially a checkbox that controls visibility of content, often styled as an accordion.
+            // In the backend python code, it inherits from Checkbox but acts as a container.
+            // However, the python implementation creates a separate 'accordion' component internally.
+            // If we see 'inputaccordionimpl', it's the checkbox part.
+            
+            var label = GetPropString(node, "label") ?? "Enable";
+            var value = GetPropBool(node, "value") ?? false;
+
+            var checkBox = new CheckBox
+            {
+                Content = label,
+                IsChecked = value
+            };
+
+            var nodeId = node.Id;
+            checkBox.IsCheckedChanged += async (s, e) =>
+            {
+                await _service.SetComponentValueAsync(nodeId, checkBox.IsChecked ?? false);
+            };
+
+            // It might have children if the interceptor captured them under this node, 
+            // though usually the python side splits them into a separate accordion component.
+            // If there are children, we render them in a panel that toggles visibility.
+            if (node.Children.Count > 0)
+            {
+                var container = new StackPanel { Orientation = Orientation.Vertical, Spacing = 5 };
+                container.Children.Add(checkBox);
+
+                var contentPanel = new StackPanel { Orientation = Orientation.Vertical, Spacing = 10, Margin = new Avalonia.Thickness(20, 0, 0, 0) };
+                contentPanel.IsVisible = value; // Initial visibility based on checkbox
+                
+                RenderChildren(node, contentPanel, allComponents);
+                container.Children.Add(contentPanel);
+
+                checkBox.IsCheckedChanged += (s, e) =>
+                {
+                    contentPanel.IsVisible = checkBox.IsChecked ?? false;
+                };
+
+                return container;
+            }
+
+            return checkBox;
         }
 
         private Control RenderButton(
