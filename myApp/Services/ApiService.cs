@@ -132,7 +132,9 @@ namespace myApp.Services
             string dynthres_separate_feature_channels = "enable",
             string dynthres_scaling_startpoint = "MEAN",
             string dynthres_variability_measure = "AD",
-            double dynthres_interpolate_phi = 1.0
+            double dynthres_interpolate_phi = 1.0,
+            // Extension Scripts from Translation Layer
+            Dictionary<string, object>? extensionScripts = null
         )
         {
             // Build request payload dynamically
@@ -201,6 +203,20 @@ namespace myApp.Services
                 }
             }
             catch { }
+            
+            // Merge extension scripts from translation layer if provided
+            if (extensionScripts != null)
+            {
+                foreach (var (scriptName, scriptData) in extensionScripts)
+                {
+                    // Only add if not already present (manual config takes precedence)
+                    if (!alwayson.ContainsKey(scriptName))
+                    {
+                        alwayson[scriptName] = scriptData;
+                    }
+                }
+            }
+            
             if (alwayson.Count > 0)
                 requestData["alwayson_scripts"] = alwayson;
 

@@ -23,7 +23,7 @@ def setup_translation_api(app):
 
 @router.get("/component-tree")
 async def get_component_tree():
-    """Get the full component tree as JSON"""
+    """Get the full component tree as JSON, grouped by extension"""
     interceptor = GradioInterceptor.get_instance()
     
     if not interceptor.active:
@@ -38,6 +38,24 @@ async def get_component_tree():
     return {
         'active': True,
         'tree': interceptor.get_component_tree()
+    }
+
+
+@router.get("/extension-values")
+async def get_extension_values():
+    """Get all extension component values in alwayson_scripts format"""
+    interceptor = GradioInterceptor.get_instance()
+    
+    if not interceptor.active:
+        return {
+            'active': False,
+            'message': 'Translation layer not active.',
+            'values': {}
+        }
+    
+    return {
+        'active': True,
+        'values': interceptor.get_all_extension_values()
     }
 
 

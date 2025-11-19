@@ -31,10 +31,19 @@ namespace myApp.Services
 
         public class ComponentTree
         {
+            public Dictionary<string, ExtensionTree> Extensions { get; set; } = new();
+            public List<string> supported_types { get; set; } = new();
+            public int total_extensions { get; set; }
+        }
+
+        public class ExtensionTree
+        {
             public List<string> root_nodes { get; set; } = new();
             public Dictionary<string, ComponentNode> Components { get; set; } = new();
-            public List<string> supported_types { get; set; } = new();
-            public List<string> unsupported_encountered { get; set; } = new();
+            public bool? Supported { get; set; }
+            public int component_count { get; set; }
+            public List<string> component_types { get; set; } = new();
+            public List<string> unsupported_types { get; set; } = new();
         }
 
         public class ComponentNode
@@ -66,6 +75,18 @@ namespace myApp.Services
             public List<string> SupportedTypes { get; set; } = new();
             public List<string> EncounteredTypes { get; set; } = new();
             public List<string> UnsupportedTypes { get; set; } = new();
+        }
+
+        public class ExtensionValuesResponse
+        {
+            public bool Active { get; set; }
+            public string? Message { get; set; }
+            public Dictionary<string, ExtensionArgs> Values { get; set; } = new();
+        }
+
+        public class ExtensionArgs
+        {
+            public List<JsonElement> Args { get; set; } = new();
         }
 
             /// Get the list of supported component types.
@@ -268,6 +289,30 @@ namespace myApp.Services
             catch
             {
                 return null;
+            }
+        }
+
+        /// Get extension component values in alwayson_scripts format.
+        public async Task<ExtensionValuesResponse> GetExtensionValuesAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync("/translation-layer/extension-values");
+                response.EnsureSuccessStatusCode();
+
+                var json = await response.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<ExtensionValuesResponse>(json, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                }) ?? new ExtensionValuesResponse();
+            }
+            catch (Exception ex)
+            {
+                return new ExtensionValuesResponse
+                {
+                    Active = false,
+                    Message = $"Failed to fetch extension values: {ex.Message}"
+                };
             }
         }
     }

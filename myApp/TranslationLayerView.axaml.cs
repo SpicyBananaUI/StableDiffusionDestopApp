@@ -52,50 +52,81 @@ namespace myApp
                     return;
                 }
 
-                StatusText.Text = $"Loaded {treeResponse.Tree.Components.Count} components";
-
                 // Clear existing components
                 ComponentsContainer.Children.Clear();
                 _renderedComponents.Clear();
 
-                Console.WriteLine($"Component tree has {treeResponse.Tree.Components.Count} total components");
-                Console.WriteLine($"Component tree has {treeResponse.Tree.root_nodes.Count} root nodes");
-                
-                if (treeResponse.Tree.root_nodes.Count == 0)
+                var extensions = treeResponse.Tree.Extensions;
+                Console.WriteLine($"Component tree has {extensions.Count} extensions");
+
+                if (extensions.Count == 0)
                 {
-                    StatusText.Text = "No root nodes found. Components may not have been registered from extensions.";
-                    Console.WriteLine("WARNING: No root nodes in component tree!");
+                    StatusText.Text = "No extension components found.";
+                    Console.WriteLine("WARNING: No extensions in component tree!");
                     return;
                 }
-                
-                // Render root nodes
-                foreach (var rootId in treeResponse.Tree.root_nodes)
-                {
-                    if (treeResponse.Tree.Components.TryGetValue(rootId, out var rootNode))
-                    {
-                        Console.WriteLine($"Root node {rootNode.Id} ({rootNode.Type}) has {rootNode.Children.Count} children");
 
-                        var control = RenderComponent(rootNode, ComponentsContainer, treeResponse.Tree.Components);
-                        if (control != null)
+                // Count total components
+                int totalComponents = extensions.Values.Sum(ext => ext.component_count);
+                StatusText.Text = $"Loaded {extensions.Count} extensions with {totalComponents} components";
+
+                // Sort extensions alphabetically
+                var sortedExtensions = extensions.OrderBy(kvp => kvp.Key);
+
+                // Render each extension in its own expander
+                foreach (var (extName, extTree) in sortedExtensions)
+                {
+                    Console.WriteLine($"Rendering extension: {extName} with {extTree.component_count} components");
+
+                    // Create expander for this extension
+                    var expander = new Expander
+                    {
+                        Margin = new Avalonia.Thickness(0, 5, 0, 5),
+                        Background = Avalonia.Media.Brushes.DarkSlateGray,
+                        BorderBrush = Avalonia.Media.Brushes.Gray,
+                        BorderThickness = new Avalonia.Thickness(1),
+                        Padding = new Avalonia.Thickness(10)
+                    };
+
+                    // Create header with compatibility status
+                    string statusIcon = extTree.Supported == true ? "✓" : 
+                                       extTree.Supported == false ? "✗" : "⚠";
+                    string statusText = extTree.Supported == true ? "Supported" :
+                                       extTree.Supported == false ? "Unsupported" : "Partially Supported";
+                    
+                    expander.Header = $"{statusIcon} {extName} ({statusText} - {extTree.component_count} components)";
+
+                    // Create panel for extension components
+                    var extPanel = new StackPanel 
+                    { 
+                        Orientation = Orientation.Vertical, 
+                        Spacing = 10,
+                        Margin = new Avalonia.Thickness(10, 5, 0, 0)
+                    };
+
+                    // Render root nodes for this extension
+                    foreach (var rootId in extTree.root_nodes)
+                    {
+                        if (extTree.Components.TryGetValue(rootId, out var rootNode))
                         {
-                            ComponentsContainer.Children.Add(control);
-                            Console.WriteLine($"Added root control {rootNode.Type} to container");
-                        }
-                        else
-                        {
-                            Console.WriteLine($"Root control {rootNode.Type} returned null - not added");
+                            var control = RenderComponent(rootNode, extPanel, extTree.Components);
+                            if (control != null)
+                            {
+                                extPanel.Children.Add(control);
+                            }
                         }
                     }
-                    else{
-                        Console.WriteLine($"Root node {rootId} not found in tree");
-                    }
+
+                    expander.Content = extPanel;
+                    ComponentsContainer.Children.Add(expander);
                 }
-                
-                Console.WriteLine($"Final container has {ComponentsContainer.Children.Count} child controls");
+
+                Console.WriteLine($"Final container has {ComponentsContainer.Children.Count} extension expanders");
             }
             catch (Exception ex)
             {
                 StatusText.Text = $"Error: {ex.Message}";
+                Console.WriteLine($"Error loading component tree: {ex}");
             }
         }
 

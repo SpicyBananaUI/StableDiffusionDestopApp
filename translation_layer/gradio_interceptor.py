@@ -128,6 +128,19 @@ class GradioInterceptor:
         self.encountered_types: Set[str] = set()  # Track all component types we've seen
         self.extension_components: Dict[str, List[str]] = {}  # Maps extension name -> list of component IDs
         
+        # Depth tracking to prevent recursive interception
+        self.context_depth: Dict[str, int] = {}  # Maps extension name -> current depth
+        self.max_depth = 5  # Maximum nesting depth per extension
+        
+        # Blacklist for help/documentation components
+        self.elem_id_blacklist = {
+            'help', 'info', 'tooltip', 'documentation', 'readme',
+            'accordion_help', 'help_accordion', 'info_accordion'
+        }
+        
+        # Cache for extension name lookups
+        self._extension_cache: Dict[int, Optional[str]] = {}  # Maps stack hash -> extension name
+        
     def activate(self):
         """Activate the interceptor by patching Gradio"""
         if self.active:
@@ -192,7 +205,15 @@ class GradioInterceptor:
     def _get_current_extension(self) -> Optional[str]:
         """Try to infer the current extension name by inspecting the call stack."""
         try:
-            for frame_info in inspect.stack():
+            # Create a hash of the stack for caching
+            stack = inspect.stack()
+            stack_hash = hash(tuple(frame.filename for frame in stack[:10]))
+            
+            # Check cache first
+            if stack_hash in self._extension_cache:
+                return self._extension_cache[stack_hash]
+            
+            for frame_info in stack:
                 filename = frame_info.filename.replace("\\", "/")
                 parts = filename.split("/")
 
@@ -201,29 +222,53 @@ class GradioInterceptor:
                     if part in ["extensions", "extensions-builtin"] and i + 1 < len(parts):
                         ext_name = parts[i + 1]
                         print(f"[Interceptor] Detected extension '{ext_name}' from file: {filename}")
+                        # Cache the result
+                        self._extension_cache[stack_hash] = ext_name
                         return ext_name
+            
+            # Cache None result too
+            self._extension_cache[stack_hash] = None
         except Exception as e:
             print(f"[Interceptor] Failed to detect extension: {e}")
         
         return None
 
+    def _should_skip_component(self, component: Any, extension_name: Optional[str]) -> bool:
+        """Check if a component should be skipped based on various criteria."""
+        # Skip if already registered
+        if component in self.component_map:
+            return True
+        
+        if hasattr(component, '_translation_layer_registered'):
+            return True
+        
+        # Check elem_id blacklist
+        if hasattr(component, 'elem_id'):
+            elem_id = getattr(component, 'elem_id', '')
+            if elem_id and any(blacklisted in elem_id.lower() for blacklisted in self.elem_id_blacklist):
+                print(f"[Interceptor] Skipping blacklisted component with elem_id: {elem_id}")
+                return True
+        
+        # Check depth limit (only for extension components)
+        if extension_name:
+            current_depth = self.context_depth.get(extension_name, 0)
+            if current_depth > self.max_depth:
+                print(f"[Interceptor] Skipping component in '{extension_name}' - depth {current_depth} exceeds max {self.max_depth}")
+                return True
+        
+        return False
+
     def _register_context(self, component: Any):
         """Register a context component (Row, Column, etc.)"""
-        # Check if already registered
-        if component in self.component_map:
-            return
+        extension_name = self._get_current_extension()
         
-        # Check if this component has already been processed by checking for a marker
-        if hasattr(component, '_translation_layer_registered'):
+        # Early exit checks
+        if self._should_skip_component(component, extension_name):
             return
         
         node_id = str(uuid.uuid4())
-        extension_name = self._get_current_extension()
         node = ComponentNode(component, node_id, extension_name)
         node.extract_props()
-
-        if extension_name is None:
-            return
 
         # Mark registered
         component._translation_layer_registered = True
@@ -236,6 +281,9 @@ class GradioInterceptor:
             if extension_name not in self.extension_components:
                 self.extension_components[extension_name] = []
             self.extension_components[extension_name].append(node_id)
+            
+            # Increment depth for this extension
+            self.context_depth[extension_name] = self.context_depth.get(extension_name, 0) + 1
         
         self.components[node_id] = node
         self.component_map[component] = node_id
@@ -270,6 +318,9 @@ class GradioInterceptor:
                 def exit_wrapper(exc_type=None, exc_val=None, exc_tb=None):
                     if self.context_stack and self.context_stack[-1] == node_id:
                         self.context_stack.pop()
+                    # Decrement depth when exiting context
+                    if extension_name and extension_name in self.context_depth:
+                        self.context_depth[extension_name] = max(0, self.context_depth[extension_name] - 1)
                     return original_exit(exc_type, exc_val, exc_tb)
 
                 enter_wrapper._translation_layer_wrapped = True
@@ -280,21 +331,15 @@ class GradioInterceptor:
         
     def _register_component(self, component: Any):
         """Register an IO component"""
-        # Check if already registered
-        if component in self.component_map:
-            return
+        extension_name = self._get_current_extension()
         
-        # Check if this component has already been processed by checking for a marker
-        if hasattr(component, '_translation_layer_registered'):
+        # Early exit checks
+        if self._should_skip_component(component, extension_name):
             return
             
         node_id = str(uuid.uuid4())
-        extension_name = self._get_current_extension()
         node = ComponentNode(component, node_id, extension_name)
         node.extract_props()
-        
-        if extension_name is None:
-            return
 
         # Mark as registered
         component._translation_layer_registered = True
@@ -383,19 +428,95 @@ class GradioInterceptor:
         return self.encountered_types - SUPPORTED_COMPONENT_TYPES
     
     def get_component_tree(self) -> Dict[str, Any]:
-        """Get the full component tree as a dictionary"""
-        components_dict = {}
-        for node_id, node in self.components.items():
-            component_dict = node.to_dict()
-            component_dict['supported'] = node.type in SUPPORTED_COMPONENT_TYPES
-            components_dict[node_id] = component_dict
+        """Get the full component tree grouped by extension"""
+        extensions = {}
+        tracked_component_ids = set()
+        
+        # Group components by extension
+        for ext_name, component_ids in self.extension_components.items():
+            ext_root_nodes = []
+            ext_components = {}
+            
+            for comp_id in component_ids:
+                tracked_component_ids.add(comp_id)
+                if comp_id in self.components:
+                    node = self.components[comp_id]
+                    component_dict = node.to_dict()
+                    component_dict['supported'] = node.type in SUPPORTED_COMPONENT_TYPES
+                    ext_components[comp_id] = component_dict
+                    
+                    # Add to root nodes if it has no parent or parent is not in this extension
+                    if not node.parent_id or node.parent_id not in component_ids:
+                        ext_root_nodes.append(comp_id)
+            
+            # Get compatibility info
+            compat = self.get_extension_compatibility(ext_name)
+            
+            extensions[ext_name] = {
+                'root_nodes': ext_root_nodes,
+                'components': ext_components,
+                'supported': compat['supported'],
+                'component_count': compat['component_count'],
+                'component_types': compat['component_types'],
+                'unsupported_types': compat['unsupported_types']
+            }
+        
+        # Handle components not in any extension (base app components)
+        untracked_components = {}
+        untracked_root_nodes = []
+        for comp_id, node in self.components.items():
+            if comp_id not in tracked_component_ids:
+                component_dict = node.to_dict()
+                component_dict['supported'] = node.type in SUPPORTED_COMPONENT_TYPES
+                untracked_components[comp_id] = component_dict
+                
+                # Add to root if no parent or parent is also untracked
+                if not node.parent_id or node.parent_id not in self.components or node.parent_id in tracked_component_ids:
+                    untracked_root_nodes.append(comp_id)
+        
+        # Only add untracked components if there are any
+        if untracked_components:
+            extensions['_base_app'] = {
+                'root_nodes': untracked_root_nodes,
+                'components': untracked_components,
+                'supported': None,  # Unknown compatibility for base app
+                'component_count': len(untracked_components),
+                'component_types': list(set(node.type for node in self.components.values() if node.id in untracked_components)),
+                'unsupported_types': []
+            }
         
         return {
-            'root_nodes': self.root_nodes,
-            'components': components_dict,
+            'extensions': extensions,
             'supported_types': sorted(SUPPORTED_COMPONENT_TYPES),
-            'unsupported_encountered': sorted(self.get_unsupported_types())
+            'total_extensions': len(extensions)
         }
+    
+    def get_extension_tree(self, extension_name: str) -> Optional[Dict[str, Any]]:
+        """Get the component tree for a specific extension"""
+        tree = self.get_component_tree()
+        return tree['extensions'].get(extension_name)
+    
+    def get_extension_values(self, extension_name: str) -> Dict[str, Any]:
+        """Get component values for an extension in alwayson_scripts format"""
+        component_ids = self.extension_components.get(extension_name, [])
+        if not component_ids:
+            return {'args': []}
+        
+        # Collect values in order
+        values = []
+        for comp_id in component_ids:
+            value = self.get_component_value(comp_id)
+            if value is not None:
+                values.append(value)
+        
+        return {'args': values}
+    
+    def get_all_extension_values(self) -> Dict[str, Dict[str, Any]]:
+        """Get all extension values in alwayson_scripts format"""
+        result = {}
+        for ext_name in self.extension_components.keys():
+            result[ext_name] = self.get_extension_values(ext_name)
+        return result
     
     def get_component_tree_json(self) -> str:
         """Get the component tree as JSON string"""
