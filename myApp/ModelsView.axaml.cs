@@ -234,20 +234,30 @@ public partial class ModelsView : UserControl
         try
         {
             var api = _apiService ?? throw new InvalidOperationException("API service not initialized");
-            var extensions = await api.GetExtensionsAsync();
+            var extensions = await api.GetExtensionsWithCompatibilityAsync();
 
-            // Separate backend-safe vs unsafe by simple heuristic (same as backend): no javascript folder and no gradio imports known server-side.
-            // The backend-safe set is what /enable-backend-safe would choose; here we just display based on names in list that backend exposes.
+            // Separate backend-safe vs unsafe using translation layer compatibility info if available,
+            // otherwise fall back to simple heuristic.
             var backendSafe = new List<ApiService.ExtensionInfo>();
             var unsafeList = new List<ApiService.ExtensionInfo>();
 
-            // TODO: ask backend to compute and return the set by calling the endpoint with dry run behavior.
-            // Fallback: classify by known prefixes likely safe.
             _backendSafeSelected.Clear();
             _unsafeSelected.Clear();
             foreach (var e in extensions)
             {
-                if (e.name.StartsWith("forge_preprocessor_") || e.name == "SwinIR" || e.name == "ScuNET" || e.name == "soft-inpainting")
+                bool isSafe;
+                if (e.translation_layer != null)
+                {
+                    // If we have explicit compatibility info, use it
+                    isSafe = e.translation_layer.supported == true;
+                }
+                else
+                {
+                    // Fallback heuristic
+                    isSafe = e.name.StartsWith("forge_preprocessor_") || e.name == "SwinIR" || e.name == "ScuNET" || e.name == "soft-inpainting";
+                }
+
+                if (isSafe)
                     backendSafe.Add(e);
                 else
                     unsafeList.Add(e);

@@ -36,6 +36,15 @@ namespace myApp.Services
             public long? commit_date { get; set; }
             public string? version { get; set; }
             public bool enabled { get; set; }
+            public TranslationLayerCompatInfo? translation_layer { get; set; }
+        }
+
+        public class TranslationLayerCompatInfo
+        {
+            public bool? supported { get; set; }
+            public List<string>? component_types { get; set; }
+            public List<string>? unsupported_types { get; set; }
+            public int? component_count { get; set; }
         }
 
         public async Task<List<ExtensionInfo>> GetExtensionsAsync()
@@ -49,6 +58,30 @@ namespace myApp.Services
                 PropertyNameCaseInsensitive = true
             });
             return list ?? new List<ExtensionInfo>();
+        }
+
+        public async Task<List<ExtensionInfo>> GetExtensionsWithCompatibilityAsync()
+        {
+            // Try to call the translation layer endpoint first
+            try 
+            {
+                var response = await _httpClient.GetAsync("/translation-layer/extensions");
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+                    var list = JsonSerializer.Deserialize<List<ExtensionInfo>>(json, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    });
+                    return list ?? new List<ExtensionInfo>();
+                }
+            }
+            catch
+            {
+                // Fallback to standard endpoint if translation layer is not available or fails
+            }
+
+            return await GetExtensionsAsync();
         }
 
         public async Task<bool> EnableExtensionsAsync(IEnumerable<string> names)
