@@ -17,7 +17,7 @@ import gradio as gr
 SUPPORTED_COMPONENT_TYPES: Set[str] = {
     'blocks', 'row', 'column', 'group', 'accordion',
     'button', 'textbox', 'slider', 'checkbox', 'dropdown', 'number',
-    'inputaccordionimpl', 'formrow', 'formcolumn'
+    'inputaccordionimpl'
 }
 
 
