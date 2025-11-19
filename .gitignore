@@ -75,3 +75,12 @@ backend/auth.json
 backend/config.json
 backend/params.txt
 backend/ui-config.json
+backend/embeddings
+backend/extensions/put extensions here.txt
+backend/log/images
+backend/outputs/extras-images
+backend/outputs/img2img-grids
+backend/outputs/img2img-images
+backend/outputs/svd
+backend/outputs/txt2img-grids
+backend/outputs/txt2img-images
