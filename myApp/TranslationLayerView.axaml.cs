@@ -202,6 +202,8 @@ namespace myApp
                 "dropdown" => RenderDropdown(node, parentPanel, allComponents),
                 "number" => RenderNumber(node, parentPanel, allComponents),
                 "inputaccordionimpl" => RenderInputAccordionImpl(node, parentPanel, allComponents),
+                "formrow" => RenderFormRow(node, parentPanel, allComponents),
+                "formcolumn" => RenderFormColumn(node, parentPanel, allComponents),
                 _ => RenderPlaceholder(node, parentPanel, allComponents)
             };
 
@@ -237,6 +239,30 @@ namespace myApp
             RenderChildren(node, panel, allComponents);
             return panel;
         }
+
+        private Control RenderFormRow(
+            TranslationLayerService.ComponentNode node,
+            Panel parentPanel,
+            System.Collections.Generic.Dictionary<string, TranslationLayerService.ComponentNode> allComponents)
+        {
+            // FormRow is similar to Row but used in forms
+            var panel = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8 };
+            RenderChildren(node, panel, allComponents);
+            return panel;
+        }
+
+        private Control RenderFormColumn(
+            TranslationLayerService.ComponentNode node,
+            Panel parentPanel,
+            System.Collections.Generic.Dictionary<string, TranslationLayerService.ComponentNode> allComponents)
+        {
+            // FormColumn is similar to Column but used in forms
+            var panel = new StackPanel { Orientation = Orientation.Vertical, Spacing = 8 };
+            RenderChildren(node, panel, allComponents);
+            return panel;
+        }
+
+
 
         private Control RenderGroup(
             TranslationLayerService.ComponentNode node,

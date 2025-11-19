@@ -17,7 +17,7 @@ import gradio as gr
 SUPPORTED_COMPONENT_TYPES: Set[str] = {
     'blocks', 'row', 'column', 'group', 'accordion',
     'button', 'textbox', 'slider', 'checkbox', 'dropdown', 'number',
-    'inputaccordionimpl'
+    'inputaccordionimpl', 'formrow', 'formcolumn'
 }
 
 
@@ -130,7 +130,7 @@ class GradioInterceptor:
         
         # Depth tracking to prevent recursive interception
         self.context_depth: Dict[str, int] = {}  # Maps extension name -> current depth
-        self.max_depth = 5  # Maximum nesting depth per extension
+        self.max_depth = 6  # Maximum nesting depth per extension
         
         # Blacklist for help/documentation components
         self.elem_id_blacklist = {
@@ -171,7 +171,7 @@ class GradioInterceptor:
             if hasattr(self, '__class__'):
                 class_name = self.__class__.__name__
                 # Container components
-                if class_name in ['Blocks', 'Row', 'Column', 'Group', 'Tabs', 'TabItem', 'Accordion']:
+                if class_name in ['Blocks', 'Row', 'Column', 'Group', 'Tabs', 'TabItem', 'Accordion', 'FormRow', 'FormColumn']:
                     interceptor = GradioInterceptor.get_instance()
                     if interceptor.active:
                         interceptor._register_context(self)
@@ -248,6 +248,9 @@ class GradioInterceptor:
             if elem_id and any(blacklisted in elem_id.lower() for blacklisted in self.elem_id_blacklist):
                 print(f"[Interceptor] Skipping blacklisted component with elem_id: {elem_id}")
                 return True
+
+        if extension_name == "extra-options-section":
+            print(f"Component from extra-options-section has content {component}")
         
         # Check depth limit (only for extension components)
         if extension_name:
