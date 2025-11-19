@@ -355,9 +355,11 @@ class Api:
         # get default values
         with gr.Blocks(): # will throw errors calling ui function without this
             for script in script_runner.scripts:
-                if script.ui(script.is_img2img):
+                print(f"script: {script.name}")
+                ui_elements = script.ui(script.is_img2img)
+                if ui_elements:
                     ui_default_values = []
-                    for elem in script.ui(script.is_img2img):
+                    for elem in ui_elements:
                         ui_default_values.append(elem.value)
                     script_args[script.args_from:script.args_to] = ui_default_values
         return script_args
