@@ -120,9 +120,9 @@ public partial class ModelsView : UserControl
             {
                 downloadId = await apiService.StartDownloadModelAsync(modelUrl, checksum);
             }
-            catch (InvalidOperationException)
+            catch (InvalidOperationException ex)
             {
-                if (statusText != null) statusText.Text = "Model already exists on server";
+                if (statusText != null) statusText.Text = ex.Message;
                 return;
             }
             if (statusText != null) statusText.Text = "Downloading model...";
