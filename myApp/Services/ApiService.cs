@@ -231,7 +231,9 @@ namespace myApp.Services
             // Check if the response is successful
             if (!response.IsSuccessStatusCode)
             {
-                throw new Exception($"SD API returned error: {response.StatusCode}");
+                var errorContent = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"SD API Error ({response.StatusCode}): {errorContent}");
+                throw new Exception($"SD API returned error: {response.StatusCode} - {errorContent}");
             }
 
             // Read the response content

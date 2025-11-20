@@ -220,6 +220,20 @@ class GradioInterceptor:
                 # Look for the 'extensions' or 'extensions-builtin' folder
                 for i, part in enumerate(parts):
                     if part in ["extensions", "extensions-builtin"] and i + 1 < len(parts):
+                        # Try to get script title from 'self' in frame locals
+                        try:
+                            frame = frame_info.frame
+                            if 'self' in frame.f_locals:
+                                obj = frame.f_locals['self']
+                                # Check if it looks like a Script object (has title method)
+                                if hasattr(obj, 'title') and callable(obj.title):
+                                    title = obj.title()
+                                    print(f"[Interceptor] Detected extension script '{title}' from file: {filename}")
+                                    self._extension_cache[stack_hash] = title
+                                    return title
+                        except Exception as e:
+                            print(f"[Interceptor] Error extracting script title: {e}")
+
                         ext_name = parts[i + 1]
                         print(f"[Interceptor] Detected extension '{ext_name}' from file: {filename}")
                         # Cache the result
@@ -507,11 +521,28 @@ class GradioInterceptor:
         
         # Collect values in order
         values = []
-        for comp_id in component_ids:
-            value = self.get_component_value(comp_id)
-            if value is not None:
-                values.append(value)
+        debug_types = []
         
+        # Types that should never be included in script args (containers)
+        excluded_types = {
+            'accordion', 'row', 'column', 'group', 'tabs', 'tabitem', 'blocks', 
+            'formrow', 'formcolumn', 'box', 'panel'
+        }
+        
+        for comp_id in component_ids:
+            node = self.components.get(comp_id)
+            if node:
+                # Skip containers
+                if node.type in excluded_types:
+                    continue
+                    
+                val = self.get_component_value(comp_id)
+                
+                if hasattr(node.component, 'value'):
+                    values.append(val)
+                    debug_types.append(f"{node.type}:{val}")
+        
+        print(f"[Interceptor] Extension '{extension_name}' values: {debug_types}")
         return {'args': values}
     
     def get_all_extension_values(self) -> Dict[str, Dict[str, Any]]:

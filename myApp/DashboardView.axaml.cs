@@ -432,12 +432,85 @@ public partial class DashboardView : UserControl
                     dynThresVariability = varItem.Content?.ToString() ?? "AD";
 
 
+
+                // Fetch translation layer values
+                Dictionary<string, object>? extensionScripts = null;
+                if (App.AppConfig.EnableTranslationLayer) 
+                {
+                    try 
+                    {
+                        var tlService = new TranslationLayerService();
+                        var extValues = await tlService.GetExtensionValuesAsync();
+                        
+                        // Get available scripts for current mode to filter
+                        var availableScripts = await _apiService.GetScriptsAsync();
+                        var allowedScripts = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                        
+                        if (modeComboBox.SelectedIndex == 1) // img2img
+                        {
+                            if (availableScripts.img2img != null) 
+                                foreach(var scriptName in availableScripts.img2img) allowedScripts.Add(scriptName);
+                        }
+                        else // txt2img
+                        {
+                            if (availableScripts.txt2img != null) 
+                                foreach(var scriptName in availableScripts.txt2img) allowedScripts.Add(scriptName);
+                        }
+
+                        if (extValues.Active && extValues.Values.Count > 0)
+                        {
+                            extensionScripts = new Dictionary<string, object>();
+                            foreach(var kvp in extValues.Values)
+                            {
+                                // Only include scripts valid for current mode
+                                if (!allowedScripts.Contains(kvp.Key))
+                                    continue;
+
+                                // Ensure lowercase 'args' for API
+                                var convertedArgs = new List<object?>();
+                                foreach (var arg in kvp.Value.Args)
+                                {
+                                    switch (arg.ValueKind)
+                                    {
+                                        case JsonValueKind.String:
+                                            convertedArgs.Add(arg.GetString());
+                                            break;
+                                        case JsonValueKind.Number:
+                                            if (arg.TryGetInt64(out var l)) convertedArgs.Add(l);
+                                            else if (arg.TryGetDouble(out var d)) convertedArgs.Add(d);
+                                            else convertedArgs.Add(arg.GetRawText());
+                                            break;
+                                        case JsonValueKind.True:
+                                            convertedArgs.Add(true);
+                                            break;
+                                        case JsonValueKind.False:
+                                            convertedArgs.Add(false);
+                                            break;
+                                        case JsonValueKind.Null:
+                                            convertedArgs.Add(null);
+                                            break;
+                                        default:
+                                            convertedArgs.Add(arg.GetRawText()); // Fallback
+                                            break;
+                                    }
+                                }
+                                extensionScripts[kvp.Key] = new { args = convertedArgs };
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error fetching translation layer values: {ex}");
+                    }
+                }
+
                 result = await _apiService.GenerateImage(
                     prompt, steps, scale, negativePrompt, width, height, sampler, seed, batchSize,
                     enableHr, hrUpscaler, hrScale, hrDenoising,
                     freeuEnabled, freeuB1, freeuB2, freeuS1, freeuS2, freeuStart, freeuEnd,
                     dynThresEnabled, dynThresMimicScale, dynThresThreshold, dynThresMimicMode, dynThresMimicScaleMin,
-                    dynThresCfgMode, dynThresCfgScaleMin, dynThresSchedVal, dynThresSeparate, dynThresStartpoint, dynThresVariability, dynThresPhi
+                    dynThresCfgMode, dynThresCfgScaleMin, dynThresSchedVal, dynThresSeparate, dynThresStartpoint, dynThresVariability, dynThresPhi,
+                    extensionScripts
                 );
             }
             //var (images, seeds) = await _apiService.GenerateImage(prompt, steps, scale, negativePrompt, width, height, sampler, seed, batchSize);
