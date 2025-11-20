@@ -167,6 +167,11 @@
                                     <Button x:Name="UseCurrentImageButton" Content="Use Current Image" IsEnabled="False"/>
                                     <Image x:Name="InitImagePreview" Width="100" Height="100" Stretch="Uniform"/>
                                 </StackPanel>
+                                
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <Button x:Name="LoadMaskButton" Content="Load Mask"/>
+                                    <Image x:Name="MaskImagePreview" Width="100" Height="100" Stretch="Uniform"/>
+                                </StackPanel>
                                 <Grid ColumnDefinitions="Auto,*,Auto">
                                     <TextBlock Text="Strength:" Foreground="#ddd" VerticalAlignment="Center"/>
                                     <Slider x:Name="StrengthSlider" Minimum="0" Maximum="1" Value="0.75" VerticalAlignment="Top" Grid.Column="1" Height="48"/>

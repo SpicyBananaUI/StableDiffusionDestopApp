@@ -294,7 +294,9 @@ namespace myApp.Services
             string sampler = "Euler",
             long seed = -1,
             int batch_size = 1,
-            double denoisingStrength = 0.75)
+            double denoisingStrength = 0.75,
+            Bitmap? maskImage = null,
+            Dictionary<string, object>? extensionScripts = null)
         {
             if (initImage == null)
                 throw new ArgumentNullException(nameof(initImage));
@@ -303,23 +305,57 @@ namespace myApp.Services
             using var ms = new MemoryStream();
             initImage.Save(ms);
             string base64InitImage = Convert.ToBase64String(ms.ToArray());
-
+            
+            string? base64MaskImage = null;
+            if (maskImage != null)
+            {
+                using var msMask = new MemoryStream();
+                maskImage.Save(msMask);
+                base64MaskImage = Convert.ToBase64String(msMask.ToArray());
+            }
 
             // Build request
-            var requestData = new
+            var requestData = new Dictionary<string, object?>
             {
-                prompt = prompt,
-                negative_prompt = negativePrompt,
-                steps = steps,
-                cfg_scale = guidanceScale,
-                width = width,
-                height = height,
-                sampler_name = sampler,
-                seed = seed,
-                batch_size = batch_size,
-                denoising_strength = denoisingStrength,
-                init_images = new[] { base64InitImage }
+                ["prompt"] = prompt,
+                ["negative_prompt"] = negativePrompt,
+                ["steps"] = steps,
+                ["cfg_scale"] = guidanceScale,
+                ["width"] = width,
+                ["height"] = height,
+                ["sampler_name"] = sampler,
+                ["seed"] = seed,
+                ["batch_size"] = batch_size,
+                ["denoising_strength"] = denoisingStrength,
+                ["init_images"] = new[] { base64InitImage }
             };
+
+            if (base64MaskImage != null)
+            {
+                requestData["mask"] = base64MaskImage;
+                requestData["inpainting_fill"] = 1; // Original
+                requestData["mask_blur"] = 4;
+                requestData["inpainting_mask_invert"] = 0;
+            }
+
+            // alwayson_scripts
+            var alwayson = new Dictionary<string, object?>();
+            
+            // Merge extension scripts from translation layer if provided
+            if (extensionScripts != null)
+            {
+                foreach (var (scriptName, scriptData) in extensionScripts)
+                {
+                    // Only add if not already present (manual config takes precedence)
+                    if (!alwayson.ContainsKey(scriptName))
+                    {
+                        alwayson[scriptName] = scriptData;
+                    }
+                }
+            }
+            
+            if (alwayson.Count > 0)
+                requestData["alwayson_scripts"] = alwayson;
 
             var content = new StringContent(JsonSerializer.Serialize(requestData), Encoding.UTF8, "application/json");
 

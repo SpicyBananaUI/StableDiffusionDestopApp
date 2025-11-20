@@ -28,6 +28,7 @@ public partial class DashboardView : UserControl
     private CancellationTokenSource? _generationCts;
     
     private Bitmap? _initImage;
+    private Bitmap? _maskImage;
     private double _strength = 0.75;
     
     public static DashboardView? _instance;
@@ -128,6 +129,33 @@ public partial class DashboardView : UserControl
                     using var stream = File.OpenRead(result[0]);
                     _initImage = new Bitmap(stream);
                     this.FindControl<Image>("InitImagePreview").Source = _initImage;
+                }
+            };
+        }
+
+        if (this.FindControl<Button>("LoadMaskButton") is Button loadMaskButton)
+        {
+            loadMaskButton.Click += async (s, e) =>
+            {
+                var dialog = new OpenFileDialog
+                {
+                    Title = "Select Mask Image",
+                    Filters = new List<FileDialogFilter>
+                    {
+                        new FileDialogFilter { Name = "Images", Extensions = { "png", "jpg", "jpeg" } }
+                    },
+                    AllowMultiple = false
+                };
+
+                var window = this.VisualRoot as Window;
+                if (window == null) return;
+
+                var result = await dialog.ShowAsync(window);
+                if (result != null && result.Length > 0)
+                {
+                    using var stream = File.OpenRead(result[0]);
+                    _maskImage = new Bitmap(stream);
+                    this.FindControl<Image>("MaskImagePreview").Source = _maskImage;
                 }
             };
         }
@@ -373,6 +401,77 @@ public partial class DashboardView : UserControl
             });
             
             (List<Bitmap> images, List<long> seeds) result;
+            // Fetch translation layer values
+            Dictionary<string, object>? extensionScripts = null;
+            if (App.AppConfig.EnableTranslationLayer) 
+            {
+                try 
+                {
+                    var tlService = new TranslationLayerService();
+                    var extValues = await tlService.GetExtensionValuesAsync();
+                    
+                    // Get available scripts for current mode to filter
+                    var availableScripts = await _apiService.GetScriptsAsync();
+                    var allowedScripts = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    
+                    if (modeComboBox.SelectedIndex == 1) // img2img
+                    {
+                        if (availableScripts.img2img != null) 
+                            foreach(var scriptName in availableScripts.img2img) allowedScripts.Add(scriptName);
+                    }
+                    else // txt2img
+                    {
+                        if (availableScripts.txt2img != null) 
+                            foreach(var scriptName in availableScripts.txt2img) allowedScripts.Add(scriptName);
+                    }
+
+                    if (extValues.Active && extValues.Values.Count > 0)
+                    {
+                        extensionScripts = new Dictionary<string, object>();
+                        foreach(var kvp in extValues.Values)
+                        {
+                            // Only include scripts valid for current mode
+                            if (!allowedScripts.Contains(kvp.Key))
+                                continue;
+
+                            // Ensure lowercase 'args' for API
+                            var convertedArgs = new List<object?>();
+                            foreach (var arg in kvp.Value.Args)
+                            {
+                                switch (arg.ValueKind)
+                                {
+                                    case JsonValueKind.String:
+                                        convertedArgs.Add(arg.GetString());
+                                        break;
+                                    case JsonValueKind.Number:
+                                        if (arg.TryGetInt64(out var l)) convertedArgs.Add(l);
+                                        else if (arg.TryGetDouble(out var d)) convertedArgs.Add(d);
+                                        else convertedArgs.Add(arg.GetRawText());
+                                        break;
+                                    case JsonValueKind.True:
+                                        convertedArgs.Add(true);
+                                        break;
+                                    case JsonValueKind.False:
+                                        convertedArgs.Add(false);
+                                        break;
+                                    case JsonValueKind.Null:
+                                        convertedArgs.Add(null);
+                                        break;
+                                    default:
+                                        convertedArgs.Add(arg.GetRawText()); // Fallback
+                                        break;
+                                }
+                            }
+                            extensionScripts[kvp.Key] = new { args = convertedArgs };
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error fetching translation layer values: {ex}");
+                }
+            }
+
             if (modeComboBox.SelectedIndex == 1) // Image2Image
             {
                 
@@ -381,7 +480,7 @@ public partial class DashboardView : UserControl
                     statusText.Text = "Please select an init image first.";
                     return;
                 }
-                result = await _apiService.GenerateImage2Image(prompt, steps, scale, _initImage, negativePrompt, width, height, sampler, seed, batchSize, _strength);
+                result = await _apiService.GenerateImage2Image(prompt, steps, scale, _initImage, negativePrompt, width, height, sampler, seed, batchSize, _strength, _maskImage, extensionScripts);
             }
             else
             {
@@ -433,76 +532,7 @@ public partial class DashboardView : UserControl
 
 
 
-                // Fetch translation layer values
-                Dictionary<string, object>? extensionScripts = null;
-                if (App.AppConfig.EnableTranslationLayer) 
-                {
-                    try 
-                    {
-                        var tlService = new TranslationLayerService();
-                        var extValues = await tlService.GetExtensionValuesAsync();
-                        
-                        // Get available scripts for current mode to filter
-                        var availableScripts = await _apiService.GetScriptsAsync();
-                        var allowedScripts = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                        
-                        if (modeComboBox.SelectedIndex == 1) // img2img
-                        {
-                            if (availableScripts.img2img != null) 
-                                foreach(var scriptName in availableScripts.img2img) allowedScripts.Add(scriptName);
-                        }
-                        else // txt2img
-                        {
-                            if (availableScripts.txt2img != null) 
-                                foreach(var scriptName in availableScripts.txt2img) allowedScripts.Add(scriptName);
-                        }
 
-                        if (extValues.Active && extValues.Values.Count > 0)
-                        {
-                            extensionScripts = new Dictionary<string, object>();
-                            foreach(var kvp in extValues.Values)
-                            {
-                                // Only include scripts valid for current mode
-                                if (!allowedScripts.Contains(kvp.Key))
-                                    continue;
-
-                                // Ensure lowercase 'args' for API
-                                var convertedArgs = new List<object?>();
-                                foreach (var arg in kvp.Value.Args)
-                                {
-                                    switch (arg.ValueKind)
-                                    {
-                                        case JsonValueKind.String:
-                                            convertedArgs.Add(arg.GetString());
-                                            break;
-                                        case JsonValueKind.Number:
-                                            if (arg.TryGetInt64(out var l)) convertedArgs.Add(l);
-                                            else if (arg.TryGetDouble(out var d)) convertedArgs.Add(d);
-                                            else convertedArgs.Add(arg.GetRawText());
-                                            break;
-                                        case JsonValueKind.True:
-                                            convertedArgs.Add(true);
-                                            break;
-                                        case JsonValueKind.False:
-                                            convertedArgs.Add(false);
-                                            break;
-                                        case JsonValueKind.Null:
-                                            convertedArgs.Add(null);
-                                            break;
-                                        default:
-                                            convertedArgs.Add(arg.GetRawText()); // Fallback
-                                            break;
-                                    }
-                                }
-                                extensionScripts[kvp.Key] = new { args = convertedArgs };
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error fetching translation layer values: {ex}");
-                    }
-                }
 
                 result = await _apiService.GenerateImage(
                     prompt, steps, scale, negativePrompt, width, height, sampler, seed, batchSize,
