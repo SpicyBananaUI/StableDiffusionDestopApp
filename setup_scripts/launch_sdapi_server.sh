@@ -7,16 +7,49 @@ MODE="${1:---local-backend}"  # Default to local-backend if no argument
 EXTRA_ARGS="${@:2}"       # Capture all arguments starting from the second one
 
 BACKEND_DIR="./backend"
-SCRIPT_DIR="$(dirname "$0")"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+LOG_FILE="$SCRIPT_DIR/../sdapi_server.log"
+
+# Enable logging if not already redirected
+if [ -z "$SDAPI_LOGGING_ENABLED" ]; then
+    export SDAPI_LOGGING_ENABLED=1
+    exec > >(tee -a "$LOG_FILE") 2>&1
+fi
+
+echo "=== Launching SDAPI Server ==="
+echo "Date: $(date)"
+echo "Script: $0"
+echo "Args: $@"
+echo "Log file: $LOG_FILE"
 
 cd "$SCRIPT_DIR"
 cd ".."
 
+
+
+# Add common paths to PATH to ensure we can find python
+export PATH="/usr/local/bin:/opt/homebrew/bin:/Library/Frameworks/Python.framework/Versions/3.10/bin:$PATH"
+
+echo "PATH: $PATH"
+
 # Check if Python is installed
-if ! command -v python3.10 &> /dev/null; then
-    echo "Python 3.10 is not installed. Please install Python 3.10."
-    exit 1
+PYTHON_CMD="python3.10"
+if ! command -v $PYTHON_CMD &> /dev/null; then
+    # Try absolute paths
+    if [ -f "/usr/local/bin/python3.10" ]; then
+        PYTHON_CMD="/usr/local/bin/python3.10"
+    elif [ -f "/opt/homebrew/bin/python3.10" ]; then
+        PYTHON_CMD="/opt/homebrew/bin/python3.10"
+    elif [ -f "/Library/Frameworks/Python.framework/Versions/3.10/bin/python3.10" ]; then
+        PYTHON_CMD="/Library/Frameworks/Python.framework/Versions/3.10/bin/python3.10"
+    else
+        echo "Python 3.10 is not installed or not found in PATH."
+        echo "Please install Python 3.10 from python.org"
+        exit 1
+    fi
 fi
+
+echo "Found Python 3.10 at: $(command -v $PYTHON_CMD || echo $PYTHON_CMD)"
 
 pwd
 
@@ -55,10 +88,10 @@ if [ -f "$VENV_PYTHON" ] && [ -x "$VENV_PYTHON" ]; then
     echo "Using venv Python: $PYTHON_EXEC"
 else
     # Use system python3.10 - with venv activated, it will use venv packages
-    PYTHON_EXEC="python3.10"
+    PYTHON_EXEC="$PYTHON_CMD"
     echo "Using system Python: $PYTHON_EXEC"
     # Verify it exists
-    if ! command -v "$PYTHON_EXEC" &> /dev/null; then
+    if ! command -v "$PYTHON_EXEC" &> /dev/null && [ ! -f "$PYTHON_EXEC" ]; then
         echo "ERROR: python3.10 not found in venv or system PATH"
         exit 1
     fi
@@ -94,14 +127,13 @@ elif [ "$MODE" = "--local-backend" ]; then
     # Output goes to terminal so user can see it
     echo "Running in local backend mode (background, attached to parent)."
     
-    # Run in background, output goes to terminal
+    # Run in background
     "$PYTHON_EXEC" launch_webui_backend.py $EXTRA_ARGS &
     
     # Get the PID
     BACKEND_PID=$!
     
     echo "Backend started with PID: $BACKEND_PID"
-    echo "Backend output will appear in this terminal."
     
     # Don't disown - keep it as a child process so it dies when parent dies
     # Exit immediately so the parent C# process doesn't wait

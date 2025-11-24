@@ -166,23 +166,37 @@ public partial class App : Application
         }
         private static void LaunchLocalBackendMac()
         {
-            var scriptPath = GetShellPathMac();
-            var args = $"\"{scriptPath}\" --local-backend";
-            
-            if (!AppConfig.EnableTranslationLayer)
+            try
             {
-                args += " --disable-translation-layer";
+                var scriptPath = GetShellPathMac();
+                Console.WriteLine($"Launching local backend script: {scriptPath}");
+                
+                var args = $"\"{scriptPath}\" --local-backend";
+                
+                if (!AppConfig.EnableTranslationLayer)
+                {
+                    args += " --disable-translation-layer";
+                }
+                
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "/bin/bash",
+                    Arguments = args,
+                    WorkingDirectory = GetProjectRootMac(),
+                    UseShellExecute = true,
+                    CreateNoWindow = false
+                };
+                Process.Start(psi);
             }
-            
-            var psi = new ProcessStartInfo
+            catch (Exception ex)
             {
-                FileName = "/bin/bash",
-                Arguments = args,
-                WorkingDirectory = GetProjectRootMac(),
-                UseShellExecute = true,
-                CreateNoWindow = false
-            };
-            Process.Start(psi);
+                Console.WriteLine($"ERROR launching local backend: {ex.Message}");
+                // Try to log to a file in AppData since Console might not be visible
+                try {
+                    var logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SDApp", "launcher_error.log");
+                    File.AppendAllText(logPath, $"{DateTime.Now}: Error launching backend: {ex.Message}\n{ex.StackTrace}\n");
+                } catch { /* ignore */ }
+            }
         }
         private static void LaunchLocalBackendLinux()
         {
@@ -245,18 +259,38 @@ public partial class App : Application
             var scriptPath = GetShellPathMac();
             var workingDir = GetProjectRootMac();
             
-            // Run the script directly - UseShellExecute=true will open it in Terminal on macOS
-            // The script runs in foreground so it stays alive
-            var psi = new ProcessStartInfo
+            // Use osascript to open Terminal and execute the script
+            var escapedScriptPath = scriptPath.Replace("'", "'\\''");
+            var escapedWorkingDir = workingDir.Replace("'", "'\\''");
+            
+            // Command to run in Terminal: cd to dir, then run script
+            var command = $"cd '{escapedWorkingDir}' && '{escapedScriptPath}' --remote-server";
+            var escapedCommand = command.Replace("\\", "\\\\").Replace("\"", "\\\"");
+            
+            var osaPsi = new ProcessStartInfo
             {
-                FileName = "/bin/bash",
-                Arguments = $"\"{scriptPath}\" --remote-server",
-                WorkingDirectory = workingDir,
-                UseShellExecute = true,
+                FileName = "/usr/bin/osascript",
+                UseShellExecute = false,
                 CreateNoWindow = false
             };
             
-            Process.Start(psi);
+            osaPsi.ArgumentList.Add("-e");
+            osaPsi.ArgumentList.Add("tell application \"Terminal\"");
+            osaPsi.ArgumentList.Add("-e");
+            osaPsi.ArgumentList.Add("activate");
+            osaPsi.ArgumentList.Add("-e");
+            osaPsi.ArgumentList.Add($"do script \"{escapedCommand}\"");
+            osaPsi.ArgumentList.Add("-e");
+            osaPsi.ArgumentList.Add("end tell");
+            
+            try
+            {
+                Process.Start(osaPsi);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Warning: Could not open Terminal via osascript: {ex.Message}");
+            }
         }
 
         private static string GetInstallerScriptPathMac()
@@ -407,7 +441,14 @@ public partial class App : Application
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                BackendLauncher.FinishInstallMac();
+                try
+                {
+                    BackendLauncher.FinishInstallMac();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error running Mac install setup: {ex.Message}");
+                }
             }
 
             ConfigManager.Load();
