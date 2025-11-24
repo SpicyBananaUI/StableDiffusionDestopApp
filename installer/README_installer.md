@@ -99,3 +99,39 @@ python --version
 # Check Inno Setup
 Get-Command ISCC.exe -ErrorAction SilentlyContinue
 ```
+
+# Mac Installer builder
+
+## Prerequisites
+1. **.NET SDK** - Make sure `dotnet` is available on PATH
+
+## Build Options
+
+The MacOS installer is built using the `write_dmg.sh` script. It does not accept any arguments and will write the DMG to the current directory.
+
+To build the installer, run:
+```bash
+./write_dmg.sh
+```
+## Installation Requirements
+
+The machine must have Python 3.10 installed.
+
+## Post-Install User Experience
+
+Once the user installs the application using the typical MacOS double-click and drag to the Applications folder, the application can be launched from the Applications folder.
+
+On startup, the application will copy required files to the Application Support folder.
+
+## Troubleshooting
+
+Run the app in the terminal to see if there are any errors.
+```bash
+/Applications/SDApp.app/Contents/MacOS/myApp
+```
+
+Be sure to wait for the app to finish copying files to the Application Support folder. You can see the progress in the terminal.
+
+If the app launches but the backend doesn't start, check the logs in the Application Support folder (~/Library/Application Support/SDApp/*.log).
+
+The most likely problem is that pip failed to install the required packages. 
