@@ -90,4 +90,7 @@ echo "Binaries created in: $OUTPUT_DIR"
 echo ""
 echo "Files:"
 ls -lh "$OUTPUT_DIR"
-
+echo ""
+echo "These binaries should be committed to the repository."
+echo "The installer will use them automatically when users run install_linux.sh"
+echo ""

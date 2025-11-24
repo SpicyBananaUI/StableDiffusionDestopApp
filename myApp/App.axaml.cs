@@ -90,8 +90,19 @@ public partial class App : Application
         }
         private static string GetShellPathLinux()
         {
-            // TODO: Linux implementation
-            return "";
+          #if DEBUG
+            // Use local scripts in development (Debug)
+            var scriptsDir = Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory,
+                "../../../../setup_scripts");
+          #else
+            // Use installed scripts in /opt/sdapp for release
+            var scriptsDir = "/opt/sdapp/setup_scripts";
+          #endif
+            
+            Console.WriteLine($"Using scripts directory: {scriptsDir}");
+
+            return Path.Combine(scriptsDir, "launch_sdapi_server.sh");
         }
 
         private static string GetProjectRootWindows()
@@ -122,8 +133,14 @@ public partial class App : Application
         }
         private static string GetProjectRootLinux()
         {
-            // TODO: Linux implementation
-            return "";
+          #if DEBUG
+            // Use local scripts in development (Debug)
+            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            return Path.Combine(baseDir, "..", "..", "..", "..");
+          #else
+            // Use installed root in /opt/sdapp for release
+            return "/opt/sdapp";
+          #endif
         }
 
 
@@ -200,15 +217,32 @@ public partial class App : Application
         }
         private static void LaunchLocalBackendLinux()
         {
-            var psi = new ProcessStartInfo
+            try
             {
-                FileName = GetShellPathLinux(),
-                Arguments = "",
-                WorkingDirectory = GetProjectRootLinux(),
-                UseShellExecute = true,
-                CreateNoWindow = false
-            };
-            Process.Start(psi);
+                var scriptPath = GetShellPathLinux();
+                Console.WriteLine($"Launching local backend script: {scriptPath}");
+                
+                var args = $"\"{scriptPath}\" --local-backend";
+                
+                if (!AppConfig.EnableTranslationLayer)
+                {
+                    args += " --disable-translation-layer";
+                }
+                
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "/bin/bash",
+                    Arguments = args,
+                    WorkingDirectory = GetProjectRootLinux(),
+                    UseShellExecute = true,
+                    CreateNoWindow = false
+                };
+                Process.Start(psi);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ERROR launching local backend: {ex.Message}");
+            }
         }
 
         public static void LaunchRemoteServer()
@@ -244,10 +278,13 @@ public partial class App : Application
         }
         private static void LaunchRemoteServerLinux()
         {
+            var scriptPath = GetShellPathLinux();
+            var args = $"\"{scriptPath}\" --remote-server";
+            
             var psi = new ProcessStartInfo
             {
-                FileName = GetShellPathLinux(),
-                Arguments = "--listen",
+                FileName = "/bin/bash",
+                Arguments = args,
                 WorkingDirectory = GetProjectRootLinux(),
                 UseShellExecute = true,
                 CreateNoWindow = false

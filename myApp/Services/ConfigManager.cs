@@ -14,8 +14,20 @@ public class AppSettings
 
 public static class ConfigManager
 {
-    private static string ConfigDir =>
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "myApp");
+    private static string ConfigDir
+    {
+        get
+        {
+            // Linux: use ~/.config/myApp
+            if (OperatingSystem.IsLinux())
+            {
+                var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                return Path.Combine(home, ".config", "myApp");
+            }
+            // Windows and macOS: use ApplicationData
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "myApp");
+        }
+    }
 
     private static string ConfigPath => Path.Combine(ConfigDir, "config.json");
 
