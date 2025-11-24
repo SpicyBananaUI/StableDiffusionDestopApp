@@ -30,6 +30,25 @@ echo "Base directory: $BASE_DIR"
 
 SOURCE_BACKEND="$BASE_DIR/backend"
 SOURCE_SCRIPTS="$BASE_DIR/setup_scripts"
+SOURCE_PYPROJECT="$BASE_DIR/pyproject.toml"
+SOURCE_TRANSLATION="$BASE_DIR/translation_layer"
+
+# In production, resources are in Contents/
+if [ ! -d "$SOURCE_BACKEND" ] && [ -d "$BASE_DIR/Contents/backend" ]; then
+    SOURCE_BACKEND="$BASE_DIR/Contents/backend"
+fi
+
+if [ ! -d "$SOURCE_SCRIPTS" ] && [ -d "$BASE_DIR/Contents/setup_scripts" ]; then
+    SOURCE_SCRIPTS="$BASE_DIR/Contents/setup_scripts"
+fi
+
+if [ ! -f "$SOURCE_PYPROJECT" ] && [ -f "$BASE_DIR/Contents/pyproject.toml" ]; then
+    SOURCE_PYPROJECT="$BASE_DIR/Contents/pyproject.toml"
+fi
+
+if [ ! -d "$SOURCE_TRANSLATION" ] && [ -d "$BASE_DIR/Contents/translation_layer" ]; then
+    SOURCE_TRANSLATION="$BASE_DIR/Contents/translation_layer"
+fi
 
 echo "Looking for backend at: $SOURCE_BACKEND"
 echo "Looking for scripts at: $SOURCE_SCRIPTS"
@@ -60,6 +79,16 @@ if [ ! -d "$SOURCE_SCRIPTS" ]; then
     exit 1
 fi
 
+if [ ! -f "$SOURCE_PYPROJECT" ]; then
+    echo "Error: Source pyproject.toml not found: $SOURCE_PYPROJECT"
+    exit 1
+fi
+
+if [ ! -d "$SOURCE_TRANSLATION" ]; then
+    echo "Error: Source translation_layer directory not found: $SOURCE_TRANSLATION"
+    exit 1
+fi
+
 # Create Application Support directory if it doesn't exist
 mkdir -p "$APP_SUPPORT_DIR"
 
@@ -69,6 +98,12 @@ cp -R "$SOURCE_BACKEND" "$TARGET_BACKEND"
 
 echo "Copying setup_scripts directory..."
 cp -R "$SOURCE_SCRIPTS" "$TARGET_SCRIPTS"
+
+echo "Copying pyproject.toml..."
+cp "$SOURCE_PYPROJECT" "$APP_SUPPORT_DIR/"
+
+echo "Copying translation_layer directory..."
+cp -R "$SOURCE_TRANSLATION" "$APP_SUPPORT_DIR/"
 
 # Create marker file with timestamp (ISO 8601 format)
 TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%S%z")
