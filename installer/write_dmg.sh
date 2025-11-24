@@ -38,7 +38,7 @@ fi
 
 echo "Building for runtime: $RUNTIME"
 
-dotnet publish -c Release -r "$RUNTIME" --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
+dotnet publish -c Release -r "$RUNTIME" --self-contained true
 
 if [ $? -ne 0 ]; then
     echo "ERROR: .NET build failed"
@@ -121,14 +121,17 @@ rsync -av --progress \
     --exclude='__pycache__' \
     --exclude='*.pyc' \
     --exclude='*.pyo' \
-    --exclude='cache' \
-    --exclude='models' \
-    --exclude='outputs' \
-    --exclude='repositories' \
-    --exclude='extensions' \
-    --exclude='embeddings' \
-    --exclude='log' \
-    --exclude='config_states' \
+    --exclude='/venv' \
+    --exclude='/webui-venv' \
+    --exclude='/cache' \
+    --exclude='/models' \
+    --exclude='/outputs' \
+    --exclude='.git' \
+    --exclude='/extensions' \
+    --exclude='/embeddings' \
+    --exclude='/log' \
+#     --exclude='/localizations' \ # TODO: should not copy contents, but do need the empty dir
+    --exclude='/config_states' \
     . "$APP_BUNDLE/Contents/backend/"
 
 # Create empty directories that might be needed
@@ -147,6 +150,13 @@ cp -R "$PROJECT_ROOT/setup_scripts"/* "$APP_BUNDLE/Contents/setup_scripts/"
 chmod +x "$APP_BUNDLE/Contents/setup_scripts"/*.sh
 
 echo "Setup scripts copied"
+
+# Step 6.1: Copy translation layer and pyproject.toml
+echo ""
+echo "Step 6.1: Copying translation layer..."
+cp "$PROJECT_ROOT/pyproject.toml" "$APP_BUNDLE/Contents/"
+cp -R "$PROJECT_ROOT/translation_layer" "$APP_BUNDLE/Contents/"
+echo "Translation layer copied"
 
 # Step 7: Copy app icon if available
 if [ -f "$SCRIPT_DIR/desktopIcon.png" ]; then
@@ -198,8 +208,8 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Clean up build directory (optional - comment out if you want to keep it)
-# rm -rf "$BUILD_DIR"
+# Clean up build directory
+rm -rf "$BUILD_DIR"
 
 echo ""
 echo "=== DMG Build Complete ==="
