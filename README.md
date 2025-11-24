@@ -48,7 +48,42 @@ The installer will be created in `installer/installer_output/` and includes:
 
 See [installer/README_installer.md](installer/README_installer.md) for detailed build options.
 
-### Option 2: Manual Setup (Development)
+### Option 2: Linux Installer
+
+A standalone installer script is available for Linux. The installer clones the project from GitHub and sets up everything automatically. It requires that binaries are built and present in /installer/linux-binaries using build_linux_binaries.sh
+
+**Download the installer:**
+```bash
+# Download the installer script
+wget https://raw.githubusercontent.com/SpicyBananaUI/StableDiffusionDestopApp/main/installer/install_linux.sh
+
+# Make it executable
+chmod +x install_linux.sh
+
+# Run with sudo
+sudo ./install_linux.sh
+```
+
+**Prerequisites:**
+- .NET 9.0 SDK (not needed because binaries are already compiled, but )
+- Python 3.10 or 3.11
+- git, rsync
+- Sudo/root access
+
+The installer will:
+1. Clone the repository from GitHub
+2. Build the .NET frontend for your architecture (x64 or ARM64)
+3. Install to `/opt/sdapp`
+4. Create a system-wide `sdapp` command
+5. Add a desktop entry for your applications menu
+6. Set up the Python virtual environment
+
+After installation, launch with:
+```bash
+sdapp
+```
+
+### Option 3: Manual Setup (Development)
 For development or manual installation, follow the backend and frontend setup below.
 
 ## Backend Setup
@@ -215,7 +250,7 @@ For detailed installer documentation, see [installer/README_installer.md](instal
 
 ## Package Setup (macOS)
 
-On macOS, there is an optional package that can be used for app installation in place of the above instructions. It is not yet as polished or reliable as the Windows installer as it was not planned as an Alpha feature.
+On macOS, there is an optional package that can be used for app installation in place of the above instructions.
 
 1. Ensure Python 3.10 is installed.
 
@@ -224,13 +259,11 @@ On macOS, there is an optional package that can be used for app installation in 
 3. After placing in your Applications folder, run the app myApp via the terminal:
 ```/Applications/SDapp.app/Contents/MacOS/```
 
-4. This will take a while since it has to download any missing python packages and a ~2GB stable diffusion model.
+4. This will take a while since it has to download any missing python packages.
 
-5. If you ran the app by clicking on it, macOS may kill the process before it has completed setting up the backend and downloading your first model. If so, rerun it. If the port is later occupied (check app_tst % lsof -i :7861), you may need to kill an errant python process
+5. Once all setup is complete, the app should launch
 
-6. Once all setup is complete, the app should launch
-
-7. If adding other models or there is another need to access the /backend/ or /setup_scripts/ folder, they are located at user/Library/Application Support/SDApp. This is now the case when running on macOS even if not using the package installation. (If using the regular installation, the frontend app will copy the backend into Application Support on the first run.)
+6. If adding other models or there is another need to access the /backend/ or /setup_scripts/ folder, they are located at user/Library/Application Support/SDApp. This is now the case when running on macOS even if not using the package installation. (If using the regular installation, the frontend app will copy the backend into Application Support on the first run.)
 
 ## Development Notes
 
@@ -239,9 +272,7 @@ On macOS, there is an optional package that can be used for app installation in 
 
 ## Known Bugs / Issues
 
-- Bug: When using MPS, quick, repeating calls to the txt2img and interrupt endpoints result in the next image generation failing (black image)
-- Bug: After long periods of time left open, sometimes the backend returns blank images
-- Bug: If generate is pressed before a prompt is entered, the next time it is pressed it will send an interrupt api call instead of a generate call, locking the frontend up
+- If a model is selected immediately after being marked for deletion (i.e. before it is done being deleted), the program will enter an illegal state as a missing model is selected.
 
 ## Credits
 
